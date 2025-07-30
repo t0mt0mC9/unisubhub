@@ -5,6 +5,7 @@ import { SpendingOverview } from "@/components/dashboard/spending-overview";
 import { SubscriptionCard } from "@/components/dashboard/subscription-card";
 import { AnalyticsStats } from "@/components/analytics/analytics-stats";
 import { AnalyticsCharts } from "@/components/analytics/analytics-charts";
+import { SettingsPage } from "@/components/settings/settings-page";
 import { AddSubscriptionDialog } from "@/components/add-subscription/add-subscription-dialog";
 import { mockSubscriptions, calculateTotalSpending } from "@/data/mock-subscriptions";
 import { Button } from "@/components/ui/button";
@@ -237,25 +238,12 @@ const Index = () => {
   const renderSettings = () => (
     <div className="flex-1 overflow-y-auto pb-20">
       <div className="p-4 space-y-6">
-        <div className="text-center space-y-4">
-          <div className="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center mx-auto">
-            <Settings className="h-8 w-8 text-accent" />
-          </div>
-          <h2 className="text-xl font-semibold">Paramètres</h2>
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-foreground mb-2">Paramètres</h2>
           <p className="text-muted-foreground">Personnalisez votre expérience UniSubHub</p>
         </div>
         
-        <div className="space-y-4">
-          <Button 
-            variant="destructive" 
-            onClick={handleSignOut}
-            className="w-full"
-            size="lg"
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Se déconnecter
-          </Button>
-        </div>
+        <SettingsPage onSignOut={handleSignOut} />
       </div>
     </div>
   );
