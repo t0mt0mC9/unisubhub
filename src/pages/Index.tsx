@@ -5,11 +5,31 @@ import { SpendingOverview } from "@/components/dashboard/spending-overview";
 import { SubscriptionCard } from "@/components/dashboard/subscription-card";
 import { mockSubscriptions, calculateTotalSpending } from "@/data/mock-subscriptions";
 import { Button } from "@/components/ui/button";
-import { Search, Filter, Plus, BarChart3, Settings } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { Search, Filter, Plus, BarChart3, Settings, LogOut } from "lucide-react";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const spendingData = calculateTotalSpending(mockSubscriptions);
+  const { toast } = useToast();
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "Déconnexion réussie",
+        description: "À bientôt sur UniSubHub",
+      });
+      window.location.href = '/auth';
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
   
   const renderDashboard = () => (
     <div className="flex-1 overflow-y-auto pb-20">
@@ -90,13 +110,27 @@ const Index = () => {
   );
 
   const renderSettings = () => (
-    <div className="flex-1 flex items-center justify-center p-4">
-      <div className="text-center space-y-4">
-        <div className="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center mx-auto">
-          <Settings className="h-8 w-8 text-accent" />
+    <div className="flex-1 overflow-y-auto pb-20">
+      <div className="p-4 space-y-6">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center mx-auto">
+            <Settings className="h-8 w-8 text-accent" />
+          </div>
+          <h2 className="text-xl font-semibold">Paramètres</h2>
+          <p className="text-muted-foreground">Personnalisez votre expérience UniSubHub</p>
         </div>
-        <h2 className="text-xl font-semibold">Paramètres</h2>
-        <p className="text-muted-foreground">Personnalisez votre expérience UniSubHub</p>
+        
+        <div className="space-y-4">
+          <Button 
+            variant="destructive" 
+            onClick={handleSignOut}
+            className="w-full"
+            size="lg"
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Se déconnecter
+          </Button>
+        </div>
       </div>
     </div>
   );
