@@ -34,30 +34,30 @@ interface DetectedSubscription {
 }
 
 const mockBanks = [
-  { id: "bnp", name: "BNP Paribas", logo: "🏦" },
-  { id: "credit_agricole", name: "Crédit Agricole", logo: "🌾" },
-  { id: "societe_generale", name: "Société Générale", logo: "🏛️" },
-  { id: "lcl", name: "LCL", logo: "🏪" },
-  { id: "credit_mutuel", name: "Crédit Mutuel", logo: "🤝" },
-  { id: "la_banque_postale", name: "La Banque Postale", logo: "📮" },
-  { id: "caisse_epargne", name: "Caisse d'Épargne", logo: "🏦" },
-  { id: "credit_du_nord", name: "Crédit du Nord", logo: "🏔️" },
-  { id: "banque_populaire", name: "Banque Populaire", logo: "👥" },
-  { id: "cic", name: "CIC", logo: "🏛️" },
-  { id: "hsbc", name: "HSBC France", logo: "🌍" },
-  { id: "bred", name: "BRED", logo: "🏦" },
-  { id: "axa_banque", name: "AXA Banque", logo: "🛡️" },
-  { id: "boursorama", name: "Boursorama Banque", logo: "📱" },
-  { id: "fortuneo", name: "Fortuneo", logo: "💰" },
-  { id: "ing", name: "ING Direct", logo: "🦁" },
-  { id: "hello_bank", name: "Hello bank!", logo: "👋" },
-  { id: "monabanq", name: "Monabanq", logo: "🏦" },
-  { id: "revolut", name: "Revolut", logo: "💳" },
-  { id: "n26", name: "N26", logo: "📱" },
-  { id: "orange_bank", name: "Orange Bank", logo: "🍊" },
-  { id: "nickel", name: "Nickel", logo: "⚡" },
-  { id: "qonto", name: "Qonto", logo: "💼" },
-  { id: "shine", name: "Shine", logo: "✨" },
+  { id: "bnp", name: "BNP Paribas", logo: "BNP", color: "bg-green-600" },
+  { id: "credit_agricole", name: "Crédit Agricole", logo: "CA", color: "bg-green-700" },
+  { id: "societe_generale", name: "Société Générale", logo: "SG", color: "bg-red-600" },
+  { id: "lcl", name: "LCL", logo: "LCL", color: "bg-blue-600" },
+  { id: "credit_mutuel", name: "Crédit Mutuel", logo: "CM", color: "bg-blue-700" },
+  { id: "la_banque_postale", name: "La Banque Postale", logo: "LBP", color: "bg-yellow-600" },
+  { id: "caisse_epargne", name: "Caisse d'Épargne", logo: "CE", color: "bg-red-700" },
+  { id: "credit_du_nord", name: "Crédit du Nord", logo: "CDN", color: "bg-blue-800" },
+  { id: "banque_populaire", name: "Banque Populaire", logo: "BP", color: "bg-red-500" },
+  { id: "cic", name: "CIC", logo: "CIC", color: "bg-blue-500" },
+  { id: "hsbc", name: "HSBC France", logo: "HSBC", color: "bg-red-600" },
+  { id: "bred", name: "BRED", logo: "BRED", color: "bg-blue-600" },
+  { id: "axa_banque", name: "AXA Banque", logo: "AXA", color: "bg-blue-800" },
+  { id: "boursorama", name: "Boursorama Banque", logo: "B", color: "bg-orange-600" },
+  { id: "fortuneo", name: "Fortuneo", logo: "F", color: "bg-purple-600" },
+  { id: "ing", name: "ING Direct", logo: "ING", color: "bg-orange-500" },
+  { id: "hello_bank", name: "Hello bank!", logo: "H", color: "bg-pink-600" },
+  { id: "monabanq", name: "Monabanq", logo: "M", color: "bg-teal-600" },
+  { id: "revolut", name: "Revolut", logo: "R", color: "bg-gray-800" },
+  { id: "n26", name: "N26", logo: "N26", color: "bg-cyan-600" },
+  { id: "orange_bank", name: "Orange Bank", logo: "O", color: "bg-orange-600" },
+  { id: "nickel", name: "Nickel", logo: "N", color: "bg-green-500" },
+  { id: "qonto", name: "Qonto", logo: "Q", color: "bg-purple-700" },
+  { id: "shine", name: "Shine", logo: "S", color: "bg-yellow-500" },
 ];
 
 const mockDetectedSubscriptions: DetectedSubscription[] = [
@@ -216,7 +216,9 @@ export const BankConnectionForm = ({ onSuccess }: BankConnectionFormProps) => {
                 onClick={() => handleBankSelect(bank.id)}
               >
                 <CardContent className="flex items-center space-x-3 p-4">
-                  <span className="text-2xl">{bank.logo}</span>
+                  <div className={`w-12 h-12 ${bank.color} rounded-full flex items-center justify-center text-white font-bold text-sm`}>
+                    {bank.logo}
+                  </div>
                   <span className="font-medium">{bank.name}</span>
                 </CardContent>
               </Card>
@@ -233,7 +235,9 @@ export const BankConnectionForm = ({ onSuccess }: BankConnectionFormProps) => {
     return (
       <div className="space-y-6">
         <div className="flex items-center space-x-3">
-          <span className="text-2xl">{selectedBankData?.logo}</span>
+          <div className={`w-12 h-12 ${selectedBankData?.color} rounded-full flex items-center justify-center text-white font-bold text-sm`}>
+            {selectedBankData?.logo}
+          </div>
           <div>
             <h3 className="font-semibold">{selectedBankData?.name}</h3>
             <p className="text-sm text-muted-foreground">Connexion sécurisée</p>
