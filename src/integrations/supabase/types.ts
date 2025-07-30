@@ -14,7 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      subscriptions: {
+        Row: {
+          auto_detected: boolean | null
+          bank_transaction_id: string | null
+          billing_cycle: string
+          category: string
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          next_billing_date: string
+          price: number
+          status: string
+          updated_at: string
+          user_id: string
+          website_url: string | null
+        }
+        Insert: {
+          auto_detected?: boolean | null
+          bank_transaction_id?: string | null
+          billing_cycle: string
+          category: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          next_billing_date: string
+          price: number
+          status?: string
+          updated_at?: string
+          user_id: string
+          website_url?: string | null
+        }
+        Update: {
+          auto_detected?: boolean | null
+          bank_transaction_id?: string | null
+          billing_cycle?: string
+          category?: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          next_billing_date?: string
+          price?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
