@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,9 @@ import {
   Shield, 
   Infinity,
   CreditCard,
-  Settings
+  Settings,
+  Clock,
+  AlertTriangle
 } from "lucide-react";
 
 interface SubscriptionData {
@@ -20,6 +23,9 @@ interface SubscriptionData {
   subscription_tier: string | null;
   subscription_type: string | null;
   subscription_end: string | null;
+  trial_active: boolean;
+  trial_days_remaining: number;
+  trial_end_date: string | null;
 }
 
 export const SubscriptionPlans = () => {
@@ -28,7 +34,10 @@ export const SubscriptionPlans = () => {
     subscribed: false,
     subscription_tier: null,
     subscription_type: null,
-    subscription_end: null
+    subscription_end: null,
+    trial_active: false,
+    trial_days_remaining: 0,
+    trial_end_date: null
   });
   const [checkingSubscription, setCheckingSubscription] = useState(true);
   const { toast } = useToast();
@@ -134,10 +143,48 @@ export const SubscriptionPlans = () => {
     );
   }
 
+  const isTrialExpiringSoon = subscriptionData.trial_days_remaining <= 3;
+
   return (
     <div className="space-y-6">
-      {/* Current Subscription Status */}
-      {subscriptionData.subscribed && (
+      {/* Trial Status */}
+      {subscriptionData.trial_active && (
+        <Card className={`${isTrialExpiringSoon ? 'border-orange-200 bg-orange-50' : 'border-blue-200 bg-blue-50'}`}>
+          <CardHeader>
+            <CardTitle className={`flex items-center gap-2 ${isTrialExpiringSoon ? 'text-orange-800' : 'text-blue-800'}`}>
+              <Star className="h-5 w-5" />
+              Essai Gratuit Actif
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className={isTrialExpiringSoon ? 'text-orange-700' : 'text-blue-700'}>Jours restants :</span>
+                <Badge className={`${isTrialExpiringSoon ? 'bg-orange-600' : 'bg-blue-600'} text-white`}>
+                  {subscriptionData.trial_days_remaining} jour{subscriptionData.trial_days_remaining !== 1 ? 's' : ''}
+                </Badge>
+              </div>
+              {subscriptionData.trial_end_date && (
+                <div className="flex items-center justify-between">
+                  <span className={isTrialExpiringSoon ? 'text-orange-700' : 'text-blue-700'}>Fin de l'essai :</span>
+                  <span className={`font-medium ${isTrialExpiringSoon ? 'text-orange-800' : 'text-blue-800'}`}>
+                    {formatSubscriptionEnd(subscriptionData.trial_end_date)}
+                  </span>
+                </div>
+              )}
+              {isTrialExpiringSoon && (
+                <div className="flex items-center gap-2 text-orange-700 font-medium">
+                  <Clock className="h-4 w-4" />
+                  <span>Votre essai se termine bientôt !</span>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Paid Subscription Status */}
+      {subscriptionData.subscribed && subscriptionData.subscription_type !== 'trial' && (
         <Card className="border-green-200 bg-green-50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-green-800">
@@ -184,13 +231,38 @@ export const SubscriptionPlans = () => {
         </Card>
       )}
 
+      {/* Trial Expired */}
+      {!subscriptionData.subscribed && !subscriptionData.trial_active && (
+        <Card className="border-red-200 bg-red-50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-red-800">
+              <AlertTriangle className="h-5 w-5" />
+              Période d'essai expirée
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-red-700 text-sm mb-4">
+              Votre essai gratuit de 14 jours est terminé. Choisissez un plan pour continuer à utiliser toutes les fonctionnalités.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Subscription Plans */}
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold text-foreground mb-2">
-          {subscriptionData.subscribed ? "Changer de plan" : "Débloquez toutes les fonctionnalités"}
+          {subscriptionData.subscribed && subscriptionData.subscription_type !== 'trial' 
+            ? "Changer de plan" 
+            : subscriptionData.trial_active 
+              ? "Passez à Premium" 
+              : "Choisissez votre plan"
+          }
         </h2>
         <p className="text-muted-foreground">
-          Accédez à l'analyse avancée, aux recommandations personnalisées et bien plus
+          {subscriptionData.trial_active 
+            ? "Évitez l'interruption en choisissant un plan avant la fin de votre essai"
+            : "Accédez à l'analyse avancée, aux recommandations personnalisées et bien plus"
+          }
         </p>
       </div>
 

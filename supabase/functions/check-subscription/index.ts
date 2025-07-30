@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
@@ -42,108 +43,120 @@ serve(async (req) => {
     
     logStep("User authenticated", { userId: user.id, email: user.email });
 
+    // Check if user already exists in subscribers table
+    const { data: existingSubscriber } = await supabaseClient
+      .from("subscribers")
+      .select("*")
+      .eq("email", user.email)
+      .single();
+
+    const now = new Date();
+    const userCreatedAt = new Date(user.created_at);
+    const trialEndDate = new Date(userCreatedAt.getTime() + 14 * 24 * 60 * 60 * 1000); // 14 jours après création
+    const isTrialActive = now < trialEndDate;
+    const trialDaysRemaining = Math.max(0, Math.ceil((trialEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+
+    logStep("Trial period calculation", { 
+      userCreatedAt: userCreatedAt.toISOString(), 
+      trialEndDate: trialEndDate.toISOString(),
+      isTrialActive,
+      trialDaysRemaining 
+    });
+
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
     
     // Check for Stripe customer
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     
-    if (customers.data.length === 0) {
-      logStep("No customer found, updating unsubscribed state");
-      await supabaseClient.from("subscribers").upsert({
-        email: user.email,
-        user_id: user.id,
-        stripe_customer_id: null,
-        subscribed: false,
-        subscription_tier: null,
-        subscription_type: null,
-        subscription_end: null,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: 'email' });
-      
-      return new Response(JSON.stringify({ 
-        subscribed: false,
-        subscription_type: null,
-        subscription_tier: null 
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      });
-    }
-
-    const customerId = customers.data[0].id;
-    logStep("Found Stripe customer", { customerId });
-
-    // Check for active subscriptions (monthly)
-    const subscriptions = await stripe.subscriptions.list({
-      customer: customerId,
-      status: "active",
-      limit: 1,
-    });
-    
-    let hasActiveSub = subscriptions.data.length > 0;
+    let hasActiveSub = false;
     let subscriptionTier = null;
     let subscriptionType = null;
     let subscriptionEnd = null;
+    let customerId = null;
 
-    if (hasActiveSub) {
-      const subscription = subscriptions.data[0];
-      subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
-      subscriptionType = 'monthly';
-      subscriptionTier = 'Premium';
-      logStep("Active monthly subscription found", { 
-        subscriptionId: subscription.id, 
-        endDate: subscriptionEnd 
-      });
-    } else {
-      // Check for lifetime payment (successful one-time payments)
-      const payments = await stripe.paymentIntents.list({
+    if (customers.data.length > 0) {
+      customerId = customers.data[0].id;
+      logStep("Found Stripe customer", { customerId });
+
+      // Check for active subscriptions (monthly)
+      const subscriptions = await stripe.subscriptions.list({
         customer: customerId,
-        limit: 10,
+        status: "active",
+        limit: 1,
       });
       
-      const lifetimePayment = payments.data.find(payment => 
-        payment.status === 'succeeded' && 
-        payment.amount >= 9900 && // 99€ or more
-        payment.metadata?.plan_type === 'lifetime'
-      );
-      
-      if (lifetimePayment) {
-        hasActiveSub = true;
-        subscriptionType = 'lifetime';
+      if (subscriptions.data.length > 0) {
+        const subscription = subscriptions.data[0];
+        subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
+        subscriptionType = 'monthly';
         subscriptionTier = 'Premium';
-        subscriptionEnd = null; // Lifetime has no end
-        logStep("Lifetime subscription found", { 
-          paymentId: lifetimePayment.id,
-          amount: lifetimePayment.amount 
+        hasActiveSub = true;
+        logStep("Active monthly subscription found", { 
+          subscriptionId: subscription.id, 
+          endDate: subscriptionEnd 
         });
       } else {
-        logStep("No active subscription or lifetime payment found");
+        // Check for lifetime payment
+        const payments = await stripe.paymentIntents.list({
+          customer: customerId,
+          limit: 10,
+        });
+        
+        const lifetimePayment = payments.data.find(payment => 
+          payment.status === 'succeeded' && 
+          payment.amount >= 9900 && 
+          payment.metadata?.plan_type === 'lifetime'
+        );
+        
+        if (lifetimePayment) {
+          hasActiveSub = true;
+          subscriptionType = 'lifetime';
+          subscriptionTier = 'Premium';
+          subscriptionEnd = null;
+          logStep("Lifetime subscription found", { 
+            paymentId: lifetimePayment.id,
+            amount: lifetimePayment.amount 
+          });
+        }
       }
     }
+
+    // Determine final access status
+    let finalAccess = hasActiveSub || isTrialActive;
+    let finalTier = subscriptionTier || (isTrialActive ? 'Trial' : null);
+    let finalType = subscriptionType || (isTrialActive ? 'trial' : null);
+    let finalEnd = subscriptionEnd || (isTrialActive ? trialEndDate.toISOString() : null);
 
     // Update database
     await supabaseClient.from("subscribers").upsert({
       email: user.email,
       user_id: user.id,
       stripe_customer_id: customerId,
-      subscribed: hasActiveSub,
-      subscription_tier: subscriptionTier,
-      subscription_type: subscriptionType,
-      subscription_end: subscriptionEnd,
+      subscribed: finalAccess,
+      subscription_tier: finalTier,
+      subscription_type: finalType,
+      subscription_end: finalEnd,
+      trial_end_date: trialEndDate.toISOString(),
+      trial_days_remaining: trialDaysRemaining,
       updated_at: new Date().toISOString(),
     }, { onConflict: 'email' });
 
     logStep("Updated database with subscription info", { 
-      subscribed: hasActiveSub, 
-      subscriptionTier,
-      subscriptionType 
+      subscribed: finalAccess, 
+      subscriptionTier: finalTier,
+      subscriptionType: finalType,
+      isTrialActive,
+      trialDaysRemaining
     });
     
     return new Response(JSON.stringify({
-      subscribed: hasActiveSub,
-      subscription_tier: subscriptionTier,
-      subscription_type: subscriptionType,
-      subscription_end: subscriptionEnd
+      subscribed: finalAccess,
+      subscription_tier: finalTier,
+      subscription_type: finalType,
+      subscription_end: finalEnd,
+      trial_active: isTrialActive,
+      trial_days_remaining: trialDaysRemaining,
+      trial_end_date: trialEndDate.toISOString()
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
