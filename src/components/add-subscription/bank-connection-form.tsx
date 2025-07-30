@@ -109,25 +109,99 @@ export const BankConnectionForm = ({ onSuccess }: BankConnectionFormProps) => {
   };
 
   const handleConnect = async () => {
-    if (!credentials.username || !credentials.password) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez remplir tous les champs",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setLoading(true);
     setStep('detecting');
 
-    // Simulation de la connexion bancaire
-    setTimeout(() => {
-      setDetectedSubscriptions(mockDetectedSubscriptions);
-      setSelectedSubscriptions(mockDetectedSubscriptions.map(s => s.id));
-      setStep('results');
+    try {
+      // Obtenir l'URL d'autorisation TrueLayer
+      const { data, error } = await supabase.functions.invoke('bank-connect', {
+        body: { action: 'get_auth_url' }
+      });
+
+      if (error) throw error;
+
+      // Rediriger vers la banque pour autorisation
+      window.open(data.auth_url, '_blank', 'width=600,height=700');
+      
+      // Attendre le retour de l'autorisation
+      await waitForBankAuthorization();
+      
+    } catch (error: any) {
+      toast({
+        title: "Erreur de connexion",
+        description: error.message,
+        variant: "destructive",
+      });
+      setStep('credentials');
       setLoading(false);
-    }, 3000);
+    }
+  };
+
+  const waitForBankAuthorization = () => {
+    return new Promise((resolve, reject) => {
+      // Écouter les messages de la fenêtre popup
+      const handleMessage = async (event: MessageEvent) => {
+        if (event.origin !== window.location.origin) return;
+        
+        if (event.data.type === 'BANK_AUTH_SUCCESS') {
+          window.removeEventListener('message', handleMessage);
+          
+          try {
+            // Échanger le code contre les données bancaires
+            const { data, error } = await supabase.functions.invoke('bank-connect', {
+              body: { 
+                action: 'exchange_code',
+                code: event.data.code,
+                state: event.data.state
+              }
+            });
+
+            if (error) throw error;
+
+            setDetectedSubscriptions(data.subscriptions || []);
+            setSelectedSubscriptions((data.subscriptions || []).map((s: any) => s.id));
+            setStep('results');
+            setLoading(false);
+            resolve(data);
+            
+          } catch (error: any) {
+            toast({
+              title: "Erreur d'analyse",
+              description: "Impossible d'analyser vos transactions bancaires",
+              variant: "destructive",
+            });
+            setStep('credentials');
+            setLoading(false);
+            reject(error);
+          }
+        } else if (event.data.type === 'BANK_AUTH_ERROR') {
+          window.removeEventListener('message', handleMessage);
+          toast({
+            title: "Autorisation annulée",
+            description: "La connexion bancaire a été annulée",
+            variant: "destructive",
+          });
+          setStep('credentials');
+          setLoading(false);
+          reject(new Error('Authorization cancelled'));
+        }
+      };
+
+      window.addEventListener('message', handleMessage);
+      
+      // Timeout après 5 minutes
+      setTimeout(() => {
+        window.removeEventListener('message', handleMessage);
+        toast({
+          title: "Timeout",
+          description: "La connexion a pris trop de temps",
+          variant: "destructive",
+        });
+        setStep('credentials');
+        setLoading(false);
+        reject(new Error('Authorization timeout'));
+      }, 300000);
+    });
   };
 
   const handleImportSelected = async () => {

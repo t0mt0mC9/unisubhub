@@ -9,6 +9,7 @@ import { Session, User } from "@supabase/supabase-js";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import { BankCallback } from "./pages/BankCallback";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,10 @@ const App = () => {
             <Route 
               path="/auth" 
               element={!user ? <Auth /> : <Navigate to="/" replace />} 
+            />
+            <Route 
+              path="/bank-callback" 
+              element={<BankCallback />} 
             />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

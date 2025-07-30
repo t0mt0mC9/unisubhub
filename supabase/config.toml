@@ -1,5 +1,8 @@
 project_id = "rhmxohcqyyyglgmtnioc"
 
+[functions.bank-connect]
+verify_jwt = true
+
 [api]
 enabled = true
 port = 54321
