@@ -5,14 +5,22 @@ import { SpendingOverview } from "@/components/dashboard/spending-overview";
 import { SubscriptionCard } from "@/components/dashboard/subscription-card";
 import { mockSubscriptions, calculateTotalSpending } from "@/data/mock-subscriptions";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Filter, Plus, BarChart3, Settings, LogOut } from "lucide-react";
+import { Search, Filter, Plus, BarChart3, Settings, LogOut, X } from "lucide-react";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [searchTerm, setSearchTerm] = useState('');
   const spendingData = calculateTotalSpending(mockSubscriptions);
   const { toast } = useToast();
+
+  // Filter subscriptions based on search term
+  const filteredSubscriptions = mockSubscriptions.filter(subscription =>
+    subscription.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    subscription.category.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleSignOut = async () => {
     try {
@@ -36,10 +44,25 @@ const Index = () => {
       <div className="p-4 space-y-6">
         {/* Search and filter */}
         <div className="flex space-x-2">
-          <Button variant="outline" className="flex-1 justify-start" size="lg">
-            <Search className="mr-2 h-4 w-4" />
-            Rechercher vos abonnements...
-          </Button>
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Rechercher vos abonnements..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-10"
+            />
+            {searchTerm && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8"
+                onClick={() => setSearchTerm('')}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
           <Button variant="outline" size="lg">
             <Filter className="h-4 w-4" />
           </Button>
@@ -65,18 +88,37 @@ const Index = () => {
         {/* Subscriptions List */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-foreground">Mes abonnements</h2>
-            <span className="text-sm text-muted-foreground">{mockSubscriptions.length} au total</span>
+            <h2 className="text-lg font-semibold text-foreground">
+              {searchTerm ? `Résultats pour "${searchTerm}"` : 'Mes abonnements'}
+            </h2>
+            <span className="text-sm text-muted-foreground">
+              {filteredSubscriptions.length} {searchTerm ? 'trouvé(s)' : 'au total'}
+            </span>
           </div>
           
-          <div className="space-y-3">
-            {mockSubscriptions.map((subscription) => (
-              <SubscriptionCard
-                key={subscription.id}
-                {...subscription}
-              />
-            ))}
-          </div>
+          {filteredSubscriptions.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Search className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-medium mb-2">Aucun abonnement trouvé</h3>
+              <p className="text-muted-foreground">
+                {searchTerm 
+                  ? 'Essayez un autre terme de recherche'
+                  : 'Vous n\'avez pas encore d\'abonnements'
+                }
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filteredSubscriptions.map((subscription) => (
+                <SubscriptionCard
+                  key={subscription.id}
+                  {...subscription}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Bottom spacing for fixed navigation */}
