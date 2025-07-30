@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -20,6 +21,7 @@ interface AnalyticsStatsProps {
 }
 
 export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
+  const { toast } = useToast();
   // Calculs des statistiques
   const totalMonthly = subscriptions.reduce((sum, sub) => {
     const monthlyPrice = sub.billing_cycle === 'yearly' ? sub.price / 12 : 
@@ -94,6 +96,34 @@ export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
       case "Faible": return "bg-green-500";
       default: return "bg-gray-500";
     }
+  };
+
+  const handleRecommendationDetails = (recommendation: any) => {
+    let detailMessage = "";
+    
+    switch (recommendation.type) {
+      case "cost":
+        detailMessage = `Analysez vos abonnements les plus coûteux : ${expensiveSubscriptions.map(sub => sub.name).join(", ")}. Considérez des alternatives moins chères ou négociez des tarifs.`;
+        break;
+      case "duplicate":
+        const streamingServices = subscriptions.filter(sub => sub.category === "Streaming");
+        detailMessage = `Services de streaming détectés : ${streamingServices.map(sub => sub.name).join(", ")}. Vous pourriez garder seulement 1-2 services principaux.`;
+        break;
+      case "billing":
+        detailMessage = `Abonnements mensuels qui seraient moins chers en annuel : ${subscriptions.filter(sub => sub.billing_cycle === 'monthly').slice(0, 3).map(sub => sub.name).join(", ")}.`;
+        break;
+      case "usage":
+        detailMessage = `Services coûteux à analyser : ${expensiveSubscriptions.slice(0, 3).map(sub => `${sub.name} (${sub.price}€)`).join(", ")}. Vérifiez votre usage réel.`;
+        break;
+      default:
+        detailMessage = "Consultez vos abonnements pour plus d'optimisations possibles.";
+    }
+
+    toast({
+      title: recommendation.title,
+      description: detailMessage,
+      duration: 5000,
+    });
   };
 
   return (
@@ -197,7 +227,12 @@ export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
                     </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground mb-2">{rec.description}</p>
-                  <Button variant="outline" size="sm" className="text-xs h-7">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="text-xs h-7"
+                    onClick={() => handleRecommendationDetails(rec)}
+                  >
                     Voir détails
                   </Button>
                 </div>
