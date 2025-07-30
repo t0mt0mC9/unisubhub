@@ -30,6 +30,14 @@ serve(async (req) => {
       throw new Error("Invalid plan type. Must be 'monthly' or 'lifetime'");
     }
 
+    // Debug: Check if Stripe key is available
+    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    logStep("Stripe key check", { hasKey: !!stripeKey, keyLength: stripeKey?.length });
+    
+    if (!stripeKey) {
+      throw new Error("STRIPE_SECRET_KEY environment variable is not set");
+    }
+
     const authHeader = req.headers.get("Authorization")!;
     const token = authHeader.replace("Bearer ", "");
     const { data } = await supabaseClient.auth.getUser(token);
@@ -38,9 +46,10 @@ serve(async (req) => {
     
     logStep("User authenticated", { userId: user.id, email: user.email, planType });
 
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", { 
+    const stripe = new Stripe(stripeKey, { 
       apiVersion: "2023-10-16" 
     });
+    logStep("Stripe initialized successfully");
 
     // Check if customer exists
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
