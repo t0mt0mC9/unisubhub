@@ -39,6 +39,25 @@ const mockBanks = [
   { id: "societe_generale", name: "Société Générale", logo: "🏛️" },
   { id: "lcl", name: "LCL", logo: "🏪" },
   { id: "credit_mutuel", name: "Crédit Mutuel", logo: "🤝" },
+  { id: "la_banque_postale", name: "La Banque Postale", logo: "📮" },
+  { id: "caisse_epargne", name: "Caisse d'Épargne", logo: "🏦" },
+  { id: "credit_du_nord", name: "Crédit du Nord", logo: "🏔️" },
+  { id: "banque_populaire", name: "Banque Populaire", logo: "👥" },
+  { id: "cic", name: "CIC", logo: "🏛️" },
+  { id: "hsbc", name: "HSBC France", logo: "🌍" },
+  { id: "bred", name: "BRED", logo: "🏦" },
+  { id: "axa_banque", name: "AXA Banque", logo: "🛡️" },
+  { id: "boursorama", name: "Boursorama Banque", logo: "📱" },
+  { id: "fortuneo", name: "Fortuneo", logo: "💰" },
+  { id: "ing", name: "ING Direct", logo: "🦁" },
+  { id: "hello_bank", name: "Hello bank!", logo: "👋" },
+  { id: "monabanq", name: "Monabanq", logo: "🏦" },
+  { id: "revolut", name: "Revolut", logo: "💳" },
+  { id: "n26", name: "N26", logo: "📱" },
+  { id: "orange_bank", name: "Orange Bank", logo: "🍊" },
+  { id: "nickel", name: "Nickel", logo: "⚡" },
+  { id: "qonto", name: "Qonto", logo: "💼" },
+  { id: "shine", name: "Shine", logo: "✨" },
 ];
 
 const mockDetectedSubscriptions: DetectedSubscription[] = [
@@ -183,8 +202,11 @@ export const BankConnectionForm = ({ onSuccess }: BankConnectionFormProps) => {
         </Alert>
 
         <div className="space-y-4">
-          <Label>Sélectionnez votre banque</Label>
-          <div className="grid grid-cols-1 gap-3">
+          <div className="flex items-center justify-between">
+            <Label>Sélectionnez votre banque</Label>
+            <span className="text-sm text-muted-foreground">{mockBanks.length} banques disponibles</span>
+          </div>
+          <div className="grid grid-cols-1 gap-3 max-h-80 overflow-y-auto">
             {mockBanks.map((bank) => (
               <Card 
                 key={bank.id}
