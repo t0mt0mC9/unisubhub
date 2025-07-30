@@ -282,7 +282,22 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <MobileHeader title={getPageTitle()} />
+      <MobileHeader 
+        title={getPageTitle()} 
+        onNotificationsClick={() => {
+          toast({
+            title: "Notifications",
+            description: "Aucune nouvelle notification",
+          });
+        }}
+        onSettingsClick={() => setActiveTab('settings')}
+        onProfileClick={() => {
+          toast({
+            title: "Profil",
+            description: "Fonctionnalité bientôt disponible",
+          });
+        }}
+      />
       {renderContent()}
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
       <AddSubscriptionDialog 
