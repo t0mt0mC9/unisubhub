@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Home, PlusCircle, BarChart3, Settings } from "lucide-react";
+import { Home, PlusCircle, BarChart3, Settings, Crown } from "lucide-react";
 
 interface BottomNavProps {
   activeTab: string;
@@ -10,13 +10,14 @@ const navItems = [
   { id: 'dashboard', label: 'Accueil', icon: Home },
   { id: 'add', label: 'Ajouter', icon: PlusCircle },
   { id: 'analytics', label: 'Analyses', icon: BarChart3 },
+  { id: 'subscription', label: 'Premium', icon: Crown },
   { id: 'settings', label: 'Réglages', icon: Settings },
 ];
 
 export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-surface border-t border-border">
-      <div className="grid grid-cols-4 h-16">
+      <div className="grid grid-cols-5 h-16">
         {navItems.map(({ id, label, icon: Icon }) => (
           <button
             key={id}

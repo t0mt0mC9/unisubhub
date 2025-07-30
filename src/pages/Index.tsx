@@ -6,6 +6,7 @@ import { SubscriptionCard } from "@/components/dashboard/subscription-card";
 import { AnalyticsStats } from "@/components/analytics/analytics-stats";
 import { AnalyticsCharts } from "@/components/analytics/analytics-charts";
 import { SettingsPage } from "@/components/settings/settings-page";
+import { SubscriptionPlans } from "@/components/subscription/subscription-plans";
 import { AddSubscriptionDialog } from "@/components/add-subscription/add-subscription-dialog";
 import { mockSubscriptions, calculateTotalSpending } from "@/data/mock-subscriptions";
 import { Button } from "@/components/ui/button";
@@ -254,6 +255,7 @@ const Index = () => {
       case 'add': return 'Ajouter';
       case 'analytics': return 'Analyses';
       case 'settings': return 'Paramètres';
+      case 'subscription': return 'Abonnements';
       default: return 'UniSubHub';
     }
   };
@@ -264,9 +266,23 @@ const Index = () => {
       case 'add': return renderAddSubscription();
       case 'analytics': return renderAnalytics();
       case 'settings': return renderSettings();
+      case 'subscription': return renderSubscription();
       default: return renderDashboard();
     }
   };
+
+  const renderSubscription = () => (
+    <div className="flex-1 overflow-y-auto pb-20">
+      <div className="p-4 space-y-6">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-foreground mb-2">Abonnements Premium</h2>
+          <p className="text-muted-foreground">Débloquez toutes les fonctionnalités de UniSubHub</p>
+        </div>
+        
+        <SubscriptionPlans />
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
