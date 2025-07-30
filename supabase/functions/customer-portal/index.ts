@@ -50,9 +50,39 @@ serve(async (req) => {
     logStep("Found Stripe customer", { customerId });
 
     const origin = req.headers.get("origin") || "http://localhost:3000";
+    
+    // Create a configuration for the customer portal if none exists
+    let configurationId;
+    try {
+      const configurations = await stripe.billingPortal.configurations.list({ limit: 1 });
+      if (configurations.data.length === 0) {
+        const configuration = await stripe.billingPortal.configurations.create({
+          business_profile: {
+            headline: "Gérez votre abonnement",
+          },
+          features: {
+            payment_method_update: { enabled: true },
+            subscription_cancel: { enabled: true },
+            subscription_update: {
+              enabled: true,
+              default_allowed_updates: ["price", "quantity", "promotion_code"],
+            },
+          },
+        });
+        configurationId = configuration.id;
+        logStep("Created customer portal configuration", { configurationId });
+      } else {
+        configurationId = configurations.data[0].id;
+        logStep("Using existing configuration", { configurationId });
+      }
+    } catch (configError) {
+      logStep("Error with configuration, creating portal session without config", { error: configError });
+    }
+
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: customerId,
       return_url: `${origin}/`,
+      configuration: configurationId,
     });
     
     logStep("Customer portal session created", { 
