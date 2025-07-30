@@ -204,6 +204,19 @@ export const BankConnectionForm = ({ onSuccess }: BankConnectionFormProps) => {
     });
   };
 
+  const handleTestWithMockData = async () => {
+    setLoading(true);
+    setStep('detecting');
+
+    // Simulation de la connexion bancaire avec délai
+    setTimeout(() => {
+      setDetectedSubscriptions(mockDetectedSubscriptions);
+      setSelectedSubscriptions(mockDetectedSubscriptions.map(s => s.id));
+      setStep('results');
+      setLoading(false);
+    }, 2000);
+  };
+
   const handleImportSelected = async () => {
     const selectedSubs = detectedSubscriptions.filter(sub => 
       selectedSubscriptions.includes(sub.id)
@@ -365,10 +378,15 @@ export const BankConnectionForm = ({ onSuccess }: BankConnectionFormProps) => {
           <Button variant="outline" onClick={() => setStep('select-bank')}>
             Retour
           </Button>
-          <Button onClick={handleConnect} disabled={loading}>
-            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Se connecter
-          </Button>
+          <div className="space-x-2">
+            <Button variant="secondary" onClick={handleTestWithMockData}>
+              Test avec données simulées
+            </Button>
+            <Button onClick={handleConnect} disabled={loading}>
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Se connecter
+            </Button>
+          </div>
         </div>
       </div>
     );

@@ -47,20 +47,21 @@ serve(async (req) => {
     logStep("User authenticated", { userId: user.id, email: user.email });
 
     if (action === "get_auth_url") {
-      // Générer l'URL d'autorisation TrueLayer
+      // Générer l'URL d'autorisation TrueLayer pour les banques européennes
       const redirectUri = `${req.headers.get("origin")}/bank-callback`;
       const scope = "accounts transactions";
       const state = `user_${user.id}_${Date.now()}`;
       
+      // Utiliser les banques européennes au lieu de UK seulement
       const authUrl = `https://auth.truelayer-sandbox.com/?` +
         `response_type=code&` +
         `client_id=${truelayerClientId}&` +
         `redirect_uri=${encodeURIComponent(redirectUri)}&` +
         `scope=${encodeURIComponent(scope)}&` +
         `state=${state}&` +
-        `providers=uk-ob-all`;
+        `providers=es-santander-sandbox,fr-ca-particuliers-sandbox,fr-bnp-paribas-sandbox,demo-bank`;
 
-      logStep("Generated auth URL", { authUrl, state });
+      logStep("Generated auth URL for European banks", { authUrl, state });
 
       return new Response(JSON.stringify({ auth_url: authUrl, state }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
