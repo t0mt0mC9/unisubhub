@@ -3,6 +3,8 @@ import { MobileHeader } from "@/components/ui/mobile-header";
 import { BottomNav } from "@/components/navigation/bottom-nav";
 import { SpendingOverview } from "@/components/dashboard/spending-overview";
 import { SubscriptionCard } from "@/components/dashboard/subscription-card";
+import { AnalyticsStats } from "@/components/analytics/analytics-stats";
+import { AnalyticsCharts } from "@/components/analytics/analytics-charts";
 import { AddSubscriptionDialog } from "@/components/add-subscription/add-subscription-dialog";
 import { mockSubscriptions, calculateTotalSpending } from "@/data/mock-subscriptions";
 import { Button } from "@/components/ui/button";
@@ -189,13 +191,15 @@ const Index = () => {
   );
 
   const renderAnalytics = () => (
-    <div className="flex-1 flex items-center justify-center p-4">
-      <div className="text-center space-y-4">
-        <div className="w-16 h-16 bg-success/20 rounded-full flex items-center justify-center mx-auto">
-          <BarChart3 className="h-8 w-8 text-success" />
+    <div className="flex-1 overflow-y-auto pb-20">
+      <div className="p-4 space-y-6">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-foreground mb-2">Analyses détaillées</h2>
+          <p className="text-muted-foreground">Optimisez vos abonnements avec nos recommandations</p>
         </div>
-        <h2 className="text-xl font-semibold">Analyses détaillées</h2>
-        <p className="text-muted-foreground">Vos statistiques et recommandations d'optimisation</p>
+        
+        <AnalyticsStats subscriptions={allSubscriptions} />
+        <AnalyticsCharts subscriptions={allSubscriptions} />
       </div>
     </div>
   );
