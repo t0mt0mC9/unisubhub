@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MobileHeader } from "@/components/ui/mobile-header";
 import { BottomNav } from "@/components/navigation/bottom-nav";
 import { SpendingOverview } from "@/components/dashboard/spending-overview";
 import { SubscriptionCard } from "@/components/dashboard/subscription-card";
+import { AddSubscriptionDialog } from "@/components/add-subscription/add-subscription-dialog";
 import { mockSubscriptions, calculateTotalSpending } from "@/data/mock-subscriptions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,14 +14,59 @@ import { Search, Filter, Plus, BarChart3, Settings, LogOut, X } from "lucide-rea
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [searchTerm, setSearchTerm] = useState('');
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [userSubscriptions, setUserSubscriptions] = useState<any[]>([]);
+  const [loadingSubscriptions, setLoadingSubscriptions] = useState(true);
   const spendingData = calculateTotalSpending(mockSubscriptions);
   const { toast } = useToast();
 
   // Filter subscriptions based on search term
-  const filteredSubscriptions = mockSubscriptions.filter(subscription =>
+  const allSubscriptions = [...mockSubscriptions, ...userSubscriptions];
+  const filteredSubscriptions = allSubscriptions.filter(subscription =>
     subscription.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     subscription.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Load user subscriptions
+  useEffect(() => {
+    const loadSubscriptions = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data, error } = await supabase
+          .from("subscriptions")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+        setUserSubscriptions(data || []);
+      } catch (error: any) {
+        console.error("Error loading subscriptions:", error);
+      } finally {
+        setLoadingSubscriptions(false);
+      }
+    };
+
+    loadSubscriptions();
+
+    // Listen for real-time updates
+    const channel = supabase
+      .channel('subscriptions_changes')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'subscriptions'
+      }, () => {
+        loadSubscriptions();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   const handleSignOut = async () => {
     try {
@@ -79,7 +125,11 @@ const Index = () => {
 
         {/* Quick Actions */}
         <div className="flex space-x-3">
-          <Button className="flex-1" size="lg">
+          <Button 
+            className="flex-1" 
+            size="lg"
+            onClick={() => setShowAddDialog(true)}
+          >
             <Plus className="mr-2 h-4 w-4" />
             Ajouter un abonnement
           </Button>
@@ -128,13 +178,12 @@ const Index = () => {
   );
 
   const renderAddSubscription = () => (
-    <div className="flex-1 flex items-center justify-center p-4">
-      <div className="text-center space-y-4">
-        <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto">
-          <Plus className="h-8 w-8 text-primary" />
-        </div>
-        <h2 className="text-xl font-semibold">Ajouter un abonnement</h2>
-        <p className="text-muted-foreground">Cette fonctionnalité sera bientôt disponible</p>
+    <div className="flex-1 overflow-y-auto pb-20">
+      <div className="p-4">
+        <AddSubscriptionDialog 
+          open={true} 
+          onOpenChange={() => setActiveTab('dashboard')} 
+        />
       </div>
     </div>
   );
@@ -202,6 +251,10 @@ const Index = () => {
       <MobileHeader title={getPageTitle()} />
       {renderContent()}
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+      <AddSubscriptionDialog 
+        open={showAddDialog} 
+        onOpenChange={setShowAddDialog}
+      />
     </div>
   );
 };
