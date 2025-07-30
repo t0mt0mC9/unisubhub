@@ -79,11 +79,16 @@ serve(async (req) => {
       logStep("Error with configuration, creating portal session without config", { error: configError });
     }
 
-    const portalSession = await stripe.billingPortal.sessions.create({
+    const portalSessionConfig: any = {
       customer: customerId,
       return_url: `${origin}/`,
-      configuration: configurationId,
-    });
+    };
+    
+    if (configurationId) {
+      portalSessionConfig.configuration = configurationId;
+    }
+
+    const portalSession = await stripe.billingPortal.sessions.create(portalSessionConfig);
     
     logStep("Customer portal session created", { 
       sessionId: portalSession.id, 
