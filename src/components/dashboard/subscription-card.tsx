@@ -1,10 +1,14 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MoreVertical, AlertTriangle } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { MoreVertical, AlertTriangle, Edit, Trash2, ExternalLink } from "lucide-react";
+import { EditSubscriptionDialog } from "@/components/subscription/edit-subscription-dialog";
 import { cn } from "@/lib/utils";
 
 interface SubscriptionCardProps {
+  id?: string;
   name: string;
   price: number;
   currency: string;
@@ -14,9 +18,12 @@ interface SubscriptionCardProps {
   status: 'active' | 'trial' | 'expired' | 'cancelled';
   daysUntilRenewal?: number;
   className?: string;
+  subscription?: any; // Pour passer l'objet complet à l'édition
+  onRefresh?: () => void;
 }
 
 export function SubscriptionCard({
+  id,
   name,
   price,
   currency,
@@ -25,8 +32,11 @@ export function SubscriptionCard({
   icon,
   status,
   daysUntilRenewal,
-  className
+  className,
+  subscription,
+  onRefresh
 }: SubscriptionCardProps) {
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active': return 'bg-success text-success-foreground';
@@ -52,9 +62,25 @@ export function SubscriptionCard({
           </div>
         </div>
         
-        <Button variant="ghost" size="icon" className="h-8 w-8">
-          <MoreVertical className="h-4 w-4" />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
+              <Edit className="mr-2 h-4 w-4" />
+              Modifier
+            </DropdownMenuItem>
+            {subscription?.website_url && (
+              <DropdownMenuItem onClick={() => window.open(subscription.website_url, '_blank')}>
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Visiter le site
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       
       <div className="mt-4 flex items-center justify-between">
@@ -82,6 +108,17 @@ export function SubscriptionCard({
           </div>
         )}
       </div>
+      
+      {subscription && (
+        <EditSubscriptionDialog
+          open={showEditDialog}
+          onOpenChange={setShowEditDialog}
+          subscription={subscription}
+          onSuccess={() => {
+            onRefresh?.();
+          }}
+        />
+      )}
     </Card>
   );
 }

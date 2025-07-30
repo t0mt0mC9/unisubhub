@@ -166,7 +166,37 @@ const Index = () => {
               {filteredSubscriptions.map((subscription) => (
                 <SubscriptionCard
                   key={subscription.id}
-                  {...subscription}
+                  id={subscription.id}
+                  name={subscription.name}
+                  price={subscription.price}
+                  currency={subscription.currency || '€'}
+                  renewalDate={subscription.next_billing_date || subscription.renewalDate}
+                  category={subscription.category}
+                  icon={subscription.icon || '📱'}
+                  status={subscription.status || 'active'}
+                  daysUntilRenewal={subscription.daysUntilRenewal}
+                  subscription={subscription}
+                  onRefresh={() => {
+                    // Reload subscriptions after edit
+                    const loadSubscriptions = async () => {
+                      try {
+                        const { data: { user } } = await supabase.auth.getUser();
+                        if (!user) return;
+
+                        const { data, error } = await supabase
+                          .from("subscriptions")
+                          .select("*")
+                          .eq("user_id", user.id)
+                          .order("created_at", { ascending: false });
+
+                        if (error) throw error;
+                        setUserSubscriptions(data || []);
+                      } catch (error: any) {
+                        console.error("Error loading subscriptions:", error);
+                      }
+                    };
+                    loadSubscriptions();
+                  }}
                 />
               ))}
             </div>
