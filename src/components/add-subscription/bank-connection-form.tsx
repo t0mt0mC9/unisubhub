@@ -109,7 +109,12 @@ export const BankConnectionForm = ({ onSuccess }: BankConnectionFormProps) => {
   };
 
   const handleConnect = async () => {
+    console.log('handleConnect appelé avec credentials:', credentials);
+    console.log('username length:', credentials.username?.length);
+    console.log('password length:', credentials.password?.length);
+    
     if (!credentials.username || !credentials.password) {
+      console.log('Validation échouée - champs manquants');
       toast({
         title: "Erreur",
         description: "Veuillez remplir tous les champs",
