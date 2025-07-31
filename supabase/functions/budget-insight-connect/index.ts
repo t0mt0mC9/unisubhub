@@ -33,8 +33,19 @@ serve(async (req) => {
     const budgetInsightClientId = Deno.env.get('BUDGET_INSIGHT_CLIENT_ID');
     const budgetInsightClientSecret = Deno.env.get('BUDGET_INSIGHT_CLIENT_SECRET');
 
+    console.log('Environment check:', {
+      domain: budgetInsightDomain ? 'SET' : 'MISSING',
+      clientId: budgetInsightClientId ? 'SET' : 'MISSING',
+      clientSecret: budgetInsightClientSecret ? 'SET' : 'MISSING'
+    });
+
     if (!budgetInsightDomain || !budgetInsightClientId || !budgetInsightClientSecret) {
-      throw new Error('Configuration Budget Insight manquante');
+      const missingVars = [];
+      if (!budgetInsightDomain) missingVars.push('BUDGET_INSIGHT_DOMAIN');
+      if (!budgetInsightClientId) missingVars.push('BUDGET_INSIGHT_CLIENT_ID');
+      if (!budgetInsightClientSecret) missingVars.push('BUDGET_INSIGHT_CLIENT_SECRET');
+      
+      throw new Error(`Variables d'environnement manquantes: ${missingVars.join(', ')}`);
     }
 
     // 1. Authentification avec Budget Insight
