@@ -122,6 +122,8 @@ export const BankConnectionForm = ({ onSuccess }: BankConnectionFormProps) => {
     setStep('detecting');
 
     try {
+      console.log('Tentative de connexion avec:', { bank_id: selectedBank, username: credentials.username?.substring(0, 3) + '***' });
+      
       // Appel à l'API Budget Insight via notre Edge Function
       const { data, error } = await supabase.functions.invoke('budget-insight-connect', {
         body: {
@@ -131,7 +133,12 @@ export const BankConnectionForm = ({ onSuccess }: BankConnectionFormProps) => {
         }
       });
 
-      if (error) throw error;
+      console.log('Réponse de budget-insight-connect:', { data, error });
+
+      if (error) {
+        console.error('Erreur lors de l\'appel à budget-insight-connect:', error);
+        throw error;
+      }
 
       if (data.detected_subscriptions && data.detected_subscriptions.length > 0) {
         setDetectedSubscriptions(data.detected_subscriptions);
