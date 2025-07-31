@@ -33,19 +33,26 @@ serve(async (req) => {
     const clientId = Deno.env.get('BUDGET_INSIGHT_CLIENT_ID');
     const clientSecret = Deno.env.get('BUDGET_INSIGHT_CLIENT_SECRET');
 
-    console.log('Credentials check:', {
-      domain: budgetInsightDomain ? 'SET' : 'MISSING',
-      clientId: clientId ? 'SET' : 'MISSING',
-      clientSecret: clientSecret ? 'SET' : 'MISSING'
+    // Log détaillé des credentials
+    console.log('🔍 Credentials check:', {
+      domain: budgetInsightDomain ? `SET (${budgetInsightDomain})` : 'MISSING',
+      clientId: clientId ? `SET (${clientId})` : 'MISSING',
+      clientSecret: clientSecret ? `SET (${clientSecret.substring(0, 4)}***)` : 'MISSING'
     });
 
+    // Vérifier chaque credential individuellement  
+    if (!budgetInsightDomain) {
+      console.error('❌ BUDGET_INSIGHT_DOMAIN est manquant');
+    }
+    if (!clientId) {
+      console.error('❌ BUDGET_INSIGHT_CLIENT_ID est manquant');
+    }
+    if (!clientSecret) {
+      console.error('❌ BUDGET_INSIGHT_CLIENT_SECRET est manquant');
+    }
+
     if (!budgetInsightDomain || !clientId || !clientSecret) {
-      console.log('Credentials Budget Insight manquants, utilisation des données simulées');
-      console.log('Missing credentials details:', {
-        domain: budgetInsightDomain,
-        clientId: clientId,
-        clientSecret: clientSecret ? 'HIDDEN' : 'MISSING'
-      });
+      console.log('❌ Credentials Budget Insight manquants, utilisation des données simulées');
       return await simulateBudgetInsightResponse();
     }
 
