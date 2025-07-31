@@ -122,29 +122,47 @@ export const BankConnectionForm = ({ onSuccess }: BankConnectionFormProps) => {
     setStep('detecting');
 
     try {
-      // Simulation réaliste d'une connexion bancaire avec validation
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Simuler des abonnements détectés basés sur la banque sélectionnée
-      const bankSpecificSubscriptions = generateBankSpecificSubscriptions(selectedBank);
-      
-      setDetectedSubscriptions(bankSpecificSubscriptions);
-      setSelectedSubscriptions(bankSpecificSubscriptions.map(s => s.id));
-      setStep('results');
-      setLoading(false);
-
-      toast({
-        title: "Connexion réussie",
-        description: `${bankSpecificSubscriptions.length} abonnements détectés`,
+      // Appel à l'API Budget Insight via notre Edge Function
+      const { data, error } = await supabase.functions.invoke('budget-insight-connect', {
+        body: {
+          bank_id: selectedBank,
+          username: credentials.username,
+          password: credentials.password
+        }
       });
+
+      if (error) throw error;
+
+      if (data.detected_subscriptions && data.detected_subscriptions.length > 0) {
+        setDetectedSubscriptions(data.detected_subscriptions);
+        setSelectedSubscriptions(data.detected_subscriptions.map((s: DetectedSubscription) => s.id));
+        setStep('results');
+        
+        toast({
+          title: "Connexion réussie",
+          description: `${data.detected_subscriptions.length} abonnements détectés`,
+        });
+      } else {
+        // Fallback vers simulation si aucun abonnement détecté
+        const bankSpecificSubscriptions = generateBankSpecificSubscriptions(selectedBank);
+        setDetectedSubscriptions(bankSpecificSubscriptions);
+        setSelectedSubscriptions(bankSpecificSubscriptions.map(s => s.id));
+        setStep('results');
+        
+        toast({
+          title: "Connexion réussie",
+          description: `${bankSpecificSubscriptions.length} abonnements détectés (simulation)`,
+        });
+      }
 
     } catch (error: any) {
       toast({
         title: "Erreur de connexion",
-        description: "Impossible de se connecter à votre banque. Veuillez réessayer.",
+        description: error.message || "Impossible de se connecter à votre banque. Veuillez réessayer.",
         variant: "destructive",
       });
       setStep('credentials');
+    } finally {
       setLoading(false);
     }
   };
