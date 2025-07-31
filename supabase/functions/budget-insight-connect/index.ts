@@ -56,47 +56,43 @@ serve(async (req) => {
       return await simulateBudgetInsightResponse();
     }
 
-    console.log('✅ Connexion à Budget Insight API...');
+    console.log('✅ Tentative de connexion à UniSubHub...');
     
-    // Budget Insight utilise maintenant l'API Powens avec un format différent
-    const apiBaseUrl = `https://${budgetInsightDomain}.biapi.pro/2.0`;
-    console.log('🔍 URL de base de l\'API:', apiBaseUrl);
+    // Test si le domaine UniSubHub est accessible
+    const testUrl = `https://${budgetInsightDomain}`;
+    console.log('🔍 Test de connectivité vers:', testUrl);
 
     try {
-      // 1. D'abord, récupérer la liste des connecteurs pour vérifier que l'API fonctionne
-      console.log('🔍 Test de connectivité avec /connectors...');
-      const connectorsResponse = await fetch(`${apiBaseUrl}/connectors/`, {
+      // Test simple de connectivité vers le domaine
+      const testResponse = await fetch(testUrl, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
       });
 
-      console.log('📊 Réponse des connecteurs:', {
-        status: connectorsResponse.status,
-        statusText: connectorsResponse.statusText,
-        ok: connectorsResponse.ok
+      console.log('📊 Réponse du domaine UniSubHub:', {
+        status: testResponse.status,
+        statusText: testResponse.statusText,
+        ok: testResponse.ok
       });
-
-      if (!connectorsResponse.ok) {
-        const errorText = await connectorsResponse.text();
-        console.error('❌ Erreur lors de la récupération des connecteurs:', errorText);
-        throw new Error(`Erreur API connecteurs: ${connectorsResponse.status} - ${errorText}`);
+      
+      if (testResponse.ok) {
+        console.log('✅ Le domaine UniSubHub est accessible');
+        console.log('ℹ️ Cependant, nous avons besoin de la documentation API UniSubHub pour l\'intégration complète');
+      } else {
+        console.log('⚠️ Le domaine UniSubHub retourne une erreur:', testResponse.status);
       }
 
-      const connectorsData = await connectorsResponse.json();
-      console.log(`✅ ${connectorsData.connectors?.length || 0} connecteurs disponibles`);
-
-      // 2. Pour l'instant, utilisons les données simulées car l'authentification nécessite plus d'intégration
-      console.log('⚠️ Authentification Budget Insight nécessite une intégration plus complexe');
-      console.log('💡 Utilisation des données simulées en attendant l\'implémentation complète');
+      // Pour l'instant, utilisons les données simulées car nous avons besoin de la documentation API UniSubHub
+      console.log('💡 Utilisation des données simulées en attendant la documentation API UniSubHub');
       
       return await simulateBudgetInsightResponse();
 
     } catch (apiError: any) {
-      console.error('❌ Erreur API Budget Insight:', apiError);
+      console.error('❌ Erreur lors du test de connectivité UniSubHub:', apiError);
       
-      // En cas d'erreur API, utiliser les données simulées comme fallback
+      // En cas d'erreur, utiliser les données simulées comme fallback
       console.log('🔄 Fallback vers les données simulées');
       return await simulateBudgetInsightResponse();
     }
