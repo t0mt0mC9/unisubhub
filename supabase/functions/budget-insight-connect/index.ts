@@ -50,6 +50,7 @@ serve(async (req) => {
     }
 
     console.log('Connexion à Budget Insight API...');
+    console.log('URL d\'authentification:', `https://${budgetInsightDomain}/auth/init`);
 
     try {
       // 1. Obtenir un token d'accès
@@ -64,8 +65,16 @@ serve(async (req) => {
         }),
       });
 
+      console.log('Réponse d\'authentification:', {
+        status: tokenResponse.status,
+        statusText: tokenResponse.statusText,
+        ok: tokenResponse.ok
+      });
+
       if (!tokenResponse.ok) {
-        throw new Error(`Erreur d'authentification: ${tokenResponse.status}`);
+        const errorText = await tokenResponse.text();
+        console.error('Erreur d\'authentification détaillée:', errorText);
+        throw new Error(`Erreur d'authentification: ${tokenResponse.status} - ${errorText}`);
       }
 
       const tokenData = await tokenResponse.json();
