@@ -3,6 +3,9 @@ project_id = "rhmxohcqyyyglgmtnioc"
 [functions.bank-connect]
 verify_jwt = true
 
+[functions.budget-insight-connect]
+verify_jwt = true
+
 [api]
 enabled = true
 port = 54321
