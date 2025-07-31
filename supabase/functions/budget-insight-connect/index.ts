@@ -26,7 +26,7 @@ serve(async (req) => {
   try {
     const { bank_id, username, password } = await req.json();
     
-    console.log('Budget Insight connection request:', { bank_id, username: username?.substring(0, 3) + '***' });
+    console.log('🔍 Budget Insight connection request:', { bank_id, username: username?.substring(0, 3) + '***' });
 
     // Récupérer les credentials Budget Insight
     const budgetInsightDomain = Deno.env.get('BUDGET_INSIGHT_DOMAIN');
