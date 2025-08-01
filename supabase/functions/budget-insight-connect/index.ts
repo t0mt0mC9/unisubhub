@@ -32,10 +32,18 @@ serve(async (req) => {
     const clientId = Deno.env.get('BUDGET_INSIGHT_CLIENT_ID');
     const clientSecret = Deno.env.get('BUDGET_INSIGHT_CLIENT_SECRET');
 
+    // Debug: vérifier toutes les variables d'environnement disponibles
+    const allEnv = Deno.env.toObject();
+    console.log('🔍 Toutes les variables d\'environnement:', Object.keys(allEnv));
+    console.log('🔍 Variables contenant BUDGET:', Object.keys(allEnv).filter(key => key.includes('BUDGET')));
+    console.log('🔍 Variables contenant INSIGHT:', Object.keys(allEnv).filter(key => key.includes('INSIGHT')));
+    console.log('🔍 Variables contenant CLIENT:', Object.keys(allEnv).filter(key => key.includes('CLIENT')));
+    
     console.log('🔍 Credentials debug:', {
       clientId: clientId ? `SET (length: ${clientId.length})` : 'MISSING',
       clientSecret: clientSecret ? `SET (length: ${clientSecret.length})` : 'MISSING',
-      allEnvKeys: Object.keys(Deno.env.toObject()).filter(key => key.includes('BUDGET'))
+      exactClientId: Deno.env.get('BUDGET_INSIGHT_CLIENT_ID'),
+      exactClientSecret: Deno.env.get('BUDGET_INSIGHT_CLIENT_SECRET') ? 'SET' : 'MISSING'
     });
 
     if (!clientId || !clientSecret) {
