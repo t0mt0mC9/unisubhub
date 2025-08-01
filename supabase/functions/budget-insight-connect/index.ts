@@ -28,28 +28,28 @@ serve(async (req) => {
     
     console.log('🔍 Budget Insight connection request:', { bank_id, username: username?.substring(0, 3) + '***', action });
 
-    // Récupérer les credentials Powens
+    // Récupérer les credentials Powens - FORCE REDEPLOY
     const clientId = Deno.env.get('BUDGET_INSIGHT_CLIENT_ID');
     const clientSecret = Deno.env.get('BUDGET_INSIGHT_CLIENT_SECRET');
 
-    // Debug: vérifier toutes les variables d'environnement disponibles
+    // Debug MAXIMUM: vérifier toutes les variables d'environnement disponibles
     const allEnv = Deno.env.toObject();
-    console.log('🔍 Toutes les variables d\'environnement:', Object.keys(allEnv));
-    console.log('🔍 Variables contenant BUDGET:', Object.keys(allEnv).filter(key => key.includes('BUDGET')));
-    console.log('🔍 Variables contenant INSIGHT:', Object.keys(allEnv).filter(key => key.includes('INSIGHT')));
-    console.log('🔍 Variables contenant CLIENT:', Object.keys(allEnv).filter(key => key.includes('CLIENT')));
+    console.log('🔍 TOTAL ENV VARS:', Object.keys(allEnv).length);
+    console.log('🔍 ALL ENV KEYS:', Object.keys(allEnv));
+    console.log('🔍 BUDGET vars:', Object.keys(allEnv).filter(key => key.toUpperCase().includes('BUDGET')));
+    console.log('🔍 CLIENT vars:', Object.keys(allEnv).filter(key => key.toUpperCase().includes('CLIENT')));
+    console.log('🔍 INSIGHT vars:', Object.keys(allEnv).filter(key => key.toUpperCase().includes('INSIGHT')));
     
-    console.log('🔍 Credentials debug:', {
-      clientId: clientId ? `SET (length: ${clientId.length})` : 'MISSING',
-      clientSecret: clientSecret ? `SET (length: ${clientSecret.length})` : 'MISSING',
-      exactClientId: Deno.env.get('BUDGET_INSIGHT_CLIENT_ID'),
-      exactClientSecret: Deno.env.get('BUDGET_INSIGHT_CLIENT_SECRET') ? 'SET' : 'MISSING'
-    });
+    // Test direct des valeurs
+    console.log('🔍 Direct clientId value:', clientId);
+    console.log('🔍 Direct clientSecret value:', clientSecret ? `EXISTS_${clientSecret.length}` : 'NULL');
+    console.log('🔍 ClientId type:', typeof clientId);
+    console.log('🔍 ClientSecret type:', typeof clientSecret);
 
     if (!clientId || !clientSecret) {
       console.log('❌ Credentials Powens manquants, utilisation des données simulées');
-      console.log('❌ ClientId present:', !!clientId);
-      console.log('❌ ClientSecret present:', !!clientSecret);
+      console.log('❌ ClientId present:', !!clientId, 'value:', clientId);
+      console.log('❌ ClientSecret present:', !!clientSecret, 'length:', clientSecret?.length);
       return await simulateBudgetInsightResponse();
     }
 
