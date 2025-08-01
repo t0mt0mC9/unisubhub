@@ -65,10 +65,43 @@ serve(async (req) => {
       }
 
       const tokenData = await tokenResponse.json();
+      const accessToken = tokenData.access_token;
       console.log('✅ Token OAuth obtenu avec succès');
 
-      // Pour l'instant, utilisons les données simulées car nous avons besoin de plus d'informations sur l'API Powens
-      console.log('💡 Token validé, utilisation des données simulées en attendant l\'implémentation complète');
+      // Étape 2: Créer une connexion bancaire
+      console.log('🔗 Création de la connexion bancaire...');
+      const connectResponse = await fetch('https://api.powens.com/api/v2/connect', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          redirect_uri: "https://c6cdb938-7790-42f1-abd3-9729bbdbc721.lovableproject.com/bank-callback",
+          client_user_id: `user_${Date.now()}`,
+          consent: {
+            transactions: true,
+            accounts: true,
+            identity: true
+          },
+          state: `bank_${bank_id}_${Date.now()}`,
+          country: "FR"
+        }),
+      });
+
+      if (!connectResponse.ok) {
+        console.error('❌ Erreur lors de la création de la connexion:', connectResponse.status, connectResponse.statusText);
+        const errorText = await connectResponse.text();
+        console.error('Détails de l\'erreur:', errorText);
+        return await simulateBudgetInsightResponse();
+      }
+
+      const connectData = await connectResponse.json();
+      console.log('✅ Connexion bancaire créée:', connectData);
+
+      // Pour l'instant, on utilise toujours les données simulées car on a besoin de l'URL de redirection
+      // et du flow complet pour récupérer les vraies transactions
+      console.log('💡 Connexion Powens validée, utilisation des données simulées pour la démo');
       
       return await simulateBudgetInsightResponse();
 
