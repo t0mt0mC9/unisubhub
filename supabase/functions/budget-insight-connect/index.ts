@@ -217,7 +217,7 @@ async function getTransactions(req: Request): Promise<Response> {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
-});
+}
 
 async function simulateBudgetInsightResponse(): Promise<Response> {
   console.log('Utilisation des données simulées');
