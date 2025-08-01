@@ -32,13 +32,16 @@ serve(async (req) => {
     const clientId = Deno.env.get('BUDGET_INSIGHT_CLIENT_ID');
     const clientSecret = Deno.env.get('BUDGET_INSIGHT_CLIENT_SECRET');
 
-    console.log('🔍 Credentials check:', {
-      clientId: clientId ? `SET (${clientId})` : 'MISSING',
-      clientSecret: clientSecret ? `SET (${clientSecret.substring(0, 4)}***)` : 'MISSING'
+    console.log('🔍 Credentials debug:', {
+      clientId: clientId ? `SET (length: ${clientId.length})` : 'MISSING',
+      clientSecret: clientSecret ? `SET (length: ${clientSecret.length})` : 'MISSING',
+      allEnvKeys: Object.keys(Deno.env.toObject()).filter(key => key.includes('BUDGET'))
     });
 
     if (!clientId || !clientSecret) {
       console.log('❌ Credentials Powens manquants, utilisation des données simulées');
+      console.log('❌ ClientId present:', !!clientId);
+      console.log('❌ ClientSecret present:', !!clientSecret);
       return await simulateBudgetInsightResponse();
     }
 
