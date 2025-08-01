@@ -34,31 +34,37 @@ interface DetectedSubscription {
 }
 
 const mockBanks = [
-  { id: "bnp", name: "BNP Paribas", logo: "BNP", color: "bg-green-600" },
-  { id: "credit_agricole", name: "Crédit Agricole", logo: "CA", color: "bg-green-700" },
-  { id: "societe_generale", name: "Société Générale", logo: "SG", color: "bg-red-600" },
-  { id: "lcl", name: "LCL", logo: "LCL", color: "bg-blue-600" },
-  { id: "credit_mutuel", name: "Crédit Mutuel", logo: "CM", color: "bg-blue-700" },
-  { id: "la_banque_postale", name: "La Banque Postale", logo: "LBP", color: "bg-yellow-600" },
-  { id: "caisse_epargne", name: "Caisse d'Épargne", logo: "CE", color: "bg-red-700" },
-  { id: "credit_du_nord", name: "Crédit du Nord", logo: "CDN", color: "bg-blue-800" },
-  { id: "banque_populaire", name: "Banque Populaire", logo: "BP", color: "bg-red-500" },
-  { id: "cic", name: "CIC", logo: "CIC", color: "bg-blue-500" },
-  { id: "hsbc", name: "HSBC France", logo: "HSBC", color: "bg-red-600" },
-  { id: "bred", name: "BRED", logo: "BRED", color: "bg-blue-600" },
-  { id: "axa_banque", name: "AXA Banque", logo: "AXA", color: "bg-blue-800" },
-  { id: "boursorama", name: "Boursorama Banque", logo: "B", color: "bg-orange-600" },
-  { id: "fortuneo", name: "Fortuneo", logo: "F", color: "bg-purple-600" },
-  { id: "ing", name: "ING Direct", logo: "ING", color: "bg-orange-500" },
-  { id: "hello_bank", name: "Hello bank!", logo: "H", color: "bg-pink-600" },
-  { id: "monabanq", name: "Monabanq", logo: "M", color: "bg-teal-600" },
-  { id: "revolut", name: "Revolut", logo: "R", color: "bg-gray-800" },
-  { id: "n26", name: "N26", logo: "N26", color: "bg-cyan-600" },
-  { id: "orange_bank", name: "Orange Bank", logo: "O", color: "bg-orange-600" },
-  { id: "nickel", name: "Nickel", logo: "N", color: "bg-green-500" },
-  { id: "qonto", name: "Qonto", logo: "Q", color: "bg-purple-700" },
-  { id: "shine", name: "Shine", logo: "S", color: "bg-yellow-500" },
+  { id: "bnp", name: "BNP Paribas", logo: "BNP", color: "bg-green-600", provider: "tink" },
+  { id: "credit_agricole", name: "Crédit Agricole", logo: "CA", color: "bg-green-700", provider: "tink" },
+  { id: "societe_generale", name: "Société Générale", logo: "SG", color: "bg-red-600", provider: "tink" },
+  { id: "lcl", name: "LCL", logo: "LCL", color: "bg-blue-600", provider: "tink" },
+  { id: "credit_mutuel", name: "Crédit Mutuel", logo: "CM", color: "bg-blue-700", provider: "tink" },
+  { id: "la_banque_postale", name: "La Banque Postale", logo: "LBP", color: "bg-yellow-600", provider: "tink" },
+  { id: "caisse_epargne", name: "Caisse d'Épargne", logo: "CE", color: "bg-red-700", provider: "tink" },
+  { id: "credit_du_nord", name: "Crédit du Nord", logo: "CDN", color: "bg-blue-800", provider: "tink" },
+  { id: "banque_populaire", name: "Banque Populaire", logo: "BP", color: "bg-red-500", provider: "tink" },
+  { id: "cic", name: "CIC", logo: "CIC", color: "bg-blue-500", provider: "tink" },
+  { id: "hsbc", name: "HSBC France", logo: "HSBC", color: "bg-red-600", provider: "tink" },
+  { id: "bred", name: "BRED", logo: "BRED", color: "bg-blue-600", provider: "tink" },
+  { id: "axa_banque", name: "AXA Banque", logo: "AXA", color: "bg-blue-800", provider: "tink" },
+  { id: "boursorama", name: "Boursorama Banque", logo: "B", color: "bg-orange-600", provider: "tink" },
+  { id: "fortuneo", name: "Fortuneo", logo: "F", color: "bg-purple-600", provider: "tink" },
+  { id: "ing", name: "ING Direct", logo: "ING", color: "bg-orange-500", provider: "tink" },
+  { id: "hello_bank", name: "Hello bank!", logo: "H", color: "bg-pink-600", provider: "tink" },
+  { id: "monabanq", name: "Monabanq", logo: "M", color: "bg-teal-600", provider: "tink" },
+  { id: "revolut", name: "Revolut", logo: "R", color: "bg-gray-800", provider: "tink" },
+  { id: "n26", name: "N26", logo: "N26", color: "bg-cyan-600", provider: "tink" },
+  { id: "orange_bank", name: "Orange Bank", logo: "O", color: "bg-orange-600", provider: "tink" },
+  { id: "nickel", name: "Nickel", logo: "N", color: "bg-green-500", provider: "budget_insight" },
+  { id: "qonto", name: "Qonto", logo: "Q", color: "bg-purple-700", provider: "budget_insight" },
+  { id: "shine", name: "Shine", logo: "S", color: "bg-yellow-500", provider: "budget_insight" },
 ];
+
+// Fonction pour déterminer si une banque utilise Tink
+const isTinkBank = (bankId: string): boolean => {
+  const bank = mockBanks.find(b => b.id === bankId);
+  return bank?.provider === 'tink';
+};
 
 const mockDetectedSubscriptions: DetectedSubscription[] = [
   {
@@ -127,30 +133,33 @@ export const BankConnectionForm = ({ onSuccess }: BankConnectionFormProps) => {
     setStep('detecting');
 
     try {
-      console.log('Tentative de connexion avec:', { bank_id: selectedBank, username: credentials.username?.substring(0, 3) + '***' });
+      // Utiliser Tink pour les banques européennes, Budget Insight comme fallback
+      const functionName = isTinkBank(selectedBank) ? 'tink-connect' : 'budget-insight-connect';
+      const provider = isTinkBank(selectedBank) ? 'tink' : 'budget_insight';
       
-      const { data, error } = await supabase.functions.invoke('budget-insight-connect', {
-        body: {
-          bank_id: selectedBank,
-          username: credentials.username,
-          password: credentials.password,
-        },
-      });
+      console.log(`Tentative de connexion avec ${provider}:`, { bank_id: selectedBank, username: credentials.username?.substring(0, 3) + '***' });
+      
+      if (isTinkBank(selectedBank)) {
+        // Pour Tink, on demande d'abord l'URL d'autorisation
+        const { data, error } = await supabase.functions.invoke('tink-connect', {
+          body: {
+            action: 'get_auth_url',
+            bank_id: selectedBank,
+            redirect_uri: `${window.location.origin}/bank-callback`
+          },
+        });
 
-      console.log('Réponse de budget-insight-connect:', { data, error });
+        if (error) {
+          console.error('Erreur Tink:', error);
+          throw new Error(error.message || 'Erreur de connexion à l\'API Tink');
+        }
 
-      if (error) {
-        console.error('Erreur Supabase:', error);
-        throw new Error(error.message || 'Erreur de connexion à l\'API');
-      }
-
-      if (data?.success) {
-        if (data.connect_url) {
-          // Si on a une URL de connexion Powens, stocker les infos et rediriger
-          localStorage.setItem('powens_connection', JSON.stringify({
-            powens_user_id: data.powens_user_id,
-            user_token: data.user_token,
-            bank_id: selectedBank
+        if (data?.auth_url) {
+          // Sauvegarder les informations de connexion
+          localStorage.setItem('bank_connection_info', JSON.stringify({
+            bank_id: selectedBank,
+            provider: 'tink',
+            authorization_code: data.authorization_code
           }));
           
           toast({
@@ -158,22 +167,68 @@ export const BankConnectionForm = ({ onSuccess }: BankConnectionFormProps) => {
             description: "Vous allez être redirigé vers votre banque",
           });
           
-          // Rediriger vers l'URL de connexion Powens
-          window.location.href = data.connect_url;
+          // Redirection vers Tink
+          window.location.href = data.auth_url;
           return;
-        } else {
-          // Utiliser les données simulées
+        } else if (data?.detected_subscriptions) {
+          // Données simulées Tink
           setDetectedSubscriptions(data.detected_subscriptions || []);
           setSelectedSubscriptions(data.detected_subscriptions?.map((s: DetectedSubscription) => s.id) || []);
           setStep('results');
           
           toast({
-            title: "Connexion réussie",
-            description: `${data.detected_subscriptions?.length || 0} abonnements détectés`,
+            title: "Connexion réussie (simulation)",
+            description: `${data.detected_subscriptions?.length || 0} abonnements détectés avec Tink`,
           });
         }
       } else {
-        throw new Error(data?.error || 'Erreur lors de la détection des abonnements');
+        // Budget Insight (ancien code)
+        const { data, error } = await supabase.functions.invoke('budget-insight-connect', {
+          body: {
+            bank_id: selectedBank,
+            username: credentials.username,
+            password: credentials.password,
+          },
+        });
+
+        console.log('Réponse de budget-insight-connect:', { data, error });
+
+        if (error) {
+          console.error('Erreur Supabase:', error);
+          throw new Error(error.message || 'Erreur de connexion à l\'API');
+        }
+
+        if (data?.success) {
+          if (data.connect_url) {
+            // Si on a une URL de connexion Powens, stocker les infos et rediriger
+            localStorage.setItem('powens_connection', JSON.stringify({
+              powens_user_id: data.powens_user_id,
+              user_token: data.user_token,
+              bank_id: selectedBank
+            }));
+            
+            toast({
+              title: "Redirection",
+              description: "Vous allez être redirigé vers votre banque",
+            });
+            
+            // Rediriger vers l'URL de connexion Powens
+            window.location.href = data.connect_url;
+            return;
+          } else {
+            // Utiliser les données simulées
+            setDetectedSubscriptions(data.detected_subscriptions || []);
+            setSelectedSubscriptions(data.detected_subscriptions?.map((s: DetectedSubscription) => s.id) || []);
+            setStep('results');
+            
+            toast({
+              title: "Connexion réussie",
+              description: `${data.detected_subscriptions?.length || 0} abonnements détectés`,
+            });
+          }
+        } else {
+          throw new Error(data?.error || 'Erreur lors de la détection des abonnements');
+        }
       }
 
     } catch (error: any) {

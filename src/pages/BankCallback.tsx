@@ -43,7 +43,42 @@ export const BankCallback = () => {
 
         console.log('Callback reçu:', { state, code: code?.substring(0, 10) + '***' });
 
-        // Récupérer les informations de connexion stockées
+        // Vérifier d'abord les nouvelles informations de connexion (Tink)
+        let connectionInfo = localStorage.getItem('bank_connection_info');
+        if (connectionInfo) {
+          const { bank_id, provider, authorization_code } = JSON.parse(connectionInfo);
+          console.log('Info de connexion (nouvelle):', { bank_id, provider, authorization_code: authorization_code ? 'présent' : 'absent' });
+
+          if (provider === 'tink') {
+            // Traitement pour Tink
+            const { data, error: functionError } = await supabase.functions.invoke('tink-connect', {
+              body: {
+                action: 'exchange_code',
+                authorization_code: code,
+                bank_id: bank_id
+              },
+            });
+
+            if (functionError) {
+              throw new Error(functionError.message || 'Erreur lors de la récupération des données Tink');
+            }
+
+            if (data?.success && data?.detected_subscriptions) {
+              setDetectedSubscriptions(data.detected_subscriptions);
+              setSuccess(true);
+              
+              toast({
+                title: "Connexion Tink réussie",
+                description: `${data.detected_subscriptions.length} abonnement(s) détecté(s)`,
+              });
+              return;
+            } else {
+              throw new Error(data?.error || 'Aucune donnée Tink reçue');
+            }
+          }
+        }
+
+        // Fallback pour Powens/Budget Insight (ancien code)
         const storedConnection = localStorage.getItem('powens_connection');
         if (!storedConnection) {
           throw new Error('Informations de connexion manquantes');
@@ -125,6 +160,7 @@ export const BankCallback = () => {
 
       // Nettoyer le localStorage et rediriger
       localStorage.removeItem('powens_connection');
+      localStorage.removeItem('bank_connection_info');
       navigate('/');
     } catch (error: any) {
       console.error('Erreur import:', error);
@@ -138,6 +174,7 @@ export const BankCallback = () => {
 
   const handleReturn = () => {
     localStorage.removeItem('powens_connection');
+    localStorage.removeItem('bank_connection_info');
     navigate('/');
   };
 
