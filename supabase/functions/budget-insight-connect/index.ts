@@ -28,9 +28,13 @@ serve(async (req) => {
     
     console.log('🔍 Budget Insight connection request:', { bank_id, username: username?.substring(0, 3) + '***', action });
 
-    // Récupérer les credentials Powens - FORCE REDEPLOY
-    const clientId = Deno.env.get('BUDGET_INSIGHT_CLIENT_ID');
-    const clientSecret = Deno.env.get('BUDGET_INSIGHT_CLIENT_SECRET');
+    // Essayer différents noms de variables d'environnement
+    const clientId = Deno.env.get('BUDGET_INSIGHT_CLIENT_ID') || 
+                     Deno.env.get('POWENS_CLIENT_ID') || 
+                     Deno.env.get('CLIENT_ID');
+    const clientSecret = Deno.env.get('BUDGET_INSIGHT_CLIENT_SECRET') || 
+                         Deno.env.get('POWENS_CLIENT_SECRET') || 
+                         Deno.env.get('CLIENT_SECRET');
 
     // Debug MAXIMUM: vérifier toutes les variables d'environnement disponibles
     const allEnv = Deno.env.toObject();
