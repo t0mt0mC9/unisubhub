@@ -8,6 +8,7 @@ import { AnalyticsCharts } from "@/components/analytics/analytics-charts";
 import { SettingsPage } from "@/components/settings/settings-page";
 import { SubscriptionPlans } from "@/components/subscription/subscription-plans";
 import { AddSubscriptionDialog } from "@/components/add-subscription/add-subscription-dialog";
+import { ProfilePage } from "@/components/profile/profile-page";
 import { mockSubscriptions, calculateTotalSpending } from "@/data/mock-subscriptions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -256,6 +257,7 @@ const Index = () => {
       case 'analytics': return 'Analyses';
       case 'settings': return 'Paramètres';
       case 'subscription': return 'Abonnements';
+      case 'profile': return 'Profil';
       default: return 'UniSubHub';
     }
   };
@@ -267,6 +269,7 @@ const Index = () => {
       case 'analytics': return renderAnalytics();
       case 'settings': return renderSettings();
       case 'subscription': return renderSubscription();
+      case 'profile': return renderProfile();
       default: return renderDashboard();
     }
   };
@@ -284,6 +287,19 @@ const Index = () => {
     </div>
   );
 
+  const renderProfile = () => (
+    <div className="flex-1 overflow-y-auto pb-20">
+      <div className="p-4 space-y-6">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-foreground mb-2">Mon Profil</h2>
+          <p className="text-muted-foreground">Gérez vos informations personnelles</p>
+        </div>
+        
+        <ProfilePage onSignOut={handleSignOut} />
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <MobileHeader 
@@ -295,12 +311,7 @@ const Index = () => {
           });
         }}
         onSettingsClick={() => setActiveTab('settings')}
-        onProfileClick={() => {
-          toast({
-            title: "Profil",
-            description: "Fonctionnalité bientôt disponible",
-          });
-        }}
+        onProfileClick={() => setActiveTab('profile')}
       />
       {renderContent()}
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
