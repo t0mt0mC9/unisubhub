@@ -28,69 +28,52 @@ serve(async (req) => {
     
     console.log('🔍 Budget Insight connection request:', { bank_id, username: username?.substring(0, 3) + '***' });
 
-    // Récupérer les credentials Budget Insight
-    const budgetInsightDomain = Deno.env.get('BUDGET_INSIGHT_DOMAIN');
+    // Récupérer les credentials Powens
     const clientId = Deno.env.get('BUDGET_INSIGHT_CLIENT_ID');
     const clientSecret = Deno.env.get('BUDGET_INSIGHT_CLIENT_SECRET');
 
-    // Log détaillé des credentials
     console.log('🔍 Credentials check:', {
-      domain: budgetInsightDomain ? `SET (${budgetInsightDomain})` : 'MISSING',
       clientId: clientId ? `SET (${clientId})` : 'MISSING',
       clientSecret: clientSecret ? `SET (${clientSecret.substring(0, 4)}***)` : 'MISSING'
     });
 
-    // Vérifier chaque credential individuellement  
-    if (!budgetInsightDomain) {
-      console.error('❌ BUDGET_INSIGHT_DOMAIN est manquant');
-    }
-    if (!clientId) {
-      console.error('❌ BUDGET_INSIGHT_CLIENT_ID est manquant');
-    }
-    if (!clientSecret) {
-      console.error('❌ BUDGET_INSIGHT_CLIENT_SECRET est manquant');
-    }
-
-    if (!budgetInsightDomain || !clientId || !clientSecret) {
-      console.log('❌ Credentials Budget Insight manquants, utilisation des données simulées');
+    if (!clientId || !clientSecret) {
+      console.log('❌ Credentials Powens manquants, utilisation des données simulées');
       return await simulateBudgetInsightResponse();
     }
 
-    console.log('✅ Tentative de connexion à UniSubHub...');
+    console.log('✅ Tentative de connexion à l\'API Powens...');
     
-    // Test si le domaine UniSubHub est accessible
-    const testUrl = `https://${budgetInsightDomain}`;
-    console.log('🔍 Test de connectivité vers:', testUrl);
-
     try {
-      // Test simple de connectivité vers le domaine
-      const testResponse = await fetch(testUrl, {
-        method: 'GET',
+      // Étape 1: Obtenir le token OAuth
+      console.log('🔐 Demande de token OAuth à Powens...');
+      const tokenResponse = await fetch('https://api.powens.com/api/v2/oauth/token', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          client_id: clientId,
+          client_secret: clientSecret,
+          grant_type: 'client_credentials'
+        }),
       });
 
-      console.log('📊 Réponse du domaine UniSubHub:', {
-        status: testResponse.status,
-        statusText: testResponse.statusText,
-        ok: testResponse.ok
-      });
-      
-      if (testResponse.ok) {
-        console.log('✅ Le domaine UniSubHub est accessible');
-        console.log('ℹ️ Cependant, nous avons besoin de la documentation API UniSubHub pour l\'intégration complète');
-      } else {
-        console.log('⚠️ Le domaine UniSubHub retourne une erreur:', testResponse.status);
+      if (!tokenResponse.ok) {
+        console.error('❌ Erreur lors de l\'authentification Powens:', tokenResponse.status, tokenResponse.statusText);
+        return await simulateBudgetInsightResponse();
       }
 
-      // Pour l'instant, utilisons les données simulées car nous avons besoin de la documentation API UniSubHub
-      console.log('💡 Utilisation des données simulées en attendant la documentation API UniSubHub');
+      const tokenData = await tokenResponse.json();
+      console.log('✅ Token OAuth obtenu avec succès');
+
+      // Pour l'instant, utilisons les données simulées car nous avons besoin de plus d'informations sur l'API Powens
+      console.log('💡 Token validé, utilisation des données simulées en attendant l\'implémentation complète');
       
       return await simulateBudgetInsightResponse();
 
     } catch (apiError: any) {
-      console.error('❌ Erreur lors du test de connectivité UniSubHub:', apiError);
+      console.error('❌ Erreur API Powens:', apiError);
       
       // En cas d'erreur, utiliser les données simulées comme fallback
       console.log('🔄 Fallback vers les données simulées');
