@@ -24,9 +24,9 @@ serve(async (req) => {
   }
 
   try {
-    const { bank_id, username, password } = await req.json();
+    const { bank_id, username, password, action } = await req.json();
     
-    console.log('🔍 Budget Insight connection request:', { bank_id, username: username?.substring(0, 3) + '***' });
+    console.log('🔍 Budget Insight connection request:', { bank_id, username: username?.substring(0, 3) + '***', action });
 
     // Récupérer les credentials Powens
     const clientId = Deno.env.get('BUDGET_INSIGHT_CLIENT_ID');
@@ -42,75 +42,14 @@ serve(async (req) => {
       return await simulateBudgetInsightResponse();
     }
 
-    console.log('✅ Tentative de connexion à l\'API Powens...');
-    
-    try {
-      // Étape 1: Obtenir le token OAuth
-      console.log('🔐 Demande de token OAuth à Powens...');
-      const tokenResponse = await fetch('https://api.powens.com/api/v2/oauth/token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          client_id: clientId,
-          client_secret: clientSecret,
-          grant_type: 'client_credentials'
-        }),
-      });
-
-      if (!tokenResponse.ok) {
-        console.error('❌ Erreur lors de l\'authentification Powens:', tokenResponse.status, tokenResponse.statusText);
-        return await simulateBudgetInsightResponse();
-      }
-
-      const tokenData = await tokenResponse.json();
-      const accessToken = tokenData.access_token;
-      console.log('✅ Token OAuth obtenu avec succès');
-
-      // Étape 2: Créer une connexion bancaire
-      console.log('🔗 Création de la connexion bancaire...');
-      const connectResponse = await fetch('https://api.powens.com/api/v2/connect', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          redirect_uri: "https://c6cdb938-7790-42f1-abd3-9729bbdbc721.lovableproject.com/bank-callback",
-          client_user_id: `user_${Date.now()}`,
-          consent: {
-            transactions: true,
-            accounts: true,
-            identity: true
-          },
-          state: `bank_${bank_id}_${Date.now()}`,
-          country: "FR"
-        }),
-      });
-
-      if (!connectResponse.ok) {
-        console.error('❌ Erreur lors de la création de la connexion:', connectResponse.status, connectResponse.statusText);
-        const errorText = await connectResponse.text();
-        console.error('Détails de l\'erreur:', errorText);
-        return await simulateBudgetInsightResponse();
-      }
-
-      const connectData = await connectResponse.json();
-      console.log('✅ Connexion bancaire créée:', connectData);
-
-      // Pour l'instant, on utilise toujours les données simulées car on a besoin de l'URL de redirection
-      // et du flow complet pour récupérer les vraies transactions
-      console.log('💡 Connexion Powens validée, utilisation des données simulées pour la démo');
-      
-      return await simulateBudgetInsightResponse();
-
-    } catch (apiError: any) {
-      console.error('❌ Erreur API Powens:', apiError);
-      
-      // En cas d'erreur, utiliser les données simulées comme fallback
-      console.log('🔄 Fallback vers les données simulées');
-      return await simulateBudgetInsightResponse();
+    // Gérer différentes actions
+    switch (action) {
+      case 'get_accounts':
+        return await getAccounts(req);
+      case 'get_transactions':
+        return await getTransactions(req);
+      default:
+        return await createConnectionLink(clientId, clientSecret, bank_id, username);
     }
 
   } catch (error: any) {
@@ -119,6 +58,161 @@ serve(async (req) => {
       success: false,
       error: error.message,
     }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+});
+
+async function createConnectionLink(clientId: string, clientSecret: string, bankId: string, username: string): Promise<Response> {
+  try {
+    console.log('✅ Tentative de connexion à l\'API Powens...');
+    
+    // Étape 1: Obtenir le token OAuth
+    console.log('🔐 Demande de token OAuth à Powens...');
+    const tokenResponse = await fetch('https://api.powens.com/api/v2/oauth/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        client_id: clientId,
+        client_secret: clientSecret,
+        grant_type: 'client_credentials'
+      }),
+    });
+
+    if (!tokenResponse.ok) {
+      console.error('❌ Erreur lors de l\'authentification Powens:', tokenResponse.status, tokenResponse.statusText);
+      return await simulateBudgetInsightResponse();
+    }
+
+    const tokenData = await tokenResponse.json();
+    const accessToken = tokenData.access_token;
+    console.log('✅ Token OAuth obtenu avec succès');
+
+    // Étape 2: Créer une connexion bancaire
+    console.log('🔗 Création de la connexion bancaire...');
+    const userId = `user_${Date.now()}`;
+    const connectResponse = await fetch('https://api.powens.com/api/v2/connect', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        redirect_uri: "https://c6cdb938-7790-42f1-abd3-9729bbdbc721.lovableproject.com/bank-callback",
+        client_user_id: userId,
+        consent: {
+          transactions: true,
+          accounts: true,
+          identity: true
+        },
+        state: `bank_${bankId}_${Date.now()}`,
+        country: "FR"
+      }),
+    });
+
+    if (!connectResponse.ok) {
+      console.error('❌ Erreur lors de la création de la connexion:', connectResponse.status, connectResponse.statusText);
+      const errorText = await connectResponse.text();
+      console.error('Détails de l\'erreur:', errorText);
+      return await simulateBudgetInsightResponse();
+    }
+
+    const connectData = await connectResponse.json();
+    console.log('✅ Connexion bancaire créée:', connectData);
+
+    return new Response(JSON.stringify({
+      success: true,
+      connect_url: connectData.connect_url,
+      powens_user_id: connectData.user.id,
+      user_token: connectData.user.user_token,
+      message: 'Connexion Powens créée avec succès'
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
+  } catch (apiError: any) {
+    console.error('❌ Erreur API Powens:', apiError);
+    return await simulateBudgetInsightResponse();
+  }
+}
+
+async function getAccounts(req: Request): Promise<Response> {
+  try {
+    const { user_token } = await req.json();
+    
+    console.log('📋 Récupération des comptes...');
+    const response = await fetch('https://api.powens.com/api/v2/users/me/accounts', {
+      headers: {
+        'Authorization': `Bearer ${user_token}`,
+      }
+    });
+
+    if (!response.ok) {
+      console.error('❌ Erreur récupération comptes:', response.status);
+      return new Response(JSON.stringify({ success: false, error: 'Erreur récupération comptes' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const accounts = await response.json();
+    console.log('✅ Comptes récupérés:', accounts.length);
+
+    return new Response(JSON.stringify({
+      success: true,
+      accounts: accounts
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
+  } catch (error: any) {
+    console.error('❌ Erreur getAccounts:', error);
+    return new Response(JSON.stringify({ success: false, error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+}
+
+async function getTransactions(req: Request): Promise<Response> {
+  try {
+    const { user_token } = await req.json();
+    
+    console.log('💳 Récupération des transactions...');
+    const response = await fetch('https://api.powens.com/api/v2/users/me/transactions', {
+      headers: {
+        'Authorization': `Bearer ${user_token}`,
+      }
+    });
+
+    if (!response.ok) {
+      console.error('❌ Erreur récupération transactions:', response.status);
+      return new Response(JSON.stringify({ success: false, error: 'Erreur récupération transactions' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const transactions = await response.json();
+    console.log('✅ Transactions récupérées:', transactions.length);
+
+    // Analyser les transactions pour détecter les abonnements
+    const detectedSubscriptions = analyzeTransactionsForSubscriptions(transactions);
+
+    return new Response(JSON.stringify({
+      success: true,
+      detected_subscriptions: detectedSubscriptions,
+      raw_transactions: transactions
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
+  } catch (error: any) {
+    console.error('❌ Erreur getTransactions:', error);
+    return new Response(JSON.stringify({ success: false, error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

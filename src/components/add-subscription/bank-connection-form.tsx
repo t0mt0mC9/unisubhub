@@ -129,42 +129,51 @@ export const BankConnectionForm = ({ onSuccess }: BankConnectionFormProps) => {
     try {
       console.log('Tentative de connexion avec:', { bank_id: selectedBank, username: credentials.username?.substring(0, 3) + '***' });
       
-      // Appel à l'API Budget Insight via notre Edge Function
       const { data, error } = await supabase.functions.invoke('budget-insight-connect', {
         body: {
           bank_id: selectedBank,
           username: credentials.username,
-          password: credentials.password
-        }
+          password: credentials.password,
+        },
       });
 
       console.log('Réponse de budget-insight-connect:', { data, error });
 
       if (error) {
-        console.error('Erreur lors de l\'appel à budget-insight-connect:', error);
-        throw error;
+        console.error('Erreur Supabase:', error);
+        throw new Error(error.message || 'Erreur de connexion à l\'API');
       }
 
-      if (data.detected_subscriptions && data.detected_subscriptions.length > 0) {
-        setDetectedSubscriptions(data.detected_subscriptions);
-        setSelectedSubscriptions(data.detected_subscriptions.map((s: DetectedSubscription) => s.id));
-        setStep('results');
-        
-        toast({
-          title: "Connexion réussie",
-          description: `${data.detected_subscriptions.length} abonnements détectés`,
-        });
+      if (data?.success) {
+        if (data.connect_url) {
+          // Si on a une URL de connexion Powens, stocker les infos et rediriger
+          localStorage.setItem('powens_connection', JSON.stringify({
+            powens_user_id: data.powens_user_id,
+            user_token: data.user_token,
+            bank_id: selectedBank
+          }));
+          
+          toast({
+            title: "Redirection",
+            description: "Vous allez être redirigé vers votre banque",
+          });
+          
+          // Rediriger vers l'URL de connexion Powens
+          window.location.href = data.connect_url;
+          return;
+        } else {
+          // Utiliser les données simulées
+          setDetectedSubscriptions(data.detected_subscriptions || []);
+          setSelectedSubscriptions(data.detected_subscriptions?.map((s: DetectedSubscription) => s.id) || []);
+          setStep('results');
+          
+          toast({
+            title: "Connexion réussie",
+            description: `${data.detected_subscriptions?.length || 0} abonnements détectés`,
+          });
+        }
       } else {
-        // Fallback vers simulation si aucun abonnement détecté
-        const bankSpecificSubscriptions = generateBankSpecificSubscriptions(selectedBank);
-        setDetectedSubscriptions(bankSpecificSubscriptions);
-        setSelectedSubscriptions(bankSpecificSubscriptions.map(s => s.id));
-        setStep('results');
-        
-        toast({
-          title: "Connexion réussie",
-          description: `${bankSpecificSubscriptions.length} abonnements détectés (simulation)`,
-        });
+        throw new Error(data?.error || 'Erreur lors de la détection des abonnements');
       }
 
     } catch (error: any) {
