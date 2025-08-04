@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Session, User } from "@supabase/supabase-js";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
 import { BankCallback } from "./pages/BankCallback";
 
@@ -58,7 +59,7 @@ const App = () => {
           <Routes>
             <Route 
               path="/" 
-              element={user ? <Index /> : <Navigate to="/auth" replace />} 
+              element={user ? <Index /> : <Landing />} 
             />
             <Route 
               path="/auth" 
