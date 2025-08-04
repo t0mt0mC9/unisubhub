@@ -9,6 +9,7 @@ import { SettingsPage } from "@/components/settings/settings-page";
 import { SubscriptionPlans } from "@/components/subscription/subscription-plans";
 import { AddSubscriptionDialog } from "@/components/add-subscription/add-subscription-dialog";
 import { ProfilePage } from "@/components/profile/profile-page";
+import { PrivacyPolicyPage } from "@/components/privacy/privacy-policy-page";
 import { mockSubscriptions, calculateTotalSpending } from "@/data/mock-subscriptions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +23,7 @@ const Index = () => {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [userSubscriptions, setUserSubscriptions] = useState<any[]>([]);
   const [loadingSubscriptions, setLoadingSubscriptions] = useState(true);
+  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const spendingData = calculateTotalSpending(mockSubscriptions);
   const { toast } = useToast();
 
@@ -245,12 +247,21 @@ const Index = () => {
           <p className="text-muted-foreground">Personnalisez votre expérience UniSubHub</p>
         </div>
         
-        <SettingsPage onSignOut={handleSignOut} />
+        <SettingsPage 
+          onSignOut={handleSignOut} 
+          onShowPrivacyPolicy={() => setShowPrivacyPolicy(true)}
+        />
       </div>
     </div>
   );
 
+  const renderPrivacyPolicy = () => (
+    <PrivacyPolicyPage onBack={() => setShowPrivacyPolicy(false)} />
+  );
+
   const getPageTitle = () => {
+    if (showPrivacyPolicy) return 'Politique de confidentialité';
+    
     switch (activeTab) {
       case 'dashboard': return 'UniSubHub';
       case 'add': return 'Ajouter';
@@ -263,6 +274,10 @@ const Index = () => {
   };
 
   const renderContent = () => {
+    if (showPrivacyPolicy) {
+      return renderPrivacyPolicy();
+    }
+    
     switch (activeTab) {
       case 'dashboard': return renderDashboard();
       case 'add': return renderAddSubscription();
@@ -314,7 +329,9 @@ const Index = () => {
         onProfileClick={() => setActiveTab('profile')}
       />
       {renderContent()}
-      <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+      {!showPrivacyPolicy && (
+        <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+      )}
       <AddSubscriptionDialog 
         open={showAddDialog} 
         onOpenChange={setShowAddDialog}

@@ -25,9 +25,10 @@ import {
 
 interface SettingsPageProps {
   onSignOut: () => void;
+  onShowPrivacyPolicy: () => void;
 }
 
-export const SettingsPage = ({ onSignOut }: SettingsPageProps) => {
+export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPageProps) => {
   const [notifications, setNotifications] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(false);
   const [budgetAlerts, setBudgetAlerts] = useState(true);
@@ -242,7 +243,7 @@ export const SettingsPage = ({ onSignOut }: SettingsPageProps) => {
             Exporter mes données
           </Button>
           
-          <Button variant="outline" className="w-full">
+          <Button variant="outline" onClick={onShowPrivacyPolicy} className="w-full">
             <HelpCircle className="mr-2 h-4 w-4" />
             Politique de confidentialité
           </Button>
