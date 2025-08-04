@@ -10,6 +10,7 @@ import { SubscriptionPlans } from "@/components/subscription/subscription-plans"
 import { AddSubscriptionDialog } from "@/components/add-subscription/add-subscription-dialog";
 import { ProfilePage } from "@/components/profile/profile-page";
 import { PrivacyPolicyPage } from "@/components/privacy/privacy-policy-page";
+import { OnboardingOverlay } from "@/components/onboarding/onboarding-overlay";
 import { mockSubscriptions, calculateTotalSpending } from "@/data/mock-subscriptions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +25,7 @@ const Index = () => {
   const [userSubscriptions, setUserSubscriptions] = useState<any[]>([]);
   const [loadingSubscriptions, setLoadingSubscriptions] = useState(true);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const spendingData = calculateTotalSpending(mockSubscriptions);
   const { toast } = useToast();
 
@@ -33,6 +35,27 @@ const Index = () => {
     subscription.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     subscription.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Check for first-time user and show onboarding
+  useEffect(() => {
+    const checkFirstTimeUser = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Check if user has seen onboarding before
+        const hasSeenOnboarding = localStorage.getItem(`onboarding_completed_${user.id}`);
+        
+        if (!hasSeenOnboarding) {
+          setShowOnboarding(true);
+        }
+      } catch (error) {
+        console.error("Error checking first-time user:", error);
+      }
+    };
+
+    checkFirstTimeUser();
+  }, []);
 
   // Load user subscriptions
   useEffect(() => {
@@ -90,6 +113,18 @@ const Index = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleCompleteOnboarding = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        localStorage.setItem(`onboarding_completed_${user.id}`, 'true');
+      }
+    } catch (error) {
+      console.error("Error saving onboarding completion:", error);
+    }
+    setShowOnboarding(false);
   };
   
   const renderDashboard = () => (
@@ -336,6 +371,9 @@ const Index = () => {
         open={showAddDialog} 
         onOpenChange={setShowAddDialog}
       />
+      {showOnboarding && (
+        <OnboardingOverlay onComplete={handleCompleteOnboarding} />
+      )}
     </div>
   );
 };
