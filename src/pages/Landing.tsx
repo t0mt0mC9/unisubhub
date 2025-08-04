@@ -139,14 +139,20 @@ const Landing = () => {
                 <Play className="mr-2 h-5 w-5" />
                 Commencer gratuitement
               </Button>
-              <Button 
-                variant="outline" 
-                size="lg"
-                className="px-8 py-6 text-lg border-primary/20 hover:bg-primary/5"
-              >
-                <BarChart3 className="mr-2 h-5 w-5" />
-                Voir la démo
-              </Button>
+            </div>
+
+            {/* Video Demo */}
+            <div className="max-w-4xl mx-auto mb-12">
+              <div className="relative aspect-video rounded-2xl overflow-hidden border border-border/50 shadow-2xl bg-card">
+                <iframe
+                  src="https://www.youtube.com/embed/inTD--zedHc"
+                  title="Démo UniSubHub"
+                  className="w-full h-full"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
             </div>
 
             {/* Stats */}
