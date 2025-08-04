@@ -59,13 +59,13 @@ const Landing = () => {
 
   const testimonials = [
     {
-      name: "Marie Dubois",
+      name: "Sarah Lefevre",
       role: "Entrepreneur",
       content: "UniSubHub m'a fait économiser plus de 200€ par mois en identifiant mes abonnements oubliés.",
       rating: 5
     },
     {
-      name: "Thomas Martin",
+      name: "Antoine Rousseau",
       role: "Designer",
       content: "L'interface est sublime et les analyses sont d'une précision remarquable. Un outil indispensable !",
       rating: 5
