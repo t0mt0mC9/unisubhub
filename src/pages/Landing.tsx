@@ -85,9 +85,11 @@ const Landing = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-                <CreditCard className="h-5 w-5 text-primary-foreground" />
-              </div>
+              <img 
+                src="/lovable-uploads/ad996069-d307-4051-877a-984d6f7152f7.png" 
+                alt="UniSubHub Logo" 
+                className="w-8 h-8"
+              />
               <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
                 UniSubHub
               </span>
@@ -355,9 +357,11 @@ const Landing = () => {
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-                  <CreditCard className="h-5 w-5 text-primary-foreground" />
-                </div>
+                <img 
+                  src="/lovable-uploads/ad996069-d307-4051-877a-984d6f7152f7.png" 
+                  alt="UniSubHub Logo" 
+                  className="w-8 h-8"
+                />
                 <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
                   UniSubHub
                 </span>
