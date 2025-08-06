@@ -11,6 +11,7 @@ import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
 import { BankCallback } from "./pages/BankCallback";
+import ExpenseAnalysis from "./pages/ExpenseAnalysis";
 
 const queryClient = new QueryClient();
 
@@ -68,6 +69,10 @@ const App = () => {
             <Route 
               path="/bank-callback" 
               element={<BankCallback />} 
+            />
+            <Route 
+              path="/expense-analysis" 
+              element={user ? <ExpenseAnalysis /> : <Navigate to="/auth" replace />} 
             />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
