@@ -115,132 +115,16 @@ export const BankConnectionForm = ({ onSuccess }: BankConnectionFormProps) => {
   };
 
   const handleConnect = async () => {
-    console.log('handleConnect appelé avec credentials:', credentials);
-    console.log('username length:', credentials.username?.length);
-    console.log('password length:', credentials.password?.length);
+    // Redirection directe vers l'URL Powens spécifiée
+    const powensUrl = "https://webview.powens.com/connect?domain=unisubhub-sandbox.biapi.pro&client_id=64557146&redirect_uri=https://lovable.dev/projects/c6cdb938-7790-42f1-abd3-9729bbdbc721";
     
-    if (!credentials.username || !credentials.password) {
-      console.log('Validation échouée - champs manquants');
-      toast({
-        title: "Erreur",
-        description: "Veuillez remplir tous les champs",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setLoading(true);
-    setStep('detecting');
-
-    try {
-      // Utiliser Tink pour les banques européennes, Budget Insight comme fallback
-      const functionName = isTinkBank(selectedBank) ? 'tink-connect' : 'budget-insight-connect';
-      const provider = isTinkBank(selectedBank) ? 'tink' : 'budget_insight';
-      
-      console.log(`Tentative de connexion avec ${provider}:`, { bank_id: selectedBank, username: credentials.username?.substring(0, 3) + '***' });
-      
-      if (isTinkBank(selectedBank)) {
-        // Pour Tink, on demande d'abord l'URL d'autorisation
-        const { data, error } = await supabase.functions.invoke('tink-connect', {
-          body: {
-            action: 'get_auth_url',
-            bank_id: selectedBank,
-            redirect_uri: `${window.location.origin}/bank-callback`
-          },
-        });
-
-        if (error) {
-          console.error('Erreur Tink:', error);
-          throw new Error(error.message || 'Erreur de connexion à l\'API Tink');
-        }
-
-        if (data?.auth_url) {
-          // Sauvegarder les informations de connexion
-          localStorage.setItem('bank_connection_info', JSON.stringify({
-            bank_id: selectedBank,
-            provider: 'tink',
-            authorization_code: data.authorization_code
-          }));
-          
-          toast({
-            title: "Redirection",
-            description: "Vous allez être redirigé vers votre banque",
-          });
-          
-          // Redirection vers Tink
-          window.location.href = data.auth_url;
-          return;
-        } else if (data?.detected_subscriptions) {
-          // Données simulées Tink
-          setDetectedSubscriptions(data.detected_subscriptions || []);
-          setSelectedSubscriptions(data.detected_subscriptions?.map((s: DetectedSubscription) => s.id) || []);
-          setStep('results');
-          
-          toast({
-            title: "Connexion réussie (simulation)",
-            description: `${data.detected_subscriptions?.length || 0} abonnements détectés avec Tink`,
-          });
-        }
-      } else {
-        // Budget Insight (ancien code)
-        const { data, error } = await supabase.functions.invoke('budget-insight-connect', {
-          body: {
-            bank_id: selectedBank,
-            username: credentials.username,
-            password: credentials.password,
-          },
-        });
-
-        console.log('Réponse de budget-insight-connect:', { data, error });
-
-        if (error) {
-          console.error('Erreur Supabase:', error);
-          throw new Error(error.message || 'Erreur de connexion à l\'API');
-        }
-
-        if (data?.success) {
-          if (data.connect_url) {
-            // Si on a une URL de connexion Powens, stocker les infos et rediriger
-            localStorage.setItem('powens_connection', JSON.stringify({
-              powens_user_id: data.powens_user_id,
-              user_token: data.user_token,
-              bank_id: selectedBank
-            }));
-            
-            toast({
-              title: "Redirection",
-              description: "Vous allez être redirigé vers votre banque",
-            });
-            
-            // Rediriger vers l'URL de connexion Powens
-            window.location.href = data.connect_url;
-            return;
-          } else {
-            // Utiliser les données simulées
-            setDetectedSubscriptions(data.detected_subscriptions || []);
-            setSelectedSubscriptions(data.detected_subscriptions?.map((s: DetectedSubscription) => s.id) || []);
-            setStep('results');
-            
-            toast({
-              title: "Connexion réussie",
-              description: `${data.detected_subscriptions?.length || 0} abonnements détectés`,
-            });
-          }
-        } else {
-          throw new Error(data?.error || 'Erreur lors de la détection des abonnements');
-        }
-      }
-
-    } catch (error: any) {
-      toast({
-        title: "Erreur de connexion",
-        description: error.message || "Impossible de se connecter à votre banque. Veuillez réessayer.",
-        variant: "destructive",
-      });
-      setStep('credentials');
-    } finally {
-      setLoading(false);
-    }
+    toast({
+      title: "Redirection",
+      description: "Vous allez être redirigé vers votre banque",
+    });
+    
+    // Redirection vers Powens
+    window.location.href = powensUrl;
   };
 
   const generateBankSpecificSubscriptions = (bankId: string) => {
