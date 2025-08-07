@@ -345,9 +345,8 @@ export const BankConnectionForm = ({ onSuccess }: BankConnectionFormProps) => {
             <Button variant="secondary" onClick={handleTestWithMockData}>
               Test avec données simulées
             </Button>
-            <Button onClick={handleConnect} disabled={loading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Se connecter
+            <Button onClick={handleConnect}>
+              Se connecter avec Powens
             </Button>
           </div>
         </div>
