@@ -31,7 +31,7 @@ export const AddSubscriptionDialog = ({ open, onOpenChange }: AddSubscriptionDia
             </TabsTrigger>
             <TabsTrigger value="bank" className="flex items-center gap-2">
               <CreditCard className="h-4 w-4" />
-              Connexion bancaire
+              Connexion Powens
             </TabsTrigger>
           </TabsList>
 
