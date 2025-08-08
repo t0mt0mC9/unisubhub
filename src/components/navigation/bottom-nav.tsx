@@ -10,7 +10,7 @@ interface BottomNavProps {
 const navItems = [
   { id: 'dashboard', label: 'Accueil', icon: Home, path: '/' },
   { id: 'add', label: 'Ajouter', icon: PlusCircle, path: null },
-  { id: 'analytics', label: 'Analyses', icon: BarChart3, path: '/analytics' },
+  { id: 'analytics', label: 'Analyses', icon: BarChart3, path: null },
   { id: 'subscription', label: 'Premium', icon: Crown, path: null },
   { id: 'settings', label: 'Réglages', icon: Settings, path: null },
 ];
