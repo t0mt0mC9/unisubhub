@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Home, PlusCircle, BarChart3, Settings, Crown, PieChart } from "lucide-react";
+import { Home, PlusCircle, BarChart3, Settings, Crown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface BottomNavProps {
@@ -11,7 +11,7 @@ const navItems = [
   { id: 'dashboard', label: 'Accueil', icon: Home, path: '/' },
   { id: 'add', label: 'Ajouter', icon: PlusCircle, path: null },
   { id: 'analytics', label: 'Analyses', icon: BarChart3, path: '/analytics' },
-  { id: 'expenses', label: 'Dépenses', icon: PieChart, path: '/expense-analysis' },
+  { id: 'subscription', label: 'Premium', icon: Crown, path: null },
   { id: 'settings', label: 'Réglages', icon: Settings, path: '/settings' },
 ];
 
