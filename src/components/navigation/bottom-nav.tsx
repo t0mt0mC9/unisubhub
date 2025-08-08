@@ -20,6 +20,8 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
 
   const handleTabClick = (item: { id: string; path: string | null }) => {
     if (item.path) {
+      // Pour les onglets avec path, on réinitialise l'état et on navigue
+      onTabChange('dashboard'); // Réinitialise l'état pour l'onglet dashboard
       navigate(item.path);
     } else {
       onTabChange(item.id);
