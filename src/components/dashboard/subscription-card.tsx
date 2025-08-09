@@ -20,6 +20,7 @@ interface SubscriptionCardProps {
   className?: string;
   subscription?: any; // Pour passer l'objet complet à l'édition
   onRefresh?: () => void;
+  onDeleteMockSubscription?: (id: string) => void;
 }
 
 export function SubscriptionCard({
@@ -34,7 +35,8 @@ export function SubscriptionCard({
   daysUntilRenewal,
   className,
   subscription,
-  onRefresh
+  onRefresh,
+  onDeleteMockSubscription
 }: SubscriptionCardProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const getStatusColor = (status: string) => {
@@ -117,6 +119,7 @@ export function SubscriptionCard({
           onSuccess={() => {
             onRefresh?.();
           }}
+          onDeleteMockSubscription={onDeleteMockSubscription}
         />
       )}
     </Card>

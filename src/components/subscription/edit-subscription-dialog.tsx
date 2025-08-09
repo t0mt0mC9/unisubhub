@@ -20,6 +20,7 @@ interface EditSubscriptionDialogProps {
   onOpenChange: (open: boolean) => void;
   subscription: any;
   onSuccess: () => void;
+  onDeleteMockSubscription?: (id: string) => void;
 }
 
 const categories = [
@@ -48,7 +49,7 @@ const statusOptions = [
   { value: "cancelled", label: "Annulé" }
 ];
 
-export const EditSubscriptionDialog = ({ open, onOpenChange, subscription, onSuccess }: EditSubscriptionDialogProps) => {
+export const EditSubscriptionDialog = ({ open, onOpenChange, subscription, onSuccess, onDeleteMockSubscription }: EditSubscriptionDialogProps) => {
   const [loading, setLoading] = useState(false);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const [formData, setFormData] = useState({
@@ -75,15 +76,6 @@ export const EditSubscriptionDialog = ({ open, onOpenChange, subscription, onSuc
       return;
     }
 
-    // Check if this is a mock subscription
-    if (typeof subscription.id === 'string' && subscription.id.length < 10) {
-      toast({
-        title: "Information",
-        description: "Impossible de modifier cet abonnement exemple. Seuls les abonnements ajoutés par vous peuvent être modifiés.",
-        variant: "destructive",
-      });
-      return;
-    }
 
     setLoading(true);
 
@@ -130,24 +122,34 @@ export const EditSubscriptionDialog = ({ open, onOpenChange, subscription, onSuc
       console.log('Attempting to delete subscription:', subscription.id, 'type:', typeof subscription.id);
       
       // Check if this is a mock subscription (string ID vs UUID)
-      if (typeof subscription.id === 'string' && subscription.id.length < 10) {
-        throw new Error("Impossible de supprimer cet abonnement exemple. Seuls les abonnements ajoutés par vous peuvent être supprimés.");
-      }
+      const isMockSubscription = typeof subscription.id === 'string' && subscription.id.length < 10;
       
-      const { data, error } = await supabase
-        .from("subscriptions")
-        .delete()
-        .eq("id", subscription.id)
-        .select();
+      if (isMockSubscription) {
+        // Handle mock subscription deletion
+        if (onDeleteMockSubscription) {
+          onDeleteMockSubscription(subscription.id);
+          toast({
+            title: "Abonnement supprimé",
+            description: `${subscription.name} a été supprimé avec succès`,
+          });
+        }
+      } else {
+        // Handle real subscription deletion from database
+        const { data, error } = await supabase
+          .from("subscriptions")
+          .delete()
+          .eq("id", subscription.id)
+          .select();
 
-      console.log('Delete response:', { data, error });
+        console.log('Delete response:', { data, error });
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast({
-        title: "Abonnement supprimé",
-        description: `${subscription.name} a été supprimé avec succès`,
-      });
+        toast({
+          title: "Abonnement supprimé",
+          description: `${subscription.name} a été supprimé avec succès`,
+        });
+      }
 
       onSuccess();
       onOpenChange(false);

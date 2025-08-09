@@ -26,11 +26,17 @@ const Index = () => {
   const [loadingSubscriptions, setLoadingSubscriptions] = useState(true);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const spendingData = calculateTotalSpending(mockSubscriptions);
+  const [displayedMockSubscriptions, setDisplayedMockSubscriptions] = useState(mockSubscriptions);
+  const spendingData = calculateTotalSpending(displayedMockSubscriptions);
   const { toast } = useToast();
 
+  // Delete mock subscription function
+  const handleDeleteMockSubscription = (id: string) => {
+    setDisplayedMockSubscriptions(prev => prev.filter(sub => sub.id !== id));
+  };
+
   // Filter subscriptions based on search term
-  const allSubscriptions = [...mockSubscriptions, ...userSubscriptions];
+  const allSubscriptions = [...displayedMockSubscriptions, ...userSubscriptions];
   const filteredSubscriptions = allSubscriptions.filter(subscription =>
     subscription.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     subscription.category.toLowerCase().includes(searchTerm.toLowerCase())
@@ -221,6 +227,7 @@ const Index = () => {
                   daysUntilRenewal={subscription.daysUntilRenewal}
                   subscription={subscription}
                   onRefresh={loadSubscriptions}
+                  onDeleteMockSubscription={handleDeleteMockSubscription}
                 />
               ))}
             </div>
