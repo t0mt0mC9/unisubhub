@@ -269,7 +269,7 @@ export const SubscriptionPlans = () => {
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
         {/* Monthly Plan */}
         <Card className={`relative ${subscriptionData.subscription_type === 'monthly' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
           <CardHeader>
