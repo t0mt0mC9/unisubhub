@@ -21,61 +21,6 @@ export const mockSubscriptions: Subscription[] = [
     icon: '🎬',
     status: 'active',
     daysUntilRenewal: 12
-  },
-  {
-    id: '2',
-    name: 'Spotify Premium',
-    price: 9.99,
-    currency: '€',
-    renewalDate: '22 août 2024',
-    category: 'Musique',
-    icon: '🎵',
-    status: 'active',
-    daysUntilRenewal: 19
-  },
-  {
-    id: '3',
-    name: 'Adobe Creative Cloud',
-    price: 23.99,
-    currency: '€',
-    renewalDate: '8 août 2024',
-    category: 'Productivité',
-    icon: '🎨',
-    status: 'active',
-    daysUntilRenewal: 5
-  },
-  {
-    id: '4',
-    name: 'ChatGPT Plus',
-    price: 20.00,
-    currency: '€',
-    renewalDate: '3 août 2024',
-    category: 'IA & Tech',
-    icon: '🤖',
-    status: 'trial',
-    daysUntilRenewal: 1
-  },
-  {
-    id: '5',
-    name: 'Figma Pro',
-    price: 12.00,
-    currency: '€',
-    renewalDate: '25 septembre 2024',
-    category: 'Design',
-    icon: '🎯',
-    status: 'active',
-    daysUntilRenewal: 50
-  },
-  {
-    id: '6',
-    name: 'YouTube Premium',
-    price: 11.99,
-    currency: '€',
-    renewalDate: '18 août 2024',
-    category: 'Streaming',
-    icon: '📺',
-    status: 'active',
-    daysUntilRenewal: 15
   }
 ];
 
