@@ -6,6 +6,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { MoreVertical, AlertTriangle, Edit, Trash2, ExternalLink } from "lucide-react";
 import { EditSubscriptionDialog } from "@/components/subscription/edit-subscription-dialog";
 import { cn } from "@/lib/utils";
+import { format, parseISO, isValid } from "date-fns";
+import { fr } from "date-fns/locale";
 
 interface SubscriptionCardProps {
   id?: string;
@@ -39,6 +41,7 @@ export function SubscriptionCard({
   onDeleteMockSubscription
 }: SubscriptionCardProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
+  
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active': return 'bg-success text-success-foreground';
@@ -46,6 +49,27 @@ export function SubscriptionCard({
       case 'expired': return 'bg-destructive text-destructive-foreground';
       case 'cancelled': return 'bg-muted text-muted-foreground';
       default: return 'bg-muted text-muted-foreground';
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    try {
+      // Essaie d'abord de parser comme ISO date
+      let date = parseISO(dateString);
+      
+      // Si ce n'est pas valide, essaie d'autres formats
+      if (!isValid(date)) {
+        date = new Date(dateString);
+      }
+      
+      // Si toujours pas valide, retourne la chaîne originale
+      if (!isValid(date)) {
+        return dateString;
+      }
+      
+      return format(date, "d MMMM yyyy", { locale: fr });
+    } catch (error) {
+      return dateString;
     }
   };
 
@@ -100,7 +124,7 @@ export function SubscriptionCard({
       
       <div className="mt-3 flex items-center justify-between text-sm">
         <span className="text-muted-foreground">
-          Renouvellement: {renewalDate}
+          Renouvellement: {formatDate(renewalDate)}
         </span>
         
         {isExpiringSoon && (
