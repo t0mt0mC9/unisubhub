@@ -60,9 +60,11 @@ const Index = () => {
   // Load user subscriptions
   const loadSubscriptions = async () => {
     try {
+      setLoadingSubscriptions(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      console.log('Loading subscriptions for user:', user.id);
       const { data, error } = await supabase
         .from("subscriptions")
         .select("*")
@@ -70,6 +72,7 @@ const Index = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
+      console.log('Loaded subscriptions:', data);
       setUserSubscriptions(data || []);
     } catch (error: any) {
       console.error("Error loading subscriptions:", error);
@@ -88,7 +91,8 @@ const Index = () => {
         event: '*',
         schema: 'public',
         table: 'subscriptions'
-      }, () => {
+      }, (payload) => {
+        console.log('Real-time update received:', payload);
         loadSubscriptions();
       })
       .subscribe();
@@ -216,27 +220,7 @@ const Index = () => {
                   status={subscription.status || 'active'}
                   daysUntilRenewal={subscription.daysUntilRenewal}
                   subscription={subscription}
-                  onRefresh={() => {
-                    // Reload subscriptions after edit
-                    const loadSubscriptions = async () => {
-                      try {
-                        const { data: { user } } = await supabase.auth.getUser();
-                        if (!user) return;
-
-                        const { data, error } = await supabase
-                          .from("subscriptions")
-                          .select("*")
-                          .eq("user_id", user.id)
-                          .order("created_at", { ascending: false });
-
-                        if (error) throw error;
-                        setUserSubscriptions(data || []);
-                      } catch (error: any) {
-                        console.error("Error loading subscriptions:", error);
-                      }
-                    };
-                    loadSubscriptions();
-                  }}
+                  onRefresh={loadSubscriptions}
                 />
               ))}
             </div>
