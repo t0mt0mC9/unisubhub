@@ -26,13 +26,28 @@ const Index = () => {
   const [loadingSubscriptions, setLoadingSubscriptions] = useState(true);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [displayedMockSubscriptions, setDisplayedMockSubscriptions] = useState(mockSubscriptions);
+  const [displayedMockSubscriptions, setDisplayedMockSubscriptions] = useState<any[]>([]);
   const spendingData = calculateTotalSpending(displayedMockSubscriptions);
   const { toast } = useToast();
 
-  // Delete mock subscription function
+  // Initialize mock subscriptions with localStorage persistence
+  useEffect(() => {
+    const deletedMockIds = JSON.parse(localStorage.getItem('deletedMockSubscriptions') || '[]');
+    const filteredMockSubscriptions = mockSubscriptions.filter(sub => !deletedMockIds.includes(sub.id));
+    setDisplayedMockSubscriptions(filteredMockSubscriptions);
+  }, []);
+
+  // Delete mock subscription function with localStorage persistence
   const handleDeleteMockSubscription = (id: string) => {
+    // Update displayed subscriptions
     setDisplayedMockSubscriptions(prev => prev.filter(sub => sub.id !== id));
+    
+    // Store deleted IDs in localStorage
+    const deletedMockIds = JSON.parse(localStorage.getItem('deletedMockSubscriptions') || '[]');
+    if (!deletedMockIds.includes(id)) {
+      deletedMockIds.push(id);
+      localStorage.setItem('deletedMockSubscriptions', JSON.stringify(deletedMockIds));
+    }
   };
 
   // Filter subscriptions based on search term
