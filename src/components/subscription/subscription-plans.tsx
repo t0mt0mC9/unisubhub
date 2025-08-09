@@ -78,8 +78,8 @@ export const SubscriptionPlans = () => {
       if (error) throw error;
       
       if (data?.url) {
-        // Redirect to Stripe checkout in the same window
-        window.location.href = data.url;
+        // Open Stripe checkout in a new tab
+        window.open(data.url, '_blank');
       }
     } catch (error: any) {
       toast({
@@ -101,8 +101,8 @@ export const SubscriptionPlans = () => {
       if (error) throw error;
       
       if (data?.url) {
-        // Redirect to Stripe customer portal in the same window
-        window.location.href = data.url;
+        // Open Stripe customer portal in a new tab
+        window.open(data.url, '_blank');
       }
     } catch (error: any) {
       toast({
