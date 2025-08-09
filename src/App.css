@@ -1,8 +1,27 @@
 #root {
-  max-width: 1280px;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  padding: 0;
+  text-align: left;
+  min-height: 100vh;
+  
+  /* iPhone dimensions */
+  @media (max-width: 430px) {
+    max-width: 430px;
+    padding: 1rem;
+  }
+  
+  /* iPad dimensions */
+  @media (min-width: 768px) and (max-width: 1024px) {
+    max-width: 1024px;
+    padding: 2rem;
+  }
+  
+  /* Desktop fallback */
+  @media (min-width: 1025px) {
+    max-width: 430px;
+    padding: 1rem;
+  }
 }
 
 .logo {
