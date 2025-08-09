@@ -75,6 +75,16 @@ export const EditSubscriptionDialog = ({ open, onOpenChange, subscription, onSuc
       return;
     }
 
+    // Check if this is a mock subscription
+    if (typeof subscription.id === 'string' && subscription.id.length < 10) {
+      toast({
+        title: "Information",
+        description: "Impossible de modifier cet abonnement exemple. Seuls les abonnements ajoutés par vous peuvent être modifiés.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -117,10 +127,20 @@ export const EditSubscriptionDialog = ({ open, onOpenChange, subscription, onSuc
     setLoading(true);
 
     try {
-      const { error } = await supabase
+      console.log('Attempting to delete subscription:', subscription.id, 'type:', typeof subscription.id);
+      
+      // Check if this is a mock subscription (string ID vs UUID)
+      if (typeof subscription.id === 'string' && subscription.id.length < 10) {
+        throw new Error("Impossible de supprimer cet abonnement exemple. Seuls les abonnements ajoutés par vous peuvent être supprimés.");
+      }
+      
+      const { data, error } = await supabase
         .from("subscriptions")
         .delete()
-        .eq("id", subscription.id);
+        .eq("id", subscription.id)
+        .select();
+
+      console.log('Delete response:', { data, error });
 
       if (error) throw error;
 
@@ -133,6 +153,7 @@ export const EditSubscriptionDialog = ({ open, onOpenChange, subscription, onSuc
       onOpenChange(false);
       setShowDeleteAlert(false);
     } catch (error: any) {
+      console.error('Delete error:', error);
       toast({
         title: "Erreur",
         description: error.message,
