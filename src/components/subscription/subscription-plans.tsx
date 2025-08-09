@@ -78,8 +78,14 @@ export const SubscriptionPlans = () => {
       if (error) throw error;
       
       if (data?.url) {
-        // Open Stripe checkout in a new tab
-        window.open(data.url, '_blank');
+        // On mobile devices, use window.location.href to avoid popup blockers
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        if (isMobile) {
+          window.location.href = data.url;
+        } else {
+          // Open Stripe checkout in a new tab for desktop
+          window.open(data.url, '_blank');
+        }
       }
     } catch (error: any) {
       toast({
@@ -101,8 +107,14 @@ export const SubscriptionPlans = () => {
       if (error) throw error;
       
       if (data?.url) {
-        // Open Stripe customer portal in a new tab
-        window.open(data.url, '_blank');
+        // On mobile devices, use window.location.href to avoid popup blockers
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        if (isMobile) {
+          window.location.href = data.url;
+        } else {
+          // Open Stripe customer portal in a new tab for desktop
+          window.open(data.url, '_blank');
+        }
       }
     } catch (error: any) {
       toast({
