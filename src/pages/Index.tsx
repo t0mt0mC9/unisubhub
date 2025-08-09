@@ -58,27 +58,27 @@ const Index = () => {
   }, []);
 
   // Load user subscriptions
+  const loadSubscriptions = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from("subscriptions")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setUserSubscriptions(data || []);
+    } catch (error: any) {
+      console.error("Error loading subscriptions:", error);
+    } finally {
+      setLoadingSubscriptions(false);
+    }
+  };
+
   useEffect(() => {
-    const loadSubscriptions = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-
-        const { data, error } = await supabase
-          .from("subscriptions")
-          .select("*")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false });
-
-        if (error) throw error;
-        setUserSubscriptions(data || []);
-      } catch (error: any) {
-        console.error("Error loading subscriptions:", error);
-      } finally {
-        setLoadingSubscriptions(false);
-      }
-    };
-
     loadSubscriptions();
 
     // Listen for real-time updates
@@ -373,6 +373,7 @@ const Index = () => {
       <AddSubscriptionDialog 
         open={showAddDialog} 
         onOpenChange={setShowAddDialog}
+        onSubscriptionAdded={loadSubscriptions}
       />
       {showOnboarding && (
         <OnboardingOverlay onComplete={handleCompleteOnboarding} />

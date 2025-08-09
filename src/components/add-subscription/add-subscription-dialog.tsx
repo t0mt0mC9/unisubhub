@@ -8,10 +8,16 @@ import { UserPlus, CreditCard } from "lucide-react";
 interface AddSubscriptionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSubscriptionAdded?: () => void;
 }
 
-export const AddSubscriptionDialog = ({ open, onOpenChange }: AddSubscriptionDialogProps) => {
+export const AddSubscriptionDialog = ({ open, onOpenChange, onSubscriptionAdded }: AddSubscriptionDialogProps) => {
   const [activeTab, setActiveTab] = useState("manual");
+
+  const handleSuccess = () => {
+    onOpenChange(false);
+    onSubscriptionAdded?.();
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -36,11 +42,11 @@ export const AddSubscriptionDialog = ({ open, onOpenChange }: AddSubscriptionDia
           </TabsList>
 
           <TabsContent value="manual" className="mt-6">
-            <ManualAddForm onSuccess={() => onOpenChange(false)} />
+            <ManualAddForm onSuccess={handleSuccess} />
           </TabsContent>
 
           <TabsContent value="bank" className="mt-6">
-            <BankConnectionForm onSuccess={() => onOpenChange(false)} />
+            <BankConnectionForm onSuccess={handleSuccess} />
           </TabsContent>
         </Tabs>
       </DialogContent>
