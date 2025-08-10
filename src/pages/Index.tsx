@@ -10,6 +10,7 @@ import { SubscriptionPlans } from "@/components/subscription/subscription-plans"
 import { AddSubscriptionDialog } from "@/components/add-subscription/add-subscription-dialog";
 import { ProfilePage } from "@/components/profile/profile-page";
 import { PrivacyPolicyPage } from "@/components/privacy/privacy-policy-page";
+import ReferralPage from "@/components/referral/referral-page";
 import { OnboardingOverlay } from "@/components/onboarding/onboarding-overlay";
 import { mockSubscriptions, calculateTotalSpending } from "@/data/mock-subscriptions";
 import { Button } from "@/components/ui/button";
@@ -313,6 +314,7 @@ const Index = () => {
       case 'settings': return 'Paramètres';
       case 'subscription': return 'Abonnements';
       case 'profile': return 'Profil';
+      case 'referral': return 'Parrainage';
       default: return 'UniSubHub';
     }
   };
@@ -329,6 +331,7 @@ const Index = () => {
       case 'settings': return renderSettings();
       case 'subscription': return renderSubscription();
       case 'profile': return renderProfile();
+      case 'referral': return renderReferral();
       default: return renderDashboard();
     }
   };
@@ -358,6 +361,8 @@ const Index = () => {
       </div>
     </div>
   );
+
+  const renderReferral = () => <ReferralPage />;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
