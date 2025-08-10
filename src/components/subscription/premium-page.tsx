@@ -420,7 +420,34 @@ export default function PremiumPage() {
               </CardContent>
             </Card>
           </TabsContent>
-        </Tabs>
+         </Tabs>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <AlertCircle className="h-5 w-5 text-destructive" />
+                Supprimer l'invitation
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Êtes-vous sûr de vouloir supprimer l'invitation envoyée à{" "}
+                <strong>{referralToDelete?.referred_email}</strong> ?
+                Cette action est irréversible.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Annuler</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmDeleteReferral}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                disabled={deleteLoading !== null}
+              >
+                {deleteLoading ? "Suppression..." : "Supprimer"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
