@@ -73,7 +73,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send the email with a verified domain from
     const emailResponse = await resend.emails.send({
-      from: "UniSubHub <no-reply@resend.dev>", // Use resend.dev domain for now
+      from: "UniSubHub <onboarding@resend.dev>", // Use the default testing address
       to: [referred_email],
       subject: "🎉 Vous êtes invité(e) à rejoindre UniSubHub !",
       html,
