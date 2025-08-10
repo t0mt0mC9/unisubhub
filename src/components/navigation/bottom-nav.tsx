@@ -11,7 +11,7 @@ const navItems = [
   { id: 'dashboard', label: 'Accueil', icon: Home, path: '/' },
   { id: 'add', label: 'Ajouter', icon: PlusCircle, path: null },
   { id: 'analytics', label: 'Analyses', icon: BarChart3, path: null },
-  { id: 'referral', label: 'Parrainage', icon: Users, path: null },
+  { id: 'subscription', label: 'Premium', icon: Crown, path: null },
   { id: 'settings', label: 'Réglages', icon: Settings, path: null },
 ];
 

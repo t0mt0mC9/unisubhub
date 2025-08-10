@@ -10,7 +10,7 @@ import { SubscriptionPlans } from "@/components/subscription/subscription-plans"
 import { AddSubscriptionDialog } from "@/components/add-subscription/add-subscription-dialog";
 import { ProfilePage } from "@/components/profile/profile-page";
 import { PrivacyPolicyPage } from "@/components/privacy/privacy-policy-page";
-import ReferralPage from "@/components/referral/referral-page";
+import PremiumPage from "@/components/subscription/premium-page";
 import { OnboardingOverlay } from "@/components/onboarding/onboarding-overlay";
 import { mockSubscriptions, calculateTotalSpending } from "@/data/mock-subscriptions";
 import { Button } from "@/components/ui/button";
@@ -312,9 +312,8 @@ const Index = () => {
       case 'add': return 'Ajouter';
       case 'analytics': return 'Analyses';
       case 'settings': return 'Paramètres';
-      case 'subscription': return 'Abonnements';
+      case 'subscription': return 'Premium';
       case 'profile': return 'Profil';
-      case 'referral': return 'Parrainage';
       default: return 'UniSubHub';
     }
   };
@@ -331,23 +330,11 @@ const Index = () => {
       case 'settings': return renderSettings();
       case 'subscription': return renderSubscription();
       case 'profile': return renderProfile();
-      case 'referral': return renderReferral();
       default: return renderDashboard();
     }
   };
 
-  const renderSubscription = () => (
-    <div className="flex-1 overflow-y-auto pb-20">
-      <div className="p-4 space-y-6">
-        <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-foreground mb-2">Abonnements Premium</h2>
-          <p className="text-muted-foreground">Débloquez toutes les fonctionnalités de UniSubHub</p>
-        </div>
-        
-        <SubscriptionPlans />
-      </div>
-    </div>
-  );
+  const renderSubscription = () => <PremiumPage />;
 
   const renderProfile = () => (
     <div className="flex-1 overflow-y-auto pb-20">
@@ -362,7 +349,7 @@ const Index = () => {
     </div>
   );
 
-  const renderReferral = () => <ReferralPage />;
+  
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
