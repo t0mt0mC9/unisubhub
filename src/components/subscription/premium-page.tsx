@@ -118,6 +118,8 @@ export default function PremiumPage() {
       }
 
       // Create referral entry in database
+      console.log('Creating referral for:', newEmail.toLowerCase().trim());
+      
       const { error: dbError } = await supabase
         .from('referrals')
         .insert({
@@ -128,8 +130,17 @@ export default function PremiumPage() {
         });
 
       if (dbError) {
+        console.error('Database error:', dbError);
+        
         if (dbError.code === '23505') {
-          toast.error("Cette personne a déjà été invitée");
+          // Check which constraint was violated
+          if (dbError.message.includes('referrals_referrer_email_unique')) {
+            toast.error("Vous avez déjà invité cette personne");
+          } else if (dbError.message.includes('referrals_referral_code_key')) {
+            toast.error("Erreur de génération de code, veuillez réessayer");
+          } else {
+            toast.error("Cette personne a déjà été invitée");
+          }
           return;
         }
         throw dbError;
