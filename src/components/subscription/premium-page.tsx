@@ -206,15 +206,33 @@ export default function PremiumPage() {
 
     setDeleteLoading(referralToDelete.id);
     try {
+      console.log('Deleting referral:', referralToDelete.id);
+      
       const { error } = await supabase
         .from('referrals')
         .delete()
         .eq('id', referralToDelete.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Delete error:', error);
+        throw error;
+      }
+
+      console.log('Delete successful, updating UI');
+
+      // Update local state immediately instead of refetching
+      setReferrals(prevReferrals => 
+        prevReferrals.filter(ref => ref.id !== referralToDelete.id)
+      );
+
+      // Recalculate stats
+      const updatedReferrals = referrals.filter(ref => ref.id !== referralToDelete.id);
+      const pending = updatedReferrals.filter(r => r.status === 'pending').length;
+      const completed = updatedReferrals.filter(r => r.status === 'completed').length;
+      const rewarded = updatedReferrals.filter(r => r.status === 'rewarded').length;
+      setStats({ pending, completed, rewarded, totalRewards: Math.floor(rewarded / 2) });
 
       toast.success("Invitation supprimée avec succès");
-      fetchReferrals();
       setDeleteDialogOpen(false);
       setReferralToDelete(null);
     } catch (error) {
