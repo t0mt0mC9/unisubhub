@@ -51,7 +51,35 @@ export default function PremiumPage() {
 
   useEffect(() => {
     fetchReferrals();
+    generateOrGetMyReferralCode();
   }, []);
+
+  const generateOrGetMyReferralCode = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Check if user already has a referral code from existing referrals
+      const { data: existingReferrals } = await supabase
+        .from('referrals')
+        .select('referral_code')
+        .eq('referrer_user_id', user.id)
+        .limit(1);
+
+      if (existingReferrals && existingReferrals.length > 0) {
+        setMyReferralCode(existingReferrals[0].referral_code);
+        return;
+      }
+
+      // If no existing code, generate a new one and store it locally
+      const savedCode = localStorage.getItem(`referral_code_${user.id}`);
+      if (savedCode) {
+        setMyReferralCode(savedCode);
+      }
+    } catch (error) {
+      console.error('Error getting referral code:', error);
+    }
+  };
 
   const fetchReferrals = async () => {
     try {
@@ -81,20 +109,38 @@ export default function PremiumPage() {
     }
   };
 
-  const generateReferralCode = async () => {
+  const generateReferralCode = async (retryCount = 0) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) return null;
 
-      // Generate a unique code
+      console.log(`Generating referral code (attempt ${retryCount + 1})`);
+
+      // Call the improved database function that ensures uniqueness
       const { data, error } = await supabase.rpc('generate_referral_code');
-      if (error) throw error;
+      
+      if (error) {
+        console.error('RPC error:', error);
+        throw error;
+      }
 
+      console.log('Generated code:', data);
+      
+      // Store the code locally for reuse
+      localStorage.setItem(`referral_code_${user.id}`, data);
       setMyReferralCode(data);
       return data;
     } catch (error) {
       console.error('Error generating referral code:', error);
-      toast.error("Erreur lors de la génération du code");
+      
+      // Retry up to 3 times with different strategies
+      if (retryCount < 2) {
+        console.log(`Retrying code generation (attempt ${retryCount + 2})`);
+        await new Promise(resolve => setTimeout(resolve, 500)); // Wait 500ms
+        return generateReferralCode(retryCount + 1);
+      }
+      
+      toast.error("Erreur lors de la génération du code de parrainage");
       return null;
     }
   };
@@ -113,8 +159,14 @@ export default function PremiumPage() {
       // Generate referral code if not exists
       let code = myReferralCode;
       if (!code) {
+        console.log('No existing code, generating new one...');
         code = await generateReferralCode();
-        if (!code) throw new Error("Impossible de générer le code");
+        if (!code) {
+          toast.error("Impossible de générer un code de parrainage");
+          return;
+        }
+      } else {
+        console.log('Using existing code:', code);
       }
 
       // Create referral entry in database
