@@ -158,7 +158,7 @@ export default function PremiumPage() {
 
       // Generate a NEW unique referral code for this specific invitation
       console.log('Generating new unique code for invitation...');
-      const code = await generateReferralCode();
+      let code = await generateReferralCode();
       if (!code) {
         toast.error("Impossible de générer un code de parrainage");
         return;
@@ -181,26 +181,42 @@ export default function PremiumPage() {
         console.error('Database error:', dbError);
         
         if (dbError.code === '23505') {
-          // If still getting unique constraint error, try once more with a new code
-          console.log('Code collision detected, generating another code...');
-          const newCode = await generateReferralCode();
-          if (newCode) {
-            const { error: retryError } = await supabase
-              .from('referrals')
-              .insert({
-                referrer_user_id: user.id,
-                referred_email: newEmail.toLowerCase().trim(),
-                referral_code: newCode,
-                status: 'pending'
-              });
-            
-            if (retryError) {
-              console.error('Retry failed:', retryError);
-              toast.error("Erreur lors de la création de l'invitation");
+          // Check which constraint was violated
+          if (dbError.message.includes('referrals_referrer_email_unique')) {
+            toast.error("Vous avez déjà invité cette personne");
+            return;
+          } else if (dbError.message.includes('referrals_referral_code_key')) {
+            // Code collision - try once more with a new code
+            console.log('Code collision detected, generating another code...');
+            const newCode = await generateReferralCode();
+            if (newCode) {
+              const { error: retryError } = await supabase
+                .from('referrals')
+                .insert({
+                  referrer_user_id: user.id,
+                  referred_email: newEmail.toLowerCase().trim(),
+                  referral_code: newCode,
+                  status: 'pending'
+                });
+              
+              if (retryError) {
+                console.error('Retry failed:', retryError);
+                if (retryError.code === '23505' && retryError.message.includes('referrals_referrer_email_unique')) {
+                  toast.error("Vous avez déjà invité cette personne");
+                } else {
+                  toast.error("Erreur lors de la création de l'invitation");
+                }
+                return;
+              }
+              
+              // Success with new code - use it for email
+              code = newCode;
+            } else {
+              toast.error("Impossible de générer un code unique");
               return;
             }
           } else {
-            toast.error("Impossible de générer un code unique");
+            toast.error("Cette invitation existe déjà");
             return;
           }
         } else {
