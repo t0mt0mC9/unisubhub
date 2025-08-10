@@ -104,7 +104,8 @@ export default function PremiumPage() {
         if (!code) throw new Error("Impossible de générer le code");
       }
 
-      const { error } = await supabase
+      // Create referral entry in database
+      const { error: dbError } = await supabase
         .from('referrals')
         .insert({
           referrer_user_id: user.id,
@@ -113,15 +114,34 @@ export default function PremiumPage() {
           status: 'pending'
         });
 
-      if (error) {
-        if (error.code === '23505') {
+      if (dbError) {
+        if (dbError.code === '23505') {
           toast.error("Cette personne a déjà été invitée");
           return;
         }
-        throw error;
+        throw dbError;
       }
 
-      toast.success("Invitation envoyée !");
+      // Send invitation email
+      const referralLink = `${window.location.origin}/auth?ref=${code}`;
+      
+      const { error: emailError } = await supabase.functions.invoke('send-referral-email', {
+        body: {
+          referral_code: code,
+          referral_link: referralLink,
+          referred_email: newEmail.toLowerCase().trim(),
+          referrer_name: user.email?.split('@')[0] || "Un ami"
+        }
+      });
+
+      if (emailError) {
+        console.error('Error sending email:', emailError);
+        // Don't fail the whole process if email fails, just show a warning
+        toast.success("Invitation créée ! (Email en cours d'envoi...)");
+      } else {
+        toast.success("Invitation envoyée par email !");
+      }
+
       setNewEmail("");
       fetchReferrals();
     } catch (error) {
