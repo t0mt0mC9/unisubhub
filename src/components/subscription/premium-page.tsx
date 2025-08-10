@@ -228,16 +228,14 @@ export default function PremiumPage() {
       const finalCode = code || await generateReferralCode();
       const referralLink = `${window.location.origin}/auth?ref=${finalCode}`;
       
-      // Pour test: envoi à votre email personnel
-      const testEmail = 'tom.lifert@gmail.com';
-      console.log('Sending email to:', testEmail, '(original:', newEmail.toLowerCase().trim() + ')');
+      console.log('Sending email to:', newEmail.toLowerCase().trim());
       console.log('Referral link:', referralLink);
       
       const { data: emailData, error: emailError } = await supabase.functions.invoke('send-referral-email', {
         body: {
           referral_code: finalCode,
           referral_link: referralLink,
-          referred_email: testEmail, // Utilise votre email pour le test
+          referred_email: newEmail.toLowerCase().trim(),
           referrer_name: user.email?.split('@')[0] || "Un ami"
         }
       });
