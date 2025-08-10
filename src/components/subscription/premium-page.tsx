@@ -156,21 +156,17 @@ export default function PremiumPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non connecté");
 
-      // Generate referral code if not exists
-      let code = myReferralCode;
+      // Generate a NEW unique referral code for this specific invitation
+      console.log('Generating new unique code for invitation...');
+      const code = await generateReferralCode();
       if (!code) {
-        console.log('No existing code, generating new one...');
-        code = await generateReferralCode();
-        if (!code) {
-          toast.error("Impossible de générer un code de parrainage");
-          return;
-        }
-      } else {
-        console.log('Using existing code:', code);
+        toast.error("Impossible de générer un code de parrainage");
+        return;
       }
 
       // Create referral entry in database
       console.log('Creating referral for:', newEmail.toLowerCase().trim());
+      console.log('Using code:', code);
       
       const { error: dbError } = await supabase
         .from('referrals')
@@ -185,28 +181,43 @@ export default function PremiumPage() {
         console.error('Database error:', dbError);
         
         if (dbError.code === '23505') {
-          // Check which constraint was violated
-          if (dbError.message.includes('referrals_referrer_email_unique')) {
-            toast.error("Vous avez déjà invité cette personne");
-          } else if (dbError.message.includes('referrals_referral_code_key')) {
-            toast.error("Erreur de génération de code, veuillez réessayer");
+          // If still getting unique constraint error, try once more with a new code
+          console.log('Code collision detected, generating another code...');
+          const newCode = await generateReferralCode();
+          if (newCode) {
+            const { error: retryError } = await supabase
+              .from('referrals')
+              .insert({
+                referrer_user_id: user.id,
+                referred_email: newEmail.toLowerCase().trim(),
+                referral_code: newCode,
+                status: 'pending'
+              });
+            
+            if (retryError) {
+              console.error('Retry failed:', retryError);
+              toast.error("Erreur lors de la création de l'invitation");
+              return;
+            }
           } else {
-            toast.error("Cette personne a déjà été invitée");
+            toast.error("Impossible de générer un code unique");
+            return;
           }
-          return;
+        } else {
+          throw dbError;
         }
-        throw dbError;
       }
 
-      // Send invitation email
-      const referralLink = `${window.location.origin}/auth?ref=${code}`;
+      // Send invitation email using the last generated code
+      const finalCode = code || await generateReferralCode();
+      const referralLink = `${window.location.origin}/auth?ref=${finalCode}`;
       
       console.log('Sending email to:', newEmail.toLowerCase().trim());
       console.log('Referral link:', referralLink);
       
       const { data: emailData, error: emailError } = await supabase.functions.invoke('send-referral-email', {
         body: {
-          referral_code: code,
+          referral_code: finalCode,
           referral_link: referralLink,
           referred_email: newEmail.toLowerCase().trim(),
           referrer_name: user.email?.split('@')[0] || "Un ami"
