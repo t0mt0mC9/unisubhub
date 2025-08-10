@@ -6,10 +6,20 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Copy, Gift, Users, Mail, Share2, Crown, Check, Star } from "lucide-react";
+import { Copy, Gift, Users, Mail, Share2, Crown, Check, Star, Trash2, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { SubscriptionPlans } from "./subscription-plans";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Referral {
   id: string;
@@ -29,6 +39,9 @@ export default function PremiumPage() {
   const [myReferralCode, setMyReferralCode] = useState<string>("");
   const [newEmail, setNewEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [referralToDelete, setReferralToDelete] = useState<Referral | null>(null);
   const [stats, setStats] = useState({
     pending: 0,
     completed: 0,
@@ -180,6 +193,35 @@ export default function PremiumPage() {
         return <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">Récompensé</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
+
+  const handleDeleteReferral = (referral: Referral) => {
+    setReferralToDelete(referral);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteReferral = async () => {
+    if (!referralToDelete) return;
+
+    setDeleteLoading(referralToDelete.id);
+    try {
+      const { error } = await supabase
+        .from('referrals')
+        .delete()
+        .eq('id', referralToDelete.id);
+
+      if (error) throw error;
+
+      toast.success("Invitation supprimée avec succès");
+      fetchReferrals();
+      setDeleteDialogOpen(false);
+      setReferralToDelete(null);
+    } catch (error) {
+      console.error('Error deleting referral:', error);
+      toast.error("Erreur lors de la suppression");
+    } finally {
+      setDeleteLoading(null);
     }
   };
 
@@ -357,8 +399,19 @@ export default function PremiumPage() {
                             Invité le {new Date(referral.created_at).toLocaleDateString()}
                           </p>
                         </div>
-                        <div className="text-right">
+                        <div className="flex items-center gap-2">
                           {getStatusBadge(referral.status)}
+                          {referral.status === 'pending' && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDeleteReferral(referral)}
+                              disabled={deleteLoading === referral.id}
+                              className="text-destructive hover:text-destructive-foreground hover:bg-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
                       </div>
                     ))}
