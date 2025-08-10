@@ -138,7 +138,10 @@ export default function PremiumPage() {
       // Send invitation email
       const referralLink = `${window.location.origin}/auth?ref=${code}`;
       
-      const { error: emailError } = await supabase.functions.invoke('send-referral-email', {
+      console.log('Sending email to:', newEmail.toLowerCase().trim());
+      console.log('Referral link:', referralLink);
+      
+      const { data: emailData, error: emailError } = await supabase.functions.invoke('send-referral-email', {
         body: {
           referral_code: code,
           referral_link: referralLink,
@@ -147,13 +150,15 @@ export default function PremiumPage() {
         }
       });
 
+      console.log('Email response:', emailData, emailError);
+
       if (emailError) {
         console.error('Error sending email:', emailError);
-        // Don't fail the whole process if email fails, just show a warning
-        toast.success("Invitation créée ! (Email en cours d'envoi...)");
-      } else {
-        toast.success("Invitation envoyée par email !");
+        toast.error("Erreur lors de l'envoi de l'email: " + emailError.message);
+        return;
       }
+
+      toast.success("Invitation créée et email envoyé !");
 
       setNewEmail("");
       fetchReferrals();

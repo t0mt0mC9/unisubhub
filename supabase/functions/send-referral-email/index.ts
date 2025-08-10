@@ -71,9 +71,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Email template rendered successfully");
 
-    // Send the email
+    // Send the email with a verified domain from
     const emailResponse = await resend.emails.send({
-      from: "UniSubHub <onboarding@resend.dev>",
+      from: "UniSubHub <no-reply@resend.dev>", // Use resend.dev domain for now
       to: [referred_email],
       subject: "🎉 Vous êtes invité(e) à rejoindre UniSubHub !",
       html,
