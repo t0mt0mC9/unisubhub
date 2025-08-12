@@ -97,6 +97,7 @@ class RevenueCatService {
         await Purchases.configure({
           apiKey: 'appl_GQGNOrPGOAqUKRTcAhDYoCAZPZN',
         });
+        console.log('RevenueCat configured with API key for iOS');
       } else {
         // Mode simulation pour le web
         console.log('RevenueCat: Running in web simulation mode');
@@ -106,6 +107,7 @@ class RevenueCatService {
       console.log('RevenueCat initialized successfully');
     } catch (error) {
       console.error('Failed to initialize RevenueCat:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
       throw error;
     }
   }
