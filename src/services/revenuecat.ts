@@ -18,7 +18,7 @@ class RevenueCatService {
       
       // Remplacez 'your_api_key' par votre clé API RevenueCat
       await Purchases.configure({
-        apiKey: 'your_revenuecat_api_key_here',
+        apiKey: 'appl_GQGNOrPGOAqUKRTcAhDYoCAZPZN',
       });
 
       this.initialized = true;
