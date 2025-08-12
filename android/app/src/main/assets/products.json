@@ -1,0 +1,20 @@
+{
+  "products": [
+    {
+      "identifier": "com.unisubhub.premium.monthly",
+      "type": "subscription",
+      "price": "4.99",
+      "currency": "EUR",
+      "title": "Premium Mensuel",
+      "description": "Accès complet aux fonctionnalités premium"
+    },
+    {
+      "identifier": "com.unisubhub.premium.yearly", 
+      "type": "subscription",
+      "price": "49.99",
+      "currency": "EUR",
+      "title": "Premium Annuel",
+      "description": "Accès complet aux fonctionnalités premium pour un an"
+    }
+  ]
+}
