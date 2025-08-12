@@ -1,4 +1,4 @@
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobile, useIsNativePlatform } from "@/hooks/use-mobile";
 import { StripeSubscriptionPlans } from "./stripe-subscription-plans";
 import { MobileSubscriptionPlans } from "./mobile-subscription-plans";
 
@@ -9,10 +9,12 @@ interface UnifiedSubscriptionManagerProps {
 
 export const UnifiedSubscriptionManager = ({ userId, onSubscriptionChange }: UnifiedSubscriptionManagerProps) => {
   const isMobile = useIsMobile();
+  const isNative = useIsNativePlatform();
 
-  // Sur mobile (ou dans une app Capacitor), utiliser RevenueCat
-  // Sur desktop, utiliser Stripe
-  if (isMobile) {
+  // Utiliser RevenueCat si on est sur une plateforme native (iOS/Android)
+  // ou sur mobile pour simuler l'expérience mobile
+  // Utiliser Stripe pour desktop/web
+  if (isNative || isMobile) {
     return <MobileSubscriptionPlans />;
   }
 

@@ -1,4 +1,5 @@
 import * as React from "react"
+import { Capacitor } from '@capacitor/core';
 
 const MOBILE_BREAKPOINT = 768
 
@@ -16,4 +17,15 @@ export function useIsMobile() {
   }, [])
 
   return !!isMobile
+}
+
+// Hook pour détecter si on est sur une plateforme native (iOS/Android via Capacitor)
+export function useIsNativePlatform() {
+  const [isNative, setIsNative] = React.useState<boolean>(false)
+
+  React.useEffect(() => {
+    setIsNative(Capacitor.isNativePlatform())
+  }, [])
+
+  return isNative
 }
