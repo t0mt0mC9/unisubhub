@@ -25,9 +25,9 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const { planType } = await req.json();
-    if (!planType || !['monthly', 'lifetime'].includes(planType)) {
-      throw new Error("Invalid plan type. Must be 'monthly' or 'lifetime'");
+    const { planId, priceAmount, currency, interval, planName } = await req.json();
+    if (!planId || !priceAmount || !currency || !planName) {
+      throw new Error("Missing required parameters: planId, priceAmount, currency, planName");
     }
 
     // Debug: Check if Stripe key is available
@@ -44,7 +44,7 @@ serve(async (req) => {
     const user = data.user;
     if (!user?.email) throw new Error("User not authenticated or email not available");
     
-    logStep("User authenticated", { userId: user.id, email: user.email, planType });
+    logStep("User authenticated", { userId: user.id, email: user.email, planId });
 
     const stripe = new Stripe(stripeKey, { 
       apiVersion: "2023-10-16" 
@@ -62,21 +62,8 @@ serve(async (req) => {
     }
 
     // Configure plan details
-    const planConfig = planType === 'monthly' 
-      ? {
-          price: 500, // 5€ in cents
-          interval: 'month' as const,
-          mode: 'subscription' as const,
-          name: 'Abonnement Mensuel Premium'
-        }
-      : {
-          price: 9900, // 99€ in cents
-          interval: null,
-          mode: 'payment' as const,
-          name: 'Abonnement à Vie Premium'
-        };
-
-    logStep("Plan configuration", planConfig);
+    const mode = interval === 'lifetime' ? 'payment' : 'subscription';
+    logStep("Plan configuration", { planId, priceAmount, currency, interval, mode });
 
     // Create checkout session
     const sessionConfig: any = {
@@ -85,27 +72,27 @@ serve(async (req) => {
       line_items: [
         {
           price_data: {
-            currency: "eur",
+            currency: currency,
             product_data: { 
-              name: planConfig.name,
-              description: planType === 'monthly' 
-                ? 'Accès complet à UniSubHub avec toutes les fonctionnalités premium'
-                : 'Accès à vie à UniSubHub avec toutes les fonctionnalités premium'
+              name: planName,
+              description: planId === 'monthly_plan' 
+                ? 'Analyses détaillées illimitées + Recommandations d\'optimisation + alertes personnalisées + support prioritaire'
+                : 'Avantages du plan mensuel + Abonnements illimités + Fonctionnalités premium'
             },
-            unit_amount: planConfig.price,
-            ...(planType === 'monthly' && {
-              recurring: { interval: planConfig.interval }
+            unit_amount: priceAmount,
+            ...(interval !== 'lifetime' && {
+              recurring: { interval }
             }),
           },
           quantity: 1,
         },
       ],
-      mode: planConfig.mode,
-      success_url: `${req.headers.get("origin")}/success?plan=${planType}`,
-      cancel_url: `${req.headers.get("origin")}/cancel`,
+      mode: mode,
+      success_url: `${req.headers.get("origin")}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${req.headers.get("origin")}/premium`,
       metadata: {
         user_id: user.id,
-        plan_type: planType,
+        plan_id: planId,
       }
     };
 

@@ -5,7 +5,7 @@ import { PremiumHeader } from "./premium-header";
 import { ReferralStatsCards } from "./referral-stats";
 import { ReferralInvite } from "./referral-invite";
 import { ReferralList } from "./referral-list";
-import { SubscriptionManager } from "../subscription/subscription-manager";
+import { UnifiedSubscriptionManager } from "../subscription/unified-subscription-manager";
 import { useReferrals } from "@/hooks/use-referrals";
 import { useStoreKitSubscription } from "@/hooks/use-storekit-subscription";
 
@@ -49,7 +49,7 @@ export default function PremiumPage() {
 
           {/* Plans Tab */}
           <TabsContent value="plans" className="space-y-6">
-            <SubscriptionManager 
+            <UnifiedSubscriptionManager 
               userId={currentUser?.id}
               onSubscriptionChange={(isActive) => {
                 console.log('Subscription status changed:', isActive);
