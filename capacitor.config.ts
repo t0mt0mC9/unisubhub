@@ -13,6 +13,9 @@ const config: CapacitorConfig = {
       launchShowDuration: 2000,
       backgroundColor: '#1a1625',
       showSpinner: false
+    },
+    PurchasesCapacitor: {
+      // Configuration pour RevenueCat
     }
   }
 };

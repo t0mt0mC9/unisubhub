@@ -6,10 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Copy, Gift, Users, Mail, Share2, Crown, Check, Star, Trash2, AlertCircle } from "lucide-react";
+import { Copy, Gift, Users, Mail, Share2, Crown, Check, Star, Trash2, AlertCircle, Smartphone, Shield } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { SubscriptionPlans } from "./subscription-plans";
+import { SubscriptionManager } from "./subscription-manager";
+import { useStoreKitSubscription } from "@/hooks/use-storekit-subscription";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,6 +43,7 @@ export default function PremiumPage() {
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [referralToDelete, setReferralToDelete] = useState<Referral | null>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const [stats, setStats] = useState({
     pending: 0,
     completed: 0,
@@ -49,10 +51,28 @@ export default function PremiumPage() {
     totalRewards: 0
   });
 
+  const { subscriptionInfo, identifyUser } = useStoreKitSubscription();
+
   useEffect(() => {
+    getCurrentUser();
     fetchReferrals();
     generateOrGetMyReferralCode();
   }, []);
+
+  useEffect(() => {
+    if (currentUser?.id) {
+      identifyUser(currentUser.id);
+    }
+  }, [currentUser, identifyUser]);
+
+  const getCurrentUser = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUser(user);
+    } catch (error) {
+      console.error('Error getting current user:', error);
+    }
+  };
 
   const generateOrGetMyReferralCode = async () => {
     try {
@@ -351,9 +371,36 @@ export default function PremiumPage() {
           </div>
           <h1 className="text-3xl font-bold">Débloquez tout le potentiel</h1>
           <p className="text-muted-foreground">
-            Accédez aux fonctionnalités avancées et invitez vos amis
+            Accédez aux fonctionnalités avancées avec Apple StoreKit
           </p>
         </div>
+
+        {/* StoreKit Info Banner */}
+        <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-blue-800 dark:text-blue-400">
+              <Smartphone className="h-5 w-5" />
+              Powered by Apple StoreKit
+            </CardTitle>
+            <CardDescription>
+              Paiements sécurisés directement via votre compte Apple ID
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex items-center gap-4 text-sm">
+            <div className="flex items-center gap-1">
+              <Shield className="h-4 w-4 text-green-600" />
+              <span>Sécurisé</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Check className="h-4 w-4 text-green-600" />
+              <span>Synchronisé</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Crown className="h-4 w-4 text-green-600" />
+              <span>Premium</span>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Tabs */}
         <Tabs defaultValue="plans" className="w-full">
@@ -370,7 +417,12 @@ export default function PremiumPage() {
 
           {/* Plans Tab */}
           <TabsContent value="plans" className="space-y-6">
-            <SubscriptionPlans />
+            <SubscriptionManager 
+              userId={currentUser?.id}
+              onSubscriptionChange={(isActive) => {
+                console.log('Subscription status changed:', isActive);
+              }}
+            />
           </TabsContent>
 
           {/* Referral Tab */}
@@ -469,14 +521,14 @@ export default function PremiumPage() {
                   <Label>Ton lien de parrainage</Label>
                   <div className="flex gap-2">
                     <Input
-                      value={myReferralCode ? `${window.location.origin}/auth?ref=${myReferralCode}` : "Génération en cours..."}
                       readOnly
+                      value={myReferralCode ? `${window.location.origin}/auth?ref=${myReferralCode}` : "Génération en cours..."}
                       className="flex-1"
                     />
-                    <Button variant="outline" size="icon" onClick={copyReferralLink} disabled={!myReferralCode}>
+                    <Button variant="outline" onClick={copyReferralLink} disabled={!myReferralCode}>
                       <Copy className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="icon" onClick={shareViaEmail} disabled={!myReferralCode}>
+                    <Button variant="outline" onClick={shareViaEmail} disabled={!myReferralCode}>
                       <Mail className="h-4 w-4" />
                     </Button>
                   </div>
@@ -485,42 +537,36 @@ export default function PremiumPage() {
             </Card>
 
             {/* Referrals List */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Mes parrainages</CardTitle>
-                <CardDescription>
-                  Suivi de tes invitations et récompenses
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {referrals.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>Aucun parrainage pour le moment</p>
-                    <p className="text-sm">Commence par inviter tes premiers amis !</p>
-                  </div>
-                ) : (
+            {referrals.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Tes invitations ({referrals.length})</CardTitle>
+                  <CardDescription>
+                    Suivi de tes invitations et récompenses
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
                   <div className="space-y-3">
                     {referrals.map((referral) => (
-                      <div
-                        key={referral.id}
-                        className="flex items-center justify-between p-3 border rounded-lg"
-                      >
-                        <div className="flex-1">
+                      <div key={referral.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="space-y-1">
                           <p className="font-medium">{referral.referred_email}</p>
                           <p className="text-sm text-muted-foreground">
-                            Invité le {new Date(referral.created_at).toLocaleDateString()}
+                            Invité le {new Date(referral.created_at).toLocaleDateString('fr-FR')}
+                            {referral.completed_at && (
+                              <> • Inscrit le {new Date(referral.completed_at).toLocaleDateString('fr-FR')}</>
+                            )}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
                           {getStatusBadge(referral.status)}
                           {referral.status === 'pending' && (
                             <Button
-                              variant="outline"
+                              variant="ghost"
                               size="sm"
                               onClick={() => handleDeleteReferral(referral)}
                               disabled={deleteLoading === referral.id}
-                              className="text-destructive hover:text-destructive-foreground hover:bg-destructive"
+                              className="text-destructive hover:text-destructive"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -529,23 +575,19 @@ export default function PremiumPage() {
                       </div>
                     ))}
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
-         </Tabs>
+        </Tabs>
 
         {/* Delete Confirmation Dialog */}
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle className="flex items-center gap-2">
-                <AlertCircle className="h-5 w-5 text-destructive" />
-                Supprimer l'invitation
-              </AlertDialogTitle>
+              <AlertDialogTitle>Supprimer l'invitation ?</AlertDialogTitle>
               <AlertDialogDescription>
-                Êtes-vous sûr de vouloir supprimer l'invitation envoyée à{" "}
-                <strong>{referralToDelete?.referred_email}</strong> ?
+                Êtes-vous sûr de vouloir supprimer l'invitation envoyée à {referralToDelete?.referred_email} ?
                 Cette action est irréversible.
               </AlertDialogDescription>
             </AlertDialogHeader>
@@ -554,9 +596,8 @@ export default function PremiumPage() {
               <AlertDialogAction
                 onClick={confirmDeleteReferral}
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                disabled={deleteLoading !== null}
               >
-                {deleteLoading ? "Suppression..." : "Supprimer"}
+                Supprimer
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
