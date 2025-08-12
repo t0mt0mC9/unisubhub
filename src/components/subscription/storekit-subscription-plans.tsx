@@ -207,59 +207,69 @@ export const StoreKitSubscriptionPlans = () => {
       )}
 
       {/* Plans d'abonnement */}
-      <div className="grid gap-6 md:grid-cols-3">
-        {offerings[0]?.availablePackages?.map((pkg) => {
-          const isCurrentPlan = subscriptionInfo?.productId === pkg.product.identifier;
-          
-          return (
-            <Card key={pkg.identifier} className={`relative ${isCurrentPlan ? 'ring-2 ring-primary' : ''}`}>
-              {isCurrentPlan && (
-                <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                  Plan actuel
-                </Badge>
-              )}
-              
-              <CardHeader className="text-center">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                  {getPlanIcon(pkg.product.identifier)}
-                </div>
-                <CardTitle>{pkg.product.title}</CardTitle>
-                <CardDescription>{pkg.product.description}</CardDescription>
-                <div className="mt-4">
-                  <span className="text-3xl font-bold">
-                    {pkg.product.priceString}
-                  </span>
-                  <span className="text-muted-foreground">
-                    /{pkg.packageType === 'MONTHLY' ? 'mois' : 'an'}
-                  </span>
-                </div>
-              </CardHeader>
-              
-              <CardContent className="space-y-4">
-                <ul className="space-y-2">
-                  {getPlanFeatures(pkg.product.identifier).map((feature, index) => (
-                    <li key={index} className="flex items-center gap-2 text-sm">
-                      <Check className="h-4 w-4 text-green-500" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
+      <div className="grid gap-6 md:grid-cols-2">
+        {offerings.length > 0 && offerings[0].availablePackages ? 
+          offerings[0].availablePackages.map((pkg) => {
+            const isCurrentPlan = subscriptionInfo?.productId === pkg.product.identifier;
+            
+            return (
+              <Card key={pkg.identifier} className={`relative ${isCurrentPlan ? 'ring-2 ring-primary' : ''}`}>
+                {isCurrentPlan && (
+                  <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                    Plan actuel
+                  </Badge>
+                )}
                 
-                <Button
-                  onClick={() => handlePurchase(pkg)}
-                  disabled={purchasing === pkg.identifier || isCurrentPlan}
-                  className="w-full"
-                  variant={isCurrentPlan ? "outline" : "default"}
-                >
-                  {purchasing === pkg.identifier && (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  )}
-                  {isCurrentPlan ? "Plan actuel" : "S'abonner"}
-                </Button>
-              </CardContent>
-            </Card>
-          );
-        })}
+                <CardHeader className="text-center">
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                    {getPlanIcon(pkg.product.identifier)}
+                  </div>
+                  <CardTitle>{pkg.product.title}</CardTitle>
+                  <CardDescription>{pkg.product.description}</CardDescription>
+                  <div className="mt-4">
+                    <span className="text-3xl font-bold">
+                      {pkg.product.priceString}
+                    </span>
+                    <span className="text-muted-foreground">
+                      /{pkg.packageType === 'MONTHLY' ? 'mois' : 'an'}
+                    </span>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="space-y-4">
+                  <ul className="space-y-2">
+                    {getPlanFeatures(pkg.product.identifier).map((feature, index) => (
+                      <li key={index} className="flex items-center gap-2 text-sm">
+                        <Check className="h-4 w-4 text-green-500" />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                  
+                  <Button
+                    onClick={() => handlePurchase(pkg)}
+                    disabled={purchasing === pkg.identifier || isCurrentPlan}
+                    className="w-full"
+                    variant={isCurrentPlan ? "outline" : "default"}
+                  >
+                    {purchasing === pkg.identifier && (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    )}
+                    {isCurrentPlan ? "Plan actuel" : "S'abonner"}
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          }) : (
+            <div className="col-span-2 text-center p-8">
+              <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Aucun plan disponible</h3>
+              <p className="text-muted-foreground">
+                Les plans d'abonnement ne sont pas disponibles actuellement.
+              </p>
+            </div>
+          )
+        }
       </div>
 
       {/* Bouton de restauration */}
