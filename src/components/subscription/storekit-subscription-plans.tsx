@@ -5,7 +5,28 @@ import { Badge } from "@/components/ui/badge";
 import { Check, Crown, Star, Zap, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { revenueCatService, SubscriptionInfo } from "@/services/revenuecat";
-import { PurchasesOffering, PurchasesPackage } from '@revenuecat/purchases-capacitor';
+
+// Types locaux pour éviter les imports conditionnels
+interface PurchasesOffering {
+  identifier: string;
+  serverDescription: string;
+  metadata: Record<string, any>;
+  availablePackages: PurchasesPackage[];
+}
+
+interface PurchasesPackage {
+  identifier: string;
+  packageType: string;
+  product: {
+    identifier: string;
+    description: string;
+    title: string;
+    priceString: string;
+    price: number;
+    currencyCode: string;
+  };
+  offeringIdentifier: string;
+}
 
 export const StoreKitSubscriptionPlans = () => {
   const [offerings, setOfferings] = useState<PurchasesOffering[]>([]);
