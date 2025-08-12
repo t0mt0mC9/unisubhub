@@ -50,7 +50,7 @@ const MOCK_OFFERINGS: MockOffering[] = [
         packageType: 'MONTHLY',
         product: {
           identifier: 'basic_monthly',
-          description: 'Plan basique mensuel',
+          description: 'Accès aux fonctionnalités de base avec suivi des abonnements',
           title: 'Plan Basique',
           priceString: '4,99 €',
           price: 4.99,
@@ -63,7 +63,7 @@ const MOCK_OFFERINGS: MockOffering[] = [
         packageType: 'MONTHLY',
         product: {
           identifier: 'premium_monthly',
-          description: 'Plan premium mensuel',
+          description: 'Accès complet avec analyses avancées et fonctionnalités premium',
           title: 'Plan Premium',
           priceString: '9,99 €',
           price: 9.99,
