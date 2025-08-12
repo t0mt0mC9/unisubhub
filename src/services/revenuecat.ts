@@ -94,10 +94,25 @@ class RevenueCatService {
         // Import dynamique pour éviter les erreurs web
         const { Purchases, LOG_LEVEL } = await import('@revenuecat/purchases-capacitor');
         await Purchases.setLogLevel({ level: LOG_LEVEL.DEBUG });
-        await Purchases.configure({
-          apiKey: 'appl_GQGNOrPGOAqUKRTcAhDYoCAZPZN',
-        });
-        console.log('RevenueCat configured with API key for iOS');
+        
+        const platform = Capacitor.getPlatform();
+        console.log('Configuring RevenueCat for platform:', platform);
+        
+        if (platform === 'ios') {
+          await Purchases.configure({
+            apiKey: 'appl_GQGNOrPGOAqUKRTcAhDYoCAZPZN',
+          });
+          console.log('RevenueCat configured with API key for iOS');
+        } else if (platform === 'android') {
+          // TODO: Remplacer par votre clé API Google Play
+          await Purchases.configure({
+            apiKey: 'goog_YOUR_GOOGLE_API_KEY_HERE',
+          });
+          console.log('RevenueCat configured with API key for Android');
+        } else {
+          console.warn('Unsupported platform for RevenueCat:', platform);
+          throw new Error(`Unsupported platform: ${platform}`);
+        }
       } else {
         // Mode simulation pour le web
         console.log('RevenueCat: Running in web simulation mode');
