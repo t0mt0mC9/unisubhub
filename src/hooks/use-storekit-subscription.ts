@@ -6,6 +6,7 @@ export const useStoreKitSubscription = () => {
   const [subscriptionInfo, setSubscriptionInfo] = useState<SubscriptionInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [initialized, setInitialized] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const initializeService = async () => {
@@ -40,9 +41,11 @@ export const useStoreKitSubscription = () => {
 
   const identifyUser = async (userId: string) => {
     if (!initialized) return;
+    if (currentUserId === userId) return; // Éviter de réidentifier le même utilisateur
     
     try {
       await revenueCatService.identifyUser(userId);
+      setCurrentUserId(userId);
       await loadSubscriptionInfo();
     } catch (error) {
       console.error('Failed to identify user:', error);
@@ -55,6 +58,7 @@ export const useStoreKitSubscription = () => {
     try {
       await revenueCatService.logout();
       setSubscriptionInfo(null);
+      setCurrentUserId(null);
     } catch (error) {
       console.error('Failed to logout:', error);
     }
