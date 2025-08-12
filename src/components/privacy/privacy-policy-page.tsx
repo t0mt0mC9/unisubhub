@@ -168,6 +168,17 @@ export const PrivacyPolicyPage = ({ onBack }: PrivacyPolicyPageProps) => {
                 <li>Email : privacy@unisubhub.com</li>
                 <li>Support : support@unisubhub.com</li>
               </ul>
+              <p className="mt-4">
+                Cette politique de confidentialité a été générée avec l'aide de{" "}
+                <a 
+                  href="https://www.privacypolicies.com/live/3d207565-ef0b-4734-b182-2eb081fa7a92" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  PrivacyPolicies.com
+                </a>
+              </p>
             </CardContent>
           </Card>
         </div>

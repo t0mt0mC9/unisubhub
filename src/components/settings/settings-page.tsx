@@ -270,6 +270,15 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
             Politique de confidentialité
           </Button>
           
+          <Button 
+            variant="outline" 
+            className="w-full"
+            onClick={() => window.open('https://www.apple.com/legal/internet-services/itunes/dev/stdeula/', '_blank')}
+          >
+            <HelpCircle className="mr-2 h-4 w-4" />
+            Conditions d'utilisation (EULA)
+          </Button>
+          
           <Separator />
           
           <AlertDialog>
