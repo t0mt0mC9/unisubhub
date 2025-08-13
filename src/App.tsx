@@ -18,72 +18,44 @@ import ExpenseAnalysis from "./pages/ExpenseAnalysis";
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
-    let mounted = true;
-    let authCheckTimeout: NodeJS.Timeout;
+    console.log('🚀 App starting...');
     
-    console.log('🔄 Starting auth initialization...');
+    // Force stop loading after 2 seconds maximum
+    const forceLoadingStop = setTimeout(() => {
+      console.log('⏰ Force stopping loading');
+      setLoading(false);
+    }, 2000);
 
-    const initializeAuth = async () => {
+    // Simple auth check
+    const checkAuth = async () => {
       try {
-        // Sur mobile, forcer un délai pour la persistence
-        if (Capacitor.isNativePlatform()) {
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('❌ Session error:', error);
-        }
-
-        if (mounted) {
-          console.log('✅ Session retrieved:', session?.user?.email || 'No user');
-          setSession(session);
-          setUser(session?.user ?? null);
-          
-          // Timeout de sécurité - toujours arrêter le loading après 3s max
-          authCheckTimeout = setTimeout(() => {
-            if (mounted) {
-              console.log('⏰ Timeout - stopping loading');
-              setLoading(false);
-            }
-          }, 3000);
-          
-          setLoading(false);
-        }
+        const { data: { user } } = await supabase.auth.getUser();
+        console.log('👤 User check:', user?.email || 'No user');
+        setUser(user);
       } catch (error) {
-        console.error('❌ Auth init failed:', error);
-        if (mounted) {
-          setSession(null);
-          setUser(null);
-          setLoading(false);
-        }
+        console.error('❌ Auth error:', error);
+        setUser(null);
+      } finally {
+        clearTimeout(forceLoadingStop);
+        setLoading(false);
       }
     };
 
-    initializeAuth();
+    checkAuth();
 
-    // Listener d'auth très simple - pas de logique complexe
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log('🔔 Auth event:', event);
-        
-        if (mounted && event !== 'INITIAL_SESSION') {
-          setSession(session);
-          setUser(session?.user ?? null);
-        }
-      }
-    );
+    // Simple auth listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('🔔 Auth change:', event);
+      setUser(session?.user ?? null);
+    });
 
     return () => {
-      mounted = false;
-      if (authCheckTimeout) clearTimeout(authCheckTimeout);
+      clearTimeout(forceLoadingStop);
       subscription.unsubscribe();
     };
   }, []);
