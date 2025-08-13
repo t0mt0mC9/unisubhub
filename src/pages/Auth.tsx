@@ -132,6 +132,13 @@ const Auth = () => {
         title: "Inscription réussie",
         description: "Vérifiez votre email pour confirmer votre compte",
       });
+
+      // Redirect to home page after successful signup
+      if (data.user) {
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 1500);
+      }
     } catch (error: any) {
       toast({
         title: "Erreur d'inscription",

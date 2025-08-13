@@ -27,7 +27,7 @@ const App = () => {
 
     const initAuth = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const { data: { session } } = await supabase.auth.getSession();
         
         if (mounted) {
           console.log('Initial session:', session?.user?.email || 'No user');
@@ -45,14 +45,14 @@ const App = () => {
       }
     };
 
-    // Initialize auth immediately
+    // Initialize auth
     initAuth();
 
-    // Listen to auth changes but don't interfere with loading state
+    // Listen to auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         console.log('Auth event:', event, session?.user?.email || 'No user');
-        if (mounted && !loading) {
+        if (mounted) {
           setSession(session);
           setUser(session?.user ?? null);
         }
@@ -63,7 +63,7 @@ const App = () => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [loading]);
+  }, []);
 
   if (showSplash) {
     return <SplashScreen onFinish={() => setShowSplash(false)} />;
