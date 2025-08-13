@@ -24,12 +24,20 @@ const App = () => {
 
   useEffect(() => {
     let mounted = true;
+    console.log("App: Starting auth check...");
 
     // Check for existing session first
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("App: Got session:", !!session);
       if (mounted) {
         setSession(session);
         setUser(session?.user ?? null);
+        setLoading(false);
+        console.log("App: Loading set to false");
+      }
+    }).catch((error) => {
+      console.error("App: Error getting session:", error);
+      if (mounted) {
         setLoading(false);
       }
     });
@@ -37,6 +45,7 @@ const App = () => {
     // Set up auth state listener for future changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log("App: Auth state change:", event, !!session);
         if (mounted) {
           setSession(session);
           setUser(session?.user ?? null);
@@ -50,11 +59,15 @@ const App = () => {
     };
   }, []);
 
+  console.log("App: Current state - loading:", loading, "user:", !!user, "session:", !!session);
+
   if (showSplash) {
+    console.log("App: Showing splash screen");
     return <SplashScreen onFinish={() => setShowSplash(false)} />;
   }
 
   if (loading) {
+    console.log("App: Showing loading screen");
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
