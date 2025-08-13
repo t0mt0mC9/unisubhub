@@ -25,45 +25,28 @@ const App = () => {
   useEffect(() => {
     let mounted = true;
 
-    const initializeAuth = async () => {
-      try {
-        // Get current session
-        const { data: { session: currentSession }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error("Error getting session:", error);
-          throw error;
-        }
-
-        if (mounted) {
-          setSession(currentSession);
-          setUser(currentSession?.user ?? null);
-          setLoading(false);
-        }
-      } catch (error) {
-        console.error("Auth initialization error:", error);
-        if (mounted) {
-          setLoading(false);
-        }
+    // Get initial session and set loading to false immediately after
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (mounted) {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false); // Always set loading to false after getting session
       }
-    };
+    }).catch((error) => {
+      console.error("Error getting session:", error);
+      if (mounted) {
+        setLoading(false); // Set loading to false even on error
+      }
+    });
 
-    // Initialize authentication
-    initializeAuth();
-
-    // Set up auth state listener
+    // Set up auth state listener for real-time changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
+        console.log('Auth state change:', event, session?.user?.email);
         if (mounted) {
           setSession(session);
           setUser(session?.user ?? null);
-          
-          // Handle specific auth events
-          if (event === 'SIGNED_OUT') {
-            setLoading(false);
-          } else if (event === 'SIGNED_IN') {
-            setLoading(false);
-          }
+          // Don't change loading state here - it should already be false
         }
       }
     );
