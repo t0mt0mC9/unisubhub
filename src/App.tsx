@@ -22,19 +22,18 @@ const App = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
-  const [authInitialized, setAuthInitialized] = useState(false);
 
   useEffect(() => {
     let mounted = true;
-    const isNative = Capacitor.isNativePlatform();
+    let authCheckTimeout: NodeJS.Timeout;
     
-    console.log('🔄 Initializing auth - Platform:', isNative ? 'Native' : 'Web');
+    console.log('🔄 Starting auth initialization...');
 
     const initializeAuth = async () => {
       try {
-        // Pour mobile, ajouter un délai pour assurer la persistence
-        if (isNative) {
-          await new Promise(resolve => setTimeout(resolve, 500));
+        // Sur mobile, forcer un délai pour la persistence
+        if (Capacitor.isNativePlatform()) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
 
         const { data: { session }, error } = await supabase.auth.getSession();
@@ -44,26 +43,25 @@ const App = () => {
         }
 
         if (mounted) {
-          console.log('✅ Session loaded:', session?.user?.email || 'No user');
+          console.log('✅ Session retrieved:', session?.user?.email || 'No user');
           setSession(session);
           setUser(session?.user ?? null);
-          setAuthInitialized(true);
           
-          // Délai supplémentaire sur mobile avant de masquer le loading
-          if (isNative) {
-            setTimeout(() => {
-              if (mounted) setLoading(false);
-            }, 300);
-          } else {
-            setLoading(false);
-          }
+          // Timeout de sécurité - toujours arrêter le loading après 3s max
+          authCheckTimeout = setTimeout(() => {
+            if (mounted) {
+              console.log('⏰ Timeout - stopping loading');
+              setLoading(false);
+            }
+          }, 3000);
+          
+          setLoading(false);
         }
       } catch (error) {
-        console.error('❌ Auth initialization failed:', error);
+        console.error('❌ Auth init failed:', error);
         if (mounted) {
           setSession(null);
           setUser(null);
-          setAuthInitialized(true);
           setLoading(false);
         }
       }
@@ -71,17 +69,12 @@ const App = () => {
 
     initializeAuth();
 
-    // Setup auth listener avec logique spécifique mobile
+    // Listener d'auth très simple - pas de logique complexe
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('🔔 Auth event:', event, session?.user?.email || 'No user');
+      (event, session) => {
+        console.log('🔔 Auth event:', event);
         
-        if (mounted && authInitialized) {
-          // Sur mobile, ajouter un délai pour les changements d'auth
-          if (isNative && event !== 'INITIAL_SESSION') {
-            await new Promise(resolve => setTimeout(resolve, 100));
-          }
-          
+        if (mounted && event !== 'INITIAL_SESSION') {
           setSession(session);
           setUser(session?.user ?? null);
         }
@@ -90,9 +83,10 @@ const App = () => {
 
     return () => {
       mounted = false;
+      if (authCheckTimeout) clearTimeout(authCheckTimeout);
       subscription.unsubscribe();
     };
-  }, [authInitialized]);
+  }, []);
 
   if (showSplash) {
     return <SplashScreen onFinish={() => setShowSplash(false)} />;
