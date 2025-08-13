@@ -53,19 +53,14 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      // Clean up existing state
-      cleanupAuthState();
-      // Attempt global sign out
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        // Continue even if this fails
-      }
-
+      console.log('🔐 Tentative de connexion pour:', email);
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
+
+      console.log('📧 Résultat de connexion:', { user: data.user?.email, error: error?.message });
 
       if (error) throw error;
 
@@ -78,6 +73,7 @@ const Auth = () => {
         window.location.href = '/';
       }
     } catch (error: any) {
+      console.error('❌ Erreur de connexion:', error);
       toast({
         title: "Erreur de connexion",
         description: error.message,
