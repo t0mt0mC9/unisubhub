@@ -21,38 +21,48 @@ const App = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     let mounted = true;
 
-    const initAuth = async () => {
+    const initializeAuth = async () => {
+      console.log('🔄 Initializing auth...');
+      
       try {
+        // Get initial session
         const { data: { session } } = await supabase.auth.getSession();
         
-        if (mounted) {
-          console.log('Initial session:', session?.user?.email || 'No user');
+        if (mounted && !initialized) {
+          console.log('✅ Setting initial session:', session?.user?.email || 'No user');
           setSession(session);
           setUser(session?.user ?? null);
+          setInitialized(true);
           setLoading(false);
         }
       } catch (error) {
-        console.error('Session error:', error);
-        if (mounted) {
+        console.error('❌ Session error:', error);
+        if (mounted && !initialized) {
           setSession(null);
           setUser(null);
+          setInitialized(true);
           setLoading(false);
         }
       }
     };
 
-    // Initialize auth
-    initAuth();
+    // Only initialize if not already initialized
+    if (!initialized) {
+      initializeAuth();
+    }
 
-    // Listen to auth changes
+    // Set up auth listener only after initialization
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log('Auth event:', event, session?.user?.email || 'No user');
-        if (mounted) {
+        console.log('🔔 Auth event:', event, session?.user?.email || 'No user');
+        
+        // Only handle auth changes after initialization is complete
+        if (mounted && initialized && event !== 'INITIAL_SESSION') {
           setSession(session);
           setUser(session?.user ?? null);
         }
@@ -63,7 +73,7 @@ const App = () => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [initialized]);
 
   if (showSplash) {
     return <SplashScreen onFinish={() => setShowSplash(false)} />;
