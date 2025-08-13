@@ -33,24 +33,50 @@ const Auth = () => {
     checkAuth();
   }, []);
 
+  const cleanupAuthState = () => {
+    // Remove all Supabase auth keys from localStorage
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        localStorage.removeItem(key);
+      }
+    });
+    // Remove from sessionStorage if in use
+    Object.keys(sessionStorage || {}).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        sessionStorage.removeItem(key);
+      }
+    });
+  };
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      // Clean up existing state
+      cleanupAuthState();
+      // Attempt global sign out
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // Continue even if this fails
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw error;
 
-      toast({
-        title: "Connexion réussie",
-        description: "Vous êtes maintenant connecté à UniSubHub",
-      });
-
-      window.location.href = '/';
+      if (data.user) {
+        toast({
+          title: "Connexion réussie",
+          description: "Vous êtes maintenant connecté à UniSubHub",
+        });
+        // Force page reload for clean state
+        window.location.href = '/';
+      }
     } catch (error: any) {
       toast({
         title: "Erreur de connexion",
