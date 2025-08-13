@@ -31,12 +31,12 @@ const App = () => {
       setLoading(false);
     }, 2000);
 
-    // Simple auth check
+    // Simple auth check using session (plus fiable sur mobile)
     const checkAuth = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        console.log('👤 User check:', user?.email || 'No user');
-        setUser(user);
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log('👤 Session check:', session?.user?.email || 'No user');
+        setUser(session?.user ?? null);
       } catch (error) {
         console.error('❌ Auth error:', error);
         setUser(null);
