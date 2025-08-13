@@ -25,28 +25,36 @@ const App = () => {
   useEffect(() => {
     let mounted = true;
 
-    // Get initial session and set loading to false immediately after
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (mounted) {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false); // Always set loading to false after getting session
-      }
-    }).catch((error) => {
-      console.error("Error getting session:", error);
-      if (mounted) {
-        setLoading(false); // Set loading to false even on error
-      }
-    });
-
-    // Set up auth state listener for real-time changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log('Auth state change:', event, session?.user?.email);
+    const initAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
         if (mounted) {
+          console.log('Initial session:', session?.user?.email || 'No user');
           setSession(session);
           setUser(session?.user ?? null);
-          // Don't change loading state here - it should already be false
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Session error:', error);
+        if (mounted) {
+          setSession(null);
+          setUser(null);
+          setLoading(false);
+        }
+      }
+    };
+
+    // Initialize auth immediately
+    initAuth();
+
+    // Listen to auth changes but don't interfere with loading state
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log('Auth event:', event, session?.user?.email || 'No user');
+        if (mounted && !loading) {
+          setSession(session);
+          setUser(session?.user ?? null);
         }
       }
     );
@@ -55,7 +63,7 @@ const App = () => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [loading]);
 
   if (showSplash) {
     return <SplashScreen onFinish={() => setShowSplash(false)} />;
