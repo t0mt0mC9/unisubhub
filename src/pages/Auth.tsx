@@ -33,47 +33,25 @@ const Auth = () => {
     checkAuth();
   }, []);
 
-  const cleanupAuthState = () => {
-    // Remove all Supabase auth keys from localStorage
-    Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        localStorage.removeItem(key);
-      }
-    });
-    // Remove from sessionStorage if in use
-    Object.keys(sessionStorage || {}).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        sessionStorage.removeItem(key);
-      }
-    });
-  };
-
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      console.log('🔐 Tentative de connexion pour:', email);
-      
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      console.log('📧 Résultat de connexion:', { user: data.user?.email, error: error?.message });
-
       if (error) throw error;
 
-      if (data.user) {
-        toast({
-          title: "Connexion réussie",
-          description: "Vous êtes maintenant connecté à UniSubHub",
-        });
-        // Force page reload for clean state
-        window.location.href = '/';
-      }
+      toast({
+        title: "Connexion réussie",
+        description: "Vous êtes maintenant connecté à UniSubHub",
+      });
+
+      window.location.href = '/';
     } catch (error: any) {
-      console.error('❌ Erreur de connexion:', error);
       toast({
         title: "Erreur de connexion",
         description: error.message,
@@ -128,13 +106,6 @@ const Auth = () => {
         title: "Inscription réussie",
         description: "Vérifiez votre email pour confirmer votre compte",
       });
-
-      // Redirect to home page after successful signup
-      if (data.user) {
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 1500);
-      }
     } catch (error: any) {
       toast({
         title: "Erreur d'inscription",

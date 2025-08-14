@@ -7,7 +7,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Session, User } from "@supabase/supabase-js";
-import { Capacitor } from "@capacitor/core";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
@@ -18,46 +17,29 @@ import ExpenseAnalysis from "./pages/ExpenseAnalysis";
 const queryClient = new QueryClient();
 
 const App = () => {
+  const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
-    console.log('🚀 App starting...');
-    
-    // Force stop loading after 2 seconds maximum
-    const forceLoadingStop = setTimeout(() => {
-      console.log('⏰ Force stopping loading');
-      setLoading(false);
-    }, 2000);
-
-    // Simple auth check using session (plus fiable sur mobile)
-    const checkAuth = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        console.log('👤 Session check:', session?.user?.email || 'No user');
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
         setUser(session?.user ?? null);
-      } catch (error) {
-        console.error('❌ Auth error:', error);
-        setUser(null);
-      } finally {
-        clearTimeout(forceLoadingStop);
         setLoading(false);
       }
-    };
+    );
 
-    checkAuth();
-
-    // Simple auth listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('🔔 Auth change:', event);
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
       setUser(session?.user ?? null);
+      setLoading(false);
     });
 
-    return () => {
-      clearTimeout(forceLoadingStop);
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
   if (showSplash) {
