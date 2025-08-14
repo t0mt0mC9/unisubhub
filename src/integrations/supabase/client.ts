@@ -13,7 +13,7 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
-    detectSessionInUrl: false, // Désactiver pour mobile
-    flowType: 'pkce' // Meilleur pour mobile
+    detectSessionInUrl: true,
+    flowType: 'pkce'
   }
 });
