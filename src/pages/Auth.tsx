@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +15,7 @@ const Auth = () => {
   const [referralCode, setReferralCode] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Check for referral code in URL
@@ -22,15 +24,6 @@ const Auth = () => {
     if (refCode) {
       setReferralCode(refCode);
     }
-
-    // Redirect if already authenticated
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        window.location.href = '/';
-      }
-    };
-    checkAuth();
   }, []);
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -50,7 +43,7 @@ const Auth = () => {
         description: "Vous êtes maintenant connecté à UniSubHub",
       });
 
-      window.location.href = '/';
+      navigate('/');
     } catch (error: any) {
       toast({
         title: "Erreur de connexion",
