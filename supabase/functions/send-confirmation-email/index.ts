@@ -25,28 +25,10 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    // Authenticate user
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-    );
-
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      throw new Error('Pas d\'autorisation fournie');
-    }
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    );
-
-    if (authError || !user) {
-      throw new Error('Utilisateur non authentifié');
-    }
-
     const { email, confirmation_link }: ConfirmationEmailRequest = await req.json();
 
     console.log('Envoi de l\'email de confirmation à:', email);
+    console.log('Lien de confirmation:', confirmation_link);
 
     // Render the React email template
     const html = await renderAsync(
