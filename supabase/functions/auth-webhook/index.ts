@@ -71,7 +71,7 @@ const handler = async (req: Request): Promise<Response> => {
 
         // Send the custom email
         const emailResponse = await resend.emails.send({
-          from: "UniSubHub <onboarding@resend.dev>",
+          from: "UniSubHub <noreply@unisubhub.fr>",
           to: [user.email],
           subject: "🎉 Confirmez votre compte UniSubHub",
           html,

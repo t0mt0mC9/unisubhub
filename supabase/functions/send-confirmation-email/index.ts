@@ -44,7 +44,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log('Resend API Key prefix:', resendApiKey?.substring(0, 7));
 
     const emailResponse = await resend.emails.send({
-      from: "UniSubHub <noreply@city-fix.fr>", // Utilise votre domaine vérifié
+      from: "UniSubHub <noreply@unisubhub.fr>",
       to: [email],
       subject: "🎉 Confirmez votre compte UniSubHub",
       html,
