@@ -71,6 +71,29 @@ const Auth = () => {
 
       if (error) throw error;
 
+      // ALWAYS send our custom UniSubHub confirmation email
+      if (data.user) {
+        try {
+          // Create a proper Supabase-style confirmation URL
+          const confirmationUrl = `https://rhmxohcqyyyglgmtnioc.supabase.co/auth/v1/verify?type=signup&redirect_to=${encodeURIComponent(window.location.origin)}&email=${encodeURIComponent(email)}`;
+          
+          const { error: emailError } = await supabase.functions.invoke('send-confirmation-email', {
+            body: {
+              email: email,
+              confirmation_link: confirmationUrl
+            }
+          });
+
+          if (emailError) {
+            console.error('❌ Error sending UniSubHub confirmation email:', emailError);
+          } else {
+            console.log('✅ Email de confirmation UniSubHub envoyé avec succès!');
+          }
+        } catch (emailError) {
+          console.error('❌ Exception sending custom confirmation email:', emailError);
+        }
+      }
+
       // If there's a referral code, record the referral after successful signup
       if (referralCode && data.user) {
         try {
