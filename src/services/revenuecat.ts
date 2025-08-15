@@ -161,8 +161,19 @@ class RevenueCatService {
     try {
       if (this.isNative) {
         const { Purchases } = await import('@revenuecat/purchases-capacitor');
+        
+        // Assurons-nous que le package a le bon format avec presentedOfferingContext
+        const packageWithContext = {
+          ...packageToPurchase,
+          presentedOfferingContext: {
+            offeringIdentifier: packageToPurchase.offeringIdentifier,
+            placementIdentifier: null,
+            targetingContext: null
+          }
+        };
+        
         const purchaseResult = await Purchases.purchasePackage({
-          aPackage: packageToPurchase,
+          aPackage: packageWithContext,
         });
         console.log('Purchase successful:', purchaseResult);
         return purchaseResult.customerInfo;
