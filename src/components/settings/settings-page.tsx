@@ -57,27 +57,32 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
 
   const handleDeleteAccount = async () => {
     try {
-      // First delete all user subscriptions
-      const { data: user } = await supabase.auth.getUser();
-      if (user.user) {
-        await supabase
-          .from('subscriptions')
-          .delete()
-          .eq('user_id', user.user.id);
+      // Call the delete account edge function for complete account deletion
+      const { data, error } = await supabase.functions.invoke('delete-user-account');
+
+      if (error) {
+        throw error;
       }
-      
-      toast({
-        title: "Compte supprimé",
-        description: "Votre compte et toutes vos données ont été supprimés",
-      });
-      
-      // Sign out
-      await supabase.auth.signOut();
-      onSignOut();
-    } catch (error) {
+
+      if (data.success) {
+        toast({
+          title: "Compte supprimé",
+          description: "Votre compte et toutes vos données ont été définitivement supprimés",
+        });
+        
+        // Clear all auth state and redirect
+        await supabase.auth.signOut({ scope: 'global' });
+        
+        // Force a complete page reload to clear all state
+        window.location.href = '/auth';
+      } else {
+        throw new Error(data.error || 'Unknown error occurred');
+      }
+    } catch (error: any) {
+      console.error('Delete account error:', error);
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de la suppression du compte",
+        description: error.message || "Une erreur est survenue lors de la suppression du compte",
         variant: "destructive",
       });
     }
