@@ -182,7 +182,7 @@ export type Database = {
     }
     Functions: {
       check_referral_rewards: {
-        Args: { user_id: string }
+        Args: { target_user_id: string }
         Returns: undefined
       }
       generate_referral_code: {
