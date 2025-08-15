@@ -96,9 +96,17 @@ export const MobileSubscriptionPlans = () => {
           description: "L'achat a été annulé par l'utilisateur",
         });
       } else {
+        // Log détaillé pour le débogage
+        console.error('Détails de l\'erreur d\'achat:', {
+          code: error.code,
+          message: error.message,
+          userInfo: error.userInfo,
+          stack: error.stack
+        });
+        
         toast({
           title: "Erreur d'achat",
-          description: "Une erreur est survenue lors de l'achat",
+          description: `Erreur: ${error.message || 'Une erreur inconnue est survenue'}. Code: ${error.code || 'N/A'}`,
           variant: "destructive",
         });
       }
