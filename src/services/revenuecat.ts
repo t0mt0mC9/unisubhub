@@ -49,7 +49,7 @@ const MOCK_OFFERINGS: MockOffering[] = [
         identifier: 'premium_monthly',
         packageType: 'MONTHLY',
         product: {
-          identifier: 'com.unisubhub.premium.monthly',
+          identifier: 'PM00',
           description: 'Accès complet aux fonctionnalités premium',
           title: 'Premium Mensuel',
           priceString: '4,99 €',
@@ -59,12 +59,12 @@ const MOCK_OFFERINGS: MockOffering[] = [
         offeringIdentifier: 'default',
       },
       {
-        identifier: 'premium_yearly',
-        packageType: 'YEARLY',
+        identifier: 'premium_lifetime',
+        packageType: 'LIFETIME',
         product: {
-          identifier: 'com.unisubhub.premium.yearly',
-          description: 'Accès complet aux fonctionnalités premium pour un an',
-          title: 'Premium Annuel',
+          identifier: 'PAV00',
+          description: 'Accès à vie aux fonctionnalités premium',
+          title: 'Premium à vie',
           priceString: '49,99 €',
           price: 49.99,
           currencyCode: 'EUR',

@@ -12,7 +12,7 @@
   "subscriptionGroups" : [
     {
       "displayName" : "Premium Subscriptions",
-      "identifier" : "21374164",
+      "identifier" : "21751580",
       "localizations" : [
 
       ],
@@ -37,35 +37,10 @@
               "locale" : "fr"
             }
           ],
-          "productID" : "com.unisubhub.premium.monthly",
+          "productID" : "PM00",
           "recurringSubscriptionPeriod" : "P1M",
           "referenceName" : "Premium Monthly",
-          "subscriptionGroupIdentifier" : "21374164",
-          "type" : "RecurringSubscription"
-        },
-        {
-          "adHocOffers" : [
-
-          ],
-          "codeOffers" : [
-
-          ],
-          "displayPrice" : "49.99",
-          "familyShareable" : false,
-          "groupNumber" : 1,
-          "identifier" : "premium_yearly",
-          "introductoryOffer" : null,
-          "localizations" : [
-            {
-              "description" : "Accès complet aux fonctionnalités premium pour un an",
-              "displayName" : "Premium Annuel",
-              "locale" : "fr"
-            }
-          ],
-          "productID" : "com.unisubhub.premium.yearly",
-          "recurringSubscriptionPeriod" : "P1Y",
-          "referenceName" : "Premium Yearly",
-          "subscriptionGroupIdentifier" : "21374164",
+          "subscriptionGroupIdentifier" : "21751580",
           "type" : "RecurringSubscription"
         }
       ]
