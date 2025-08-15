@@ -1,7 +1,7 @@
 {
   "products": [
     {
-      "identifier": "com.unisubhub.premium.monthly",
+      "identifier": "PM00",
       "type": "subscription",
       "price": "4.99",
       "currency": "EUR",
@@ -9,12 +9,12 @@
       "description": "Accès complet aux fonctionnalités premium"
     },
     {
-      "identifier": "com.unisubhub.premium.yearly", 
-      "type": "subscription",
+      "identifier": "PAV00", 
+      "type": "non_consumable",
       "price": "49.99",
       "currency": "EUR",
-      "title": "Premium Annuel",
-      "description": "Accès complet aux fonctionnalités premium pour un an"
+      "title": "Premium à vie",
+      "description": "Accès à vie aux fonctionnalités premium"
     }
   ]
 }

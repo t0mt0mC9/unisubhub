@@ -4,7 +4,21 @@
 
   ],
   "products" : [
-
+    {
+      "displayPrice" : "49.99",
+      "familyShareable" : false,
+      "identifier" : "premium_lifetime",
+      "localizations" : [
+        {
+          "description" : "Accès à vie aux fonctionnalités premium",
+          "displayName" : "Premium à vie",
+          "locale" : "fr"
+        }
+      ],
+      "productID" : "PAV00",
+      "referenceName" : "Premium Lifetime",
+      "type" : "NonConsumable"
+    }
   ],
   "settings" : {
 
