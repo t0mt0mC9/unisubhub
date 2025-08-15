@@ -46,7 +46,7 @@ const MOCK_OFFERINGS: MockOffering[] = [
     metadata: {},
     availablePackages: [
       {
-        identifier: 'premium_monthly',
+        identifier: '$rc_monthly',
         packageType: 'MONTHLY',
         product: {
           identifier: 'PM02',
@@ -59,7 +59,7 @@ const MOCK_OFFERINGS: MockOffering[] = [
         offeringIdentifier: 'default',
       },
       {
-        identifier: 'premium_lifetime',
+        identifier: '$rc_lifetime',
         packageType: 'LIFETIME',
         product: {
           identifier: 'PAV02',
@@ -287,10 +287,10 @@ class RevenueCatService {
       } else {
         return this.mockSubscriptionState ? {
           ...MOCK_CUSTOMER_INFO,
-          activeSubscriptions: ['premium_monthly'],
+          activeSubscriptions: ['$rc_monthly'],
           entitlements: {
             active: {
-              premium_monthly: {
+              '$rc_monthly': {
                 expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
               },
             },
