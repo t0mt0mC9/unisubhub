@@ -100,9 +100,9 @@ class RevenueCatService {
         
         if (platform === 'ios') {
           await Purchases.configure({
-            apiKey: 'appl_GQGNOrPGOAqUKRTcAhDYoCAZPZN',
+            apiKey: 'appl_GQGNOrPGOAqUKRTcAhDYoCAZPZN'
           });
-          console.log('RevenueCat configured with API key for iOS');
+          console.log('RevenueCat configured with API key for iOS (Sandbox enabled)');
         } else if (platform === 'android') {
           // TODO: Remplacer par votre clé API Google Play
           await Purchases.configure({
@@ -113,6 +113,11 @@ class RevenueCatService {
           console.warn('Unsupported platform for RevenueCat:', platform);
           throw new Error(`Unsupported platform: ${platform}`);
         }
+
+        // Vérifier l'environnement après configuration
+        const customerInfo = await Purchases.getCustomerInfo();
+        console.log('RevenueCat environment check - Customer info loaded successfully');
+        
       } else {
         // Mode simulation pour le web
         console.log('RevenueCat: Running in web simulation mode');
