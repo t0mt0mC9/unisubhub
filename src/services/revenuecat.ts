@@ -49,7 +49,7 @@ const MOCK_OFFERINGS: MockOffering[] = [
         identifier: 'premium_monthly',
         packageType: 'MONTHLY',
         product: {
-          identifier: 'PM00',
+          identifier: 'PM02',
           description: 'Accès complet aux fonctionnalités premium',
           title: 'Premium Mensuel',
           priceString: '4,99 €',
@@ -62,7 +62,7 @@ const MOCK_OFFERINGS: MockOffering[] = [
         identifier: 'premium_lifetime',
         packageType: 'LIFETIME',
         product: {
-          identifier: 'PAV00',
+          identifier: 'PAV02',
           description: 'Accès à vie aux fonctionnalités premium',
           title: 'Premium à vie',
           priceString: '49,99 €',
