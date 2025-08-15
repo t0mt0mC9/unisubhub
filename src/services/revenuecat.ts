@@ -205,18 +205,48 @@ class RevenueCatService {
       if (this.isNative) {
         const { Purchases } = await import('@revenuecat/purchases-capacitor');
         
+        console.log('=== PURCHASE DEBUG ===');
         console.log('Attempting to purchase package:', packageToPurchase);
         console.log('Package identifier:', packageToPurchase.identifier);
         console.log('Product identifier:', packageToPurchase.product?.identifier);
         console.log('Package type:', packageToPurchase.packageType);
+        console.log('Offering identifier:', packageToPurchase.offeringIdentifier);
+        
+        // Vérifier les offerings disponibles avant l'achat
+        const offerings = await Purchases.getOfferings();
+        console.log('Available offerings before purchase:', offerings);
+        console.log('Current offering packages:', offerings.current?.availablePackages);
         
         // Vérifier si le package a tous les champs requis
         if (!packageToPurchase.identifier) {
+          console.error('ERROR: Package identifier is missing');
           throw new Error('Package identifier is missing');
         }
         
         if (!packageToPurchase.product?.identifier) {
+          console.error('ERROR: Product identifier is missing');
           throw new Error('Product identifier is missing');
+        }
+        
+        // Chercher le package dans les offerings actuels
+        const currentOffering = offerings.current;
+        if (currentOffering && currentOffering.availablePackages) {
+          const foundPackage = currentOffering.availablePackages.find((pkg: any) => 
+            pkg.identifier === packageToPurchase.identifier || 
+            pkg.product.identifier === packageToPurchase.product.identifier
+          );
+          console.log('Package found in current offering:', foundPackage);
+          
+          if (!foundPackage) {
+            console.error('ERROR: Package not found in current offering!');
+            console.error('Looking for package identifier:', packageToPurchase.identifier);
+            console.error('Looking for product identifier:', packageToPurchase.product.identifier);
+            console.error('Available packages:');
+            currentOffering.availablePackages.forEach((pkg: any) => {
+              console.error(`- Package: ${pkg.identifier}, Product: ${pkg.product.identifier}`);
+            });
+            throw new Error(`Package ${packageToPurchase.identifier} not found in current offering`);
+          }
         }
         
         // Assurons-nous que le package a le bon format avec presentedOfferingContext
@@ -253,9 +283,10 @@ class RevenueCatService {
         };
       }
     } catch (error) {
+      console.error('=== PURCHASE ERROR ===');
       console.error('Purchase failed with error:', error);
-      console.error('Error code:', error.code);
-      console.error('Error message:', error.message);
+      console.error('Error code:', (error as any).code);
+      console.error('Error message:', (error as any).message);
       console.error('Error details:', JSON.stringify(error, null, 2));
       throw error;
     }
