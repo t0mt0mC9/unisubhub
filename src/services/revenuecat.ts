@@ -174,15 +174,31 @@ class RevenueCatService {
       if (this.isNative) {
         const { Purchases } = await import('@revenuecat/purchases-capacitor');
         
+        console.log('Attempting to purchase package:', packageToPurchase);
+        console.log('Package identifier:', packageToPurchase.identifier);
+        console.log('Product identifier:', packageToPurchase.product?.identifier);
+        console.log('Package type:', packageToPurchase.packageType);
+        
+        // Vérifier si le package a tous les champs requis
+        if (!packageToPurchase.identifier) {
+          throw new Error('Package identifier is missing');
+        }
+        
+        if (!packageToPurchase.product?.identifier) {
+          throw new Error('Product identifier is missing');
+        }
+        
         // Assurons-nous que le package a le bon format avec presentedOfferingContext
         const packageWithContext = {
           ...packageToPurchase,
           presentedOfferingContext: {
-            offeringIdentifier: packageToPurchase.offeringIdentifier,
+            offeringIdentifier: packageToPurchase.offeringIdentifier || 'default',
             placementIdentifier: null,
             targetingContext: null
           }
         };
+        
+        console.log('Package with context:', packageWithContext);
         
         const purchaseResult = await Purchases.purchasePackage({
           aPackage: packageWithContext,
@@ -206,7 +222,10 @@ class RevenueCatService {
         };
       }
     } catch (error) {
-      console.error('Purchase failed:', error);
+      console.error('Purchase failed with error:', error);
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
+      console.error('Error details:', JSON.stringify(error, null, 2));
       throw error;
     }
   }
