@@ -149,6 +149,39 @@ const Auth = () => {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast({
+        title: "Email requis",
+        description: "Veuillez saisir votre adresse email pour réinitialiser votre mot de passe.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth`,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Email envoyé",
+        description: "Un lien de réinitialisation a été envoyé à votre adresse email.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-secondary/20 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -202,6 +235,17 @@ const Auth = () => {
                       required
                       disabled={loading}
                     />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Button 
+                      type="button" 
+                      variant="link" 
+                      className="p-0 h-auto text-sm text-muted-foreground hover:text-primary"
+                      onClick={handleForgotPassword}
+                      disabled={loading}
+                    >
+                      Mot de passe oublié ?
+                    </Button>
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
