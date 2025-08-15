@@ -46,12 +46,12 @@ const MOCK_OFFERINGS: MockOffering[] = [
     metadata: {},
     availablePackages: [
       {
-        identifier: 'monthly_plan',
+        identifier: 'premium_monthly',
         packageType: 'MONTHLY',
         product: {
-          identifier: 'monthly_plan',
-          description: 'Analyses détaillées illimitées + Recommandations d\'optimisation + alertes personnalisées + support prioritaire',
-          title: 'Plan Mensuel',
+          identifier: 'com.unisubhub.premium.monthly',
+          description: 'Accès complet aux fonctionnalités premium',
+          title: 'Premium Mensuel',
           priceString: '4,99 €',
           price: 4.99,
           currencyCode: 'EUR',
@@ -59,14 +59,14 @@ const MOCK_OFFERINGS: MockOffering[] = [
         offeringIdentifier: 'default',
       },
       {
-        identifier: 'lifetime_plan',
-        packageType: 'LIFETIME',
+        identifier: 'premium_yearly',
+        packageType: 'YEARLY',
         product: {
-          identifier: 'lifetime_plan',
-          description: 'Avantages du plan mensuel + Abonnements illimités + Fonctionnalités premium',
-          title: 'Plan À Vie',
-          priceString: '89,99 €',
-          price: 89.99,
+          identifier: 'com.unisubhub.premium.yearly',
+          description: 'Accès complet aux fonctionnalités premium pour un an',
+          title: 'Premium Annuel',
+          priceString: '49,99 €',
+          price: 49.99,
           currencyCode: 'EUR',
         },
         offeringIdentifier: 'default',
