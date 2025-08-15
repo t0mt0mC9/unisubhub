@@ -38,6 +38,11 @@ const handler = async (req: Request): Promise<Response> => {
       })
     );
 
+    // Test if Resend API key is available
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+    console.log('Resend API Key available:', !!resendApiKey);
+    console.log('Resend API Key prefix:', resendApiKey?.substring(0, 7));
+
     const emailResponse = await resend.emails.send({
       from: "UniSubHub <onboarding@resend.dev>",
       to: [email],
@@ -46,6 +51,8 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     console.log("Email de confirmation envoyé avec succès:", emailResponse);
+    console.log("Email response status:", emailResponse.data?.id ? 'SUCCESS' : 'FAILED');
+    console.log("Email response error:", emailResponse.error);
 
     return new Response(JSON.stringify({ 
       success: true, 
