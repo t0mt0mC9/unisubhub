@@ -345,13 +345,6 @@ const Landing = () => {
                 Commencer gratuitement
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
-              <Button 
-                variant="outline" 
-                size="lg"
-                className="px-8 py-6 text-lg border-primary/20 hover:bg-primary/5"
-              >
-                En savoir plus
-              </Button>
             </div>
           </div>
         </div>
