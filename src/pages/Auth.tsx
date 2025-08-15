@@ -60,7 +60,7 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      // Sign up and let Supabase handle the basic flow
+      // Sign up with Supabase
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -70,31 +70,6 @@ const Auth = () => {
       });
 
       if (error) throw error;
-
-      // Always send our custom confirmation email in addition
-      // This ensures UniSubHub branding regardless of Supabase settings
-      if (data.user) {
-        try {
-          // Create a custom confirmation URL that looks professional
-          const baseUrl = window.location.origin;
-          const confirmationUrl = `${baseUrl}/auth?confirm=true&email=${encodeURIComponent(email)}&redirect=${encodeURIComponent(baseUrl)}`;
-          
-          const { error: emailError } = await supabase.functions.invoke('send-confirmation-email', {
-            body: {
-              email: email,
-              confirmation_link: confirmationUrl
-            }
-          });
-
-          if (emailError) {
-            console.error('Error sending custom confirmation email:', emailError);
-          } else {
-            console.log('Email de confirmation UniSubHub envoyé avec succès');
-          }
-        } catch (emailError) {
-          console.error('Error sending custom confirmation email:', emailError);
-        }
-      }
 
       // If there's a referral code, record the referral after successful signup
       if (referralCode && data.user) {
@@ -123,7 +98,7 @@ const Auth = () => {
 
       toast({
         title: "Inscription réussie",
-        description: "Un email de confirmation aux couleurs UniSubHub a été envoyé ! Vérifiez votre boîte mail (et vos spams).",
+        description: "Un email de confirmation aux couleurs UniSubHub vous a été envoyé automatiquement ! Vérifiez votre boîte mail (et vos spams).",
       });
     } catch (error: any) {
       toast({
