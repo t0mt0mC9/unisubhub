@@ -14,6 +14,7 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [referralCode, setReferralCode] = useState("");
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("signin");
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -69,7 +70,21 @@ const Auth = () => {
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        // Handle specific case where user already exists
+        if (error.message === "User already registered") {
+          toast({
+            title: "Compte existant détecté",
+            description: "Un compte existe déjà avec cet email. Essayez de vous connecter ou réinitialiser votre mot de passe.",
+            variant: "destructive",
+          });
+          // Automatically switch to sign in tab
+          setActiveTab("signin");
+          setLoading(false);
+          return;
+        }
+        throw error;
+      }
 
       // ALWAYS send our custom UniSubHub confirmation email
       if (data.user) {
@@ -150,7 +165,7 @@ const Auth = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="signin" className="w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="signin" className="flex items-center gap-2">
                   <LogIn className="h-4 w-4" />
