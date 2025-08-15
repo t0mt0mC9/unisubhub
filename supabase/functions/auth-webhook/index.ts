@@ -3,7 +3,7 @@ import { Resend } from "npm:resend@2.0.0";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
 import React from 'npm:react@18.3.1';
 import { renderAsync } from 'npm:@react-email/components@0.0.22';
-import { AccountConfirmationEmail } from '../send-confirmation-email/_templates/account-confirmation.tsx';
+import { AccountConfirmationEmail } from './_templates/account-confirmation.tsx';
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -71,7 +71,7 @@ const handler = async (req: Request): Promise<Response> => {
 
         // Send the custom email
         const emailResponse = await resend.emails.send({
-          from: "UniSubHub <noreply@unisubhub.com>",
+          from: "UniSubHub <onboarding@resend.dev>",
           to: [user.email],
           subject: "🎉 Confirmez votre compte UniSubHub",
           html,
