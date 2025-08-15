@@ -147,50 +147,67 @@ class RevenueCatService {
       if (this.isNative) {
         const { Purchases } = await import('@revenuecat/purchases-capacitor');
         const offerings = await Purchases.getOfferings();
-        console.log('RevenueCat offerings:', offerings);
+        console.log('=== OFFERINGS DEBUG ===');
+        console.log('RevenueCat offerings:', JSON.stringify(offerings, null, 2));
         console.log('Current offering:', offerings.current);
         console.log('All offerings:', offerings.all);
         
-        // Log pour diagnostiquer les identifiants de produits
-        if (offerings.current && offerings.current.availablePackages) {
-          console.log('Current offering packages:');
-          offerings.current.availablePackages.forEach((pkg: any) => {
-            console.log(`- Package: ${pkg.identifier}, Product ID: ${pkg.product.identifier}, Type: ${pkg.packageType}`);
-          });
-        }
-        
+        // Log détaillé des offerings disponibles
         if (offerings.all) {
-          console.log('All offerings keys:', Object.keys(offerings.all));
+          console.log('Available offerings keys:', Object.keys(offerings.all));
           Object.entries(offerings.all).forEach(([key, offering]: [string, any]) => {
-            console.log(`Offering "${key}" has ${offering.availablePackages?.length || 0} packages`);
+            console.log(`=== Offering "${key}" ===`);
+            console.log(`- Has ${offering.availablePackages?.length || 0} packages`);
             if (offering.availablePackages) {
               offering.availablePackages.forEach((pkg: any) => {
-                console.log(`  - ${pkg.identifier}: ${pkg.product.identifier}`);
+                console.log(`  Package: ${pkg.identifier}`);
+                console.log(`    Product ID: ${pkg.product.identifier}`);
+                console.log(`    Product Title: ${pkg.product.title}`);
+                console.log(`    Package Type: ${pkg.packageType}`);
+                console.log(`    Price: ${pkg.product.priceString}`);
               });
             }
           });
         }
         
-        // Si l'offering s'appelle "Default" dans RevenueCat, essayons de le récupérer
-        if (!offerings.current && offerings.all) {
-          console.log('No current offering, checking for Default offering...');
-          const defaultOffering = offerings.all['Default'] || offerings.all['default'];
-          if (defaultOffering) {
-            console.log('Found Default offering:', defaultOffering);
-            return defaultOffering;
+        // Essayer de trouver un offering par priorité
+        let targetOffering = null;
+        
+        if (offerings.current) {
+          console.log('Using current offering');
+          targetOffering = offerings.current;
+        } else if (offerings.all) {
+          // Essayer différents noms d'offering
+          const possibleNames = ['default', 'Default', 'PRIMARY', 'MAIN'];
+          for (const name of possibleNames) {
+            if (offerings.all[name]) {
+              console.log(`Found offering with name: ${name}`);
+              targetOffering = offerings.all[name];
+              break;
+            }
+          }
+          
+          // Si aucun offering nommé trouvé, prendre le premier disponible
+          if (!targetOffering) {
+            const firstOfferingKey = Object.keys(offerings.all)[0];
+            if (firstOfferingKey) {
+              console.log(`Using first available offering: ${firstOfferingKey}`);
+              targetOffering = offerings.all[firstOfferingKey];
+            }
           }
         }
-        if (offerings.current && offerings.current.availablePackages) {
-          console.log('Available packages:', offerings.current.availablePackages);
-          offerings.current.availablePackages.forEach((pkg: any) => {
-            console.log('Package details:', {
-              identifier: pkg.identifier,
-              productId: pkg.product.identifier,
-              packageType: pkg.packageType
-            });
+        
+        if (targetOffering) {
+          console.log('Selected offering:', targetOffering.identifier);
+          console.log('Available packages in selected offering:');
+          targetOffering.availablePackages?.forEach((pkg: any) => {
+            console.log(`- ${pkg.identifier} (${pkg.product.identifier})`);
           });
+        } else {
+          console.error('No offering found!');
         }
-        return offerings.current || null;
+        
+        return targetOffering;
       } else {
         return MOCK_OFFERINGS[0] || null;
       }
