@@ -151,6 +151,26 @@ class RevenueCatService {
         console.log('Current offering:', offerings.current);
         console.log('All offerings:', offerings.all);
         
+        // Log pour diagnostiquer les identifiants de produits
+        if (offerings.current && offerings.current.availablePackages) {
+          console.log('Current offering packages:');
+          offerings.current.availablePackages.forEach((pkg: any) => {
+            console.log(`- Package: ${pkg.identifier}, Product ID: ${pkg.product.identifier}, Type: ${pkg.packageType}`);
+          });
+        }
+        
+        if (offerings.all) {
+          console.log('All offerings keys:', Object.keys(offerings.all));
+          Object.entries(offerings.all).forEach(([key, offering]: [string, any]) => {
+            console.log(`Offering "${key}" has ${offering.availablePackages?.length || 0} packages`);
+            if (offering.availablePackages) {
+              offering.availablePackages.forEach((pkg: any) => {
+                console.log(`  - ${pkg.identifier}: ${pkg.product.identifier}`);
+              });
+            }
+          });
+        }
+        
         // Si l'offering s'appelle "Default" dans RevenueCat, essayons de le récupérer
         if (!offerings.current && offerings.all) {
           console.log('No current offering, checking for Default offering...');
