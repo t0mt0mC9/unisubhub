@@ -149,6 +149,17 @@ class RevenueCatService {
         const offerings = await Purchases.getOfferings();
         console.log('RevenueCat offerings:', offerings);
         console.log('Current offering:', offerings.current);
+        console.log('All offerings:', offerings.all);
+        
+        // Si l'offering s'appelle "Default" dans RevenueCat, essayons de le récupérer
+        if (!offerings.current && offerings.all) {
+          console.log('No current offering, checking for Default offering...');
+          const defaultOffering = offerings.all['Default'] || offerings.all['default'];
+          if (defaultOffering) {
+            console.log('Found Default offering:', defaultOffering);
+            return defaultOffering;
+          }
+        }
         if (offerings.current && offerings.current.availablePackages) {
           console.log('Available packages:', offerings.current.availablePackages);
           offerings.current.availablePackages.forEach((pkg: any) => {
