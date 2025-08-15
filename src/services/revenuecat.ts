@@ -147,6 +147,18 @@ class RevenueCatService {
       if (this.isNative) {
         const { Purchases } = await import('@revenuecat/purchases-capacitor');
         const offerings = await Purchases.getOfferings();
+        console.log('RevenueCat offerings:', offerings);
+        console.log('Current offering:', offerings.current);
+        if (offerings.current && offerings.current.availablePackages) {
+          console.log('Available packages:', offerings.current.availablePackages);
+          offerings.current.availablePackages.forEach((pkg: any) => {
+            console.log('Package details:', {
+              identifier: pkg.identifier,
+              productId: pkg.product.identifier,
+              packageType: pkg.packageType
+            });
+          });
+        }
         return offerings.current || null;
       } else {
         return MOCK_OFFERINGS[0] || null;
