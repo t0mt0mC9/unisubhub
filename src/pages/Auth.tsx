@@ -70,6 +70,29 @@ const Auth = () => {
 
       if (error) throw error;
 
+      // Send custom confirmation email with UniSubHub branding
+      if (data.user && !data.user.email_confirmed_at) {
+        try {
+          // Generate confirmation link
+          const confirmationLink = `${window.location.origin}/auth?token_hash=${data.user.id}&type=signup&redirect_to=${window.location.origin}`;
+          
+          const { error: emailError } = await supabase.functions.invoke('send-confirmation-email', {
+            body: {
+              email: data.user.email,
+              confirmation_link: confirmationLink
+            }
+          });
+
+          if (emailError) {
+            console.error('Error sending confirmation email:', emailError);
+          } else {
+            console.log('Email de confirmation personnalisé envoyé avec succès');
+          }
+        } catch (emailError) {
+          console.error('Error sending custom confirmation email:', emailError);
+        }
+      }
+
       // If there's a referral code, record the referral after successful signup
       if (referralCode && data.user) {
         try {
@@ -97,7 +120,7 @@ const Auth = () => {
 
       toast({
         title: "Inscription réussie",
-        description: "Vérifiez votre email pour confirmer votre compte",
+        description: "Un email de confirmation aux couleurs UniSubHub a été envoyé ! Vérifiez votre boîte mail.",
       });
     } catch (error: any) {
       toast({
