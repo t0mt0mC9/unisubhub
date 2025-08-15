@@ -136,7 +136,7 @@ export const MobileSubscriptionPlans = () => {
 
   const getPlanIcon = (productId: string) => {
     if (productId.includes('monthly')) return <Star className="h-6 w-6" />;
-    if (productId.includes('lifetime')) return <Crown className="h-6 w-6" />;
+    if (productId.includes('yearly')) return <Crown className="h-6 w-6" />;
     return <Star className="h-6 w-6" />;
   };
 
@@ -149,7 +149,7 @@ export const MobileSubscriptionPlans = () => {
         "Support prioritaire"
       ];
     }
-    if (productId.includes('lifetime')) {
+    if (productId.includes('yearly')) {
       return [
         "Analyses détaillées illimitées",
         "Recommandations d'optimisation", 
@@ -157,14 +157,14 @@ export const MobileSubscriptionPlans = () => {
         "Support prioritaire",
         "Abonnements illimités",
         "Fonctionnalités premium",
-        "Paiement unique"
+        "Économies sur l'année"
       ];
     }
     return ["Fonctionnalités de base"];
   };
 
   const isPopularPlan = (productId: string) => {
-    return productId.includes('lifetime');
+    return productId.includes('yearly');
   };
 
   if (loading) {
