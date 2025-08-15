@@ -40,8 +40,8 @@ export const AccountConfirmationEmail = ({
         </Text>
         
         <Text style={text}>
-          Vous êtes à un clic de prendre le contrôle total de vos abonnements. 
-          Confirmez votre adresse email <strong>{user_email}</strong> pour activer votre compte.
+          Votre compte <strong>{user_email}</strong> a été créé avec succès ! 
+          Vous pouvez maintenant profiter de toutes nos fonctionnalités.
         </Text>
 
         <Section style={benefitsSection}>
@@ -59,7 +59,7 @@ export const AccountConfirmationEmail = ({
             href={confirmation_link}
             style={button}
           >
-            🚀 Confirmer mon compte
+            🚀 Accéder à mon compte
           </Button>
         </Section>
 
@@ -71,13 +71,13 @@ export const AccountConfirmationEmail = ({
         <Hr style={hr} />
 
         <Text style={text}>
-          <strong>Pourquoi confirmer votre email ?</strong>
+          <strong>Votre compte est maintenant actif !</strong>
         </Text>
         <Text style={smallText}>
-          • Pour sécuriser votre compte<br/>
-          • Pour recevoir des notifications importantes<br/>
-          • Pour récupérer votre mot de passe si nécessaire<br/>
-          • Pour profiter pleinement de toutes les fonctionnalités
+          • Votre compte est immédiatement utilisable<br/>
+          • Toutes les fonctionnalités sont déjà disponibles<br/>
+          • Vous recevrez des notifications importantes<br/>
+          • Commencez dès maintenant à gérer vos abonnements
         </Text>
 
         <Text style={footer}>
