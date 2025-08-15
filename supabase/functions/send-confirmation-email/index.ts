@@ -39,7 +39,7 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     const emailResponse = await resend.emails.send({
-      from: "UniSubHub <noreply@unisubhub.com>",
+      from: "UniSubHub <onboarding@resend.dev>",
       to: [email],
       subject: "🎉 Confirmez votre compte UniSubHub",
       html,
