@@ -60,6 +60,7 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      // Sign up and let Supabase handle the basic flow
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -70,23 +71,25 @@ const Auth = () => {
 
       if (error) throw error;
 
-      // Send custom confirmation email with UniSubHub branding
-      if (data.user && !data.user.email_confirmed_at) {
+      // Always send our custom confirmation email in addition
+      // This ensures UniSubHub branding regardless of Supabase settings
+      if (data.user) {
         try {
-          // Generate confirmation link
-          const confirmationLink = `${window.location.origin}/auth?token_hash=${data.user.id}&type=signup&redirect_to=${window.location.origin}`;
+          // Create a custom confirmation URL that looks professional
+          const baseUrl = window.location.origin;
+          const confirmationUrl = `${baseUrl}/auth?confirm=true&email=${encodeURIComponent(email)}&redirect=${encodeURIComponent(baseUrl)}`;
           
           const { error: emailError } = await supabase.functions.invoke('send-confirmation-email', {
             body: {
-              email: data.user.email,
-              confirmation_link: confirmationLink
+              email: email,
+              confirmation_link: confirmationUrl
             }
           });
 
           if (emailError) {
-            console.error('Error sending confirmation email:', emailError);
+            console.error('Error sending custom confirmation email:', emailError);
           } else {
-            console.log('Email de confirmation personnalisé envoyé avec succès');
+            console.log('Email de confirmation UniSubHub envoyé avec succès');
           }
         } catch (emailError) {
           console.error('Error sending custom confirmation email:', emailError);
@@ -120,7 +123,7 @@ const Auth = () => {
 
       toast({
         title: "Inscription réussie",
-        description: "Un email de confirmation aux couleurs UniSubHub a été envoyé ! Vérifiez votre boîte mail.",
+        description: "Un email de confirmation aux couleurs UniSubHub a été envoyé ! Vérifiez votre boîte mail (et vos spams).",
       });
     } catch (error: any) {
       toast({
