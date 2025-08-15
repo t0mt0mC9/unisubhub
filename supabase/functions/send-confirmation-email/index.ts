@@ -44,21 +44,10 @@ const handler = async (req: Request): Promise<Response> => {
     console.log('Resend API Key prefix:', resendApiKey?.substring(0, 7));
 
     const emailResponse = await resend.emails.send({
-      from: "UniSubHub <onboarding@resend.dev>",
-      to: ["tom.lifert@gmail.com"], // Utilise l'email vérifié pour les tests
-      subject: `🎉 Test - Email de confirmation pour ${email}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2>🧪 Email de Test UniSubHub</h2>
-          <p><strong>Cet email aurait dû être envoyé à :</strong> ${email}</p>
-          <hr>
-          ${html}
-          <hr>
-          <p style="color: #666; font-size: 12px;">
-            <em>Note: Cet email est envoyé à votre adresse de test car aucun domaine n'est vérifié dans Resend.</em>
-          </p>
-        </div>
-      `,
+      from: "UniSubHub <noreply@city-fix.fr>", // Utilise votre domaine vérifié
+      to: [email],
+      subject: "🎉 Confirmez votre compte UniSubHub",
+      html,
     });
 
     console.log("Email de confirmation envoyé avec succès:", emailResponse);
