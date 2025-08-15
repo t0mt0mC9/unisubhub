@@ -87,7 +87,7 @@ const Auth = () => {
       }
 
       // Send our custom UniSubHub confirmation email
-      if (data.user && !data.user.email_confirmed_at) {
+      if (data.user) {
         try {
           // Use a proper confirmation URL structure that Supabase expects
           const confirmationUrl = `https://rhmxohcqyyyglgmtnioc.supabase.co/auth/v1/verify?type=signup&redirect_to=${encodeURIComponent(window.location.origin)}&email=${encodeURIComponent(email)}`;
