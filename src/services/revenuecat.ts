@@ -96,27 +96,47 @@ class RevenueCatService {
         await Purchases.setLogLevel({ level: LOG_LEVEL.DEBUG });
         
         const platform = Capacitor.getPlatform();
-        console.log('Configuring RevenueCat for platform:', platform);
+        console.log('=== REVENUECAT INITIALIZATION DEBUG ===');
+        console.log('Platform detected:', platform);
+        console.log('Native platform:', this.isNative);
         
         if (platform === 'ios') {
+          console.log('Configuring RevenueCat for iOS with Sandbox...');
           await Purchases.configure({
             apiKey: 'appl_GQGNOrPGOAqUKRTcAhDYoCAZPZN'
           });
-          console.log('RevenueCat configured with API key for iOS (Sandbox enabled)');
+          console.log('✅ RevenueCat configured for iOS');
+          
+          // Test immédiat de l'API
+          try {
+            console.log('Testing RevenueCat API...');
+            const customerInfo = await Purchases.getCustomerInfo();
+            console.log('✅ Customer info retrieved successfully:', customerInfo);
+            
+            // Test des offerings
+            console.log('Testing offerings retrieval...');
+            const offerings = await Purchases.getOfferings();
+            console.log('✅ Offerings retrieved:', offerings);
+            console.log('Available offerings count:', Object.keys(offerings.all || {}).length);
+            
+          } catch (testError) {
+            console.error('❌ RevenueCat API test failed:', testError);
+            console.error('Error code:', (testError as any).code);
+            console.error('Error message:', (testError as any).message);
+            console.error('Error userInfo:', (testError as any).userInfo);
+            throw testError;
+          }
+          
         } else if (platform === 'android') {
-          // TODO: Remplacer par votre clé API Google Play
+          console.log('Configuring RevenueCat for Android...');
           await Purchases.configure({
             apiKey: 'goog_YOUR_GOOGLE_API_KEY_HERE',
           });
-          console.log('RevenueCat configured with API key for Android');
+          console.log('✅ RevenueCat configured for Android');
         } else {
-          console.warn('Unsupported platform for RevenueCat:', platform);
+          console.warn('❌ Unsupported platform for RevenueCat:', platform);
           throw new Error(`Unsupported platform: ${platform}`);
         }
-
-        // Vérifier l'environnement après configuration
-        const customerInfo = await Purchases.getCustomerInfo();
-        console.log('RevenueCat environment check - Customer info loaded successfully');
         
       } else {
         // Mode simulation pour le web
@@ -124,10 +144,13 @@ class RevenueCatService {
       }
 
       this.initialized = true;
-      console.log('RevenueCat initialized successfully');
+      console.log('✅ RevenueCat initialization completed successfully');
     } catch (error) {
-      console.error('Failed to initialize RevenueCat:', error);
+      console.error('❌ Failed to initialize RevenueCat:', error);
+      console.error('Error code:', (error as any).code);
+      console.error('Error message:', (error as any).message);
       console.error('Error details:', JSON.stringify(error, null, 2));
+      this.initialized = false;
       throw error;
     }
   }
