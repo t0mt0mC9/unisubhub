@@ -15,7 +15,7 @@
           "locale" : "fr"
         }
       ],
-      "productID" : "PAV02",
+      "productID" : "com.unisubhub.PAV02",
       "referenceName" : "Premium Lifetime",
       "type" : "NonConsumable"
     }
@@ -51,7 +51,7 @@
               "locale" : "fr"
             }
           ],
-          "productID" : "PM02",
+          "productID" : "com.unisubhub.PM02",
           "recurringSubscriptionPeriod" : "P1M",
           "referenceName" : "Premium Monthly",
           "subscriptionGroupIdentifier" : "21751580",

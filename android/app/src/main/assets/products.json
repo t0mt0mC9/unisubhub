@@ -1,7 +1,7 @@
 {
   "products": [
     {
-      "identifier": "PM02",
+      "identifier": "com.unisubhub.PM02",
       "type": "subscription",
       "price": "4.99",
       "currency": "EUR",
@@ -9,7 +9,7 @@
       "description": "Accès complet aux fonctionnalités premium"
     },
     {
-      "identifier": "PAV02", 
+      "identifier": "com.unisubhub.PAV02", 
       "type": "non_consumable",
       "price": "49.99",
       "currency": "EUR",

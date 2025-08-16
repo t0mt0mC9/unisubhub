@@ -49,7 +49,7 @@ const MOCK_OFFERINGS: MockOffering[] = [
         identifier: '$rc_monthly',
         packageType: 'MONTHLY',
         product: {
-          identifier: 'PM02',
+          identifier: 'com.unisubhub.PM02',
           description: 'Accès complet aux fonctionnalités premium',
           title: 'Premium Mensuel',
           priceString: '4,99 €',
@@ -62,7 +62,7 @@ const MOCK_OFFERINGS: MockOffering[] = [
         identifier: '$rc_lifetime',
         packageType: 'LIFETIME',
         product: {
-          identifier: 'PAV02',
+          identifier: 'com.unisubhub.PAV02',
           description: 'Accès à vie aux fonctionnalités premium',
           title: 'Premium à vie',
           priceString: '89,99 €',

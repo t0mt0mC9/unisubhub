@@ -135,13 +135,13 @@ export const MobileSubscriptionPlans = () => {
   };
 
   const getPlanIcon = (productId: string) => {
-    if (productId.includes('monthly') || productId === 'PM02') return <Star className="h-6 w-6" />;
-    if (productId.includes('lifetime') || productId === 'PAV02') return <Crown className="h-6 w-6" />;
+    if (productId.includes('monthly') || productId === 'com.unisubhub.PM02') return <Star className="h-6 w-6" />;
+    if (productId.includes('lifetime') || productId === 'com.unisubhub.PAV02') return <Crown className="h-6 w-6" />;
     return <Star className="h-6 w-6" />;
   };
 
   const getPlanFeatures = (productId: string) => {
-    if (productId.includes('monthly') || productId === 'PM02') {
+    if (productId.includes('monthly') || productId === 'com.unisubhub.PM02') {
       return [
         "Analyses détaillées illimitées",
         "Recommandations d'optimisation",
@@ -149,7 +149,7 @@ export const MobileSubscriptionPlans = () => {
         "Support prioritaire"
       ];
     }
-    if (productId.includes('lifetime') || productId === 'PAV02') {
+    if (productId.includes('lifetime') || productId === 'com.unisubhub.PAV02') {
       return [
         "Analyses détaillées illimitées",
         "Recommandations d'optimisation", 
@@ -164,7 +164,7 @@ export const MobileSubscriptionPlans = () => {
   };
 
   const isPopularPlan = (productId: string) => {
-    return productId.includes('lifetime') || productId === 'PAV02';
+    return productId.includes('lifetime') || productId === 'com.unisubhub.PAV02';
   };
 
   if (loading) {
