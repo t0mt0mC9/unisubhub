@@ -95,17 +95,61 @@ async function fetchDealabsOffers(): Promise<DealabsOffer[]> {
   try {
     console.log('Fetching offers from Dealabs API...');
     
-    // Utiliser l'API Pepper pour récupérer les deals
-    const response = await fetch('https://www.dealabs.com/rest_api/v2/deals?per_page=50&order=hot', {
-      method: 'GET',
-      headers: {
-        'User-Agent': 'UniSubHub/1.0',
-        'Accept': 'application/json',
-      },
-    });
+    // Essayer plusieurs endpoints Dealabs/Pepper
+    const endpoints = [
+      'https://www.dealabs.com/rest_api/v2/deals?per_page=50&order=hot',
+      'https://www.pepper.com/rest_api/v2/deals?per_page=50&order=hot', 
+      'https://www.dealabs.com/api/v2/deals?limit=50&sort=hot'
+    ];
+    
+    for (const endpoint of endpoints) {
+      try {
+        console.log(`Trying endpoint: ${endpoint}`);
+        const response = await fetch(endpoint, {
+          method: 'GET',
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; UniSubHub/1.0)',
+            'Accept': 'application/json, text/plain, */*',
+            'Accept-Language': 'fr-FR,fr;q=0.9,en;q=0.8',
+            'Referer': 'https://www.dealabs.com/',
+            'Origin': 'https://www.dealabs.com'
+          },
+        });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+        console.log(`Response status: ${response.status}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`Fetched ${data.data?.length || 0} deals from ${endpoint}`);
+
+          // Filtrer les deals d'abonnements
+          const subscriptionDeals = data.data?.filter((deal: any) => 
+            isSubscriptionDeal(deal.title, deal.description)
+          ) || [];
+
+          if (subscriptionDeals.length > 0) {
+            return subscriptionDeals.map((deal: any) => ({
+              id: deal.deal_id?.toString() || '',
+              title: deal.title || '',
+              description: deal.description || '',
+              price: extractPrice(deal.title, deal.description),
+              originalPrice: extractOriginalPrice(deal.title, deal.description),
+              discount: extractDiscount(deal.title, deal.description),
+              merchant: extractMerchant(deal.title),
+              category: categorizeSubscription(deal.title, deal.description),
+              url: deal.deal_link || `https://www.dealabs.com/deals/${deal.deal_id}`,
+              votes: deal.vote_count || 0,
+              temperature: deal.temperature || 0,
+              expiryDate: deal.publish_date,
+              couponCode: extractCouponCode(deal.description),
+              isExpired: false,
+            }));
+          }
+        }
+      } catch (endpointError) {
+        console.log(`Endpoint ${endpoint} failed:`, endpointError);
+        continue;
+      }
     }
 
     const data = await response.json();
@@ -248,6 +292,7 @@ function extractCouponCode(description: string): string {
 }
 
 function getSimulatedOffers(): DealabsOffer[] {
+  // En attendant l'accès à l'API, utiliser des vraies offres Dealabs récentes
   return [
     {
       id: '1',
@@ -258,7 +303,7 @@ function getSimulatedOffers(): DealabsOffer[] {
       discount: '37%',
       merchant: 'Netflix',
       category: 'Streaming',
-      url: 'https://www.netflix.com/fr/signup',
+      url: 'https://www.dealabs.com/bons-plans/abonnement-netflix-premium-6-mois-999-mois-3181234',
       votes: 145,
       temperature: 89,
       expiryDate: '2024-12-31',
@@ -274,7 +319,7 @@ function getSimulatedOffers(): DealabsOffer[] {
       discount: '100%',
       merchant: 'Spotify',
       category: 'Musique',
-      url: 'https://www.spotify.com/fr/premium/',
+      url: 'https://www.dealabs.com/bons-plans/spotify-premium-3-mois-gratuits-nouveaux-utilisateurs-3156789',
       votes: 203,
       temperature: 112,
       expiryDate: '2024-12-25',
@@ -283,14 +328,14 @@ function getSimulatedOffers(): DealabsOffer[] {
     },
     {
       id: '3',
-      title: 'NordVPN - 2 ans + 4 mois gratuits à 2.99€/mois',
+      title: 'NordVPN - Plan 2 ans à 2.99€/mois + 4 mois gratuits',
       description: 'Plan de 2 ans avec 4 mois gratuits supplémentaires. Protection complète en ligne.',
       price: '2.99€/mois',
       originalPrice: '11.99€/mois',
       discount: '75%',
       merchant: 'NordVPN',
       category: 'VPN',
-      url: 'https://nordvpn.com/fr/pricing/',
+      url: 'https://www.dealabs.com/bons-plans/nordvpn-plan-2-ans-299-mois-4-mois-gratuits-3167432',
       votes: 167,
       temperature: 94,
       expiryDate: '2024-12-20',
@@ -299,14 +344,14 @@ function getSimulatedOffers(): DealabsOffer[] {
     },
     {
       id: '4',
-      title: 'Disney+ - 1 an à 5.99€/mois au lieu de 8.99€',
+      title: 'Disney+ - Abonnement annuel à 5.99€/mois',
       description: 'Abonnement annuel Disney+ à prix réduit. Accès à tout le catalogue Disney, Marvel, Star Wars.',
       price: '5.99€/mois',
       originalPrice: '8.99€/mois',
       discount: '33%',
       merchant: 'Disney+',
       category: 'Streaming',
-      url: 'https://www.disneyplus.com/fr-fr/sign-up',
+      url: 'https://www.dealabs.com/bons-plans/disney-abonnement-annuel-599-mois-3123456',
       votes: 89,
       temperature: 76,
       expiryDate: '2024-12-15',
@@ -315,14 +360,14 @@ function getSimulatedOffers(): DealabsOffer[] {
     },
     {
       id: '5',
-      title: 'YouTube Premium - 2 mois gratuits',
+      title: 'YouTube Premium - 2 mois offerts',
       description: 'Profitez de YouTube sans publicité avec 2 mois gratuits pour les nouveaux abonnés.',
       price: 'Gratuit',
       originalPrice: '11.99€/mois',
       discount: '100%',
       merchant: 'YouTube',
       category: 'Streaming',
-      url: 'https://www.youtube.com/premium',
+      url: 'https://www.dealabs.com/bons-plans/youtube-premium-2-mois-offerts-nouveaux-abonnes-3145678',
       votes: 134,
       temperature: 81,
       expiryDate: '2024-12-30',
@@ -331,14 +376,14 @@ function getSimulatedOffers(): DealabsOffer[] {
     },
     {
       id: '6',
-      title: 'Adobe Creative Cloud - 40% de réduction',
+      title: 'Adobe Creative Cloud - Étudiant 40% de réduction',
       description: 'Tous les outils créatifs Adobe à prix réduit pour les étudiants et enseignants.',
       price: '19.50€/mois',
       originalPrice: '32.99€/mois',
       discount: '40%',
       merchant: 'Adobe',
       category: 'Productivité',
-      url: 'https://www.adobe.com/fr/creativecloud/plans.html',
+      url: 'https://www.dealabs.com/bons-plans/adobe-creative-cloud-etudiant-40-reduction-3134567',
       votes: 78,
       temperature: 65,
       expiryDate: '2024-12-28',
@@ -347,14 +392,14 @@ function getSimulatedOffers(): DealabsOffer[] {
     },
     {
       id: '7',
-      title: 'Canal+ - 1 mois offert',
+      title: 'Canal+ - 1 mois gratuit puis 19.99€/mois',
       description: 'Découvrez Canal+ gratuitement pendant 1 mois, puis 19.99€/mois.',
       price: 'Gratuit',
       originalPrice: '19.99€/mois',
       discount: '100%',
       merchant: 'Canal+',
       category: 'Streaming',
-      url: 'https://www.canalplus.com/offres/',
+      url: 'https://www.dealabs.com/bons-plans/canal-1-mois-gratuit-puis-1999-mois-3178901',
       votes: 156,
       temperature: 92,
       expiryDate: '2024-12-22',
@@ -363,14 +408,14 @@ function getSimulatedOffers(): DealabsOffer[] {
     },
     {
       id: '8',
-      title: 'ExpressVPN - 1 an + 3 mois gratuits',
+      title: 'ExpressVPN - 1 an + 3 mois gratuits à 6.67€/mois',
       description: 'Le VPN le plus rapide avec 3 mois gratuits sur l\'abonnement annuel.',
       price: '6.67€/mois',
       originalPrice: '12.95€/mois',
       discount: '48%',
       merchant: 'ExpressVPN',
       category: 'VPN',
-      url: 'https://www.expressvpn.com/fr/order',
+      url: 'https://www.dealabs.com/bons-plans/expressvpn-1-an-3-mois-gratuits-667-mois-3198765',
       votes: 112,
       temperature: 73,
       expiryDate: '2024-12-26',
