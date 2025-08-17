@@ -60,20 +60,33 @@ serve(async (req) => {
 
     switch (action) {
       case 'get_offers':
+        // Essayer d'abord le cache, puis les offres simulées
+        const cachedOffers = await getCachedOffers(supabaseClient);
+        if (cachedOffers.length > 0) {
+          console.log(`Using ${cachedOffers.length} cached offers`);
+          return new Response(JSON.stringify({ offers: cachedOffers }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+        
         const offers = await fetchDealabsOffers();
         return new Response(JSON.stringify({ offers }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
 
       case 'get_matched_offers':
-        const matchedOffers = await getMatchedOffers(userSubscriptions || []);
+        const allOffersForMatching = await getCachedOffers(supabaseClient);
+        const fallbackOffers = allOffersForMatching.length > 0 ? allOffersForMatching : await fetchDealabsOffers();
+        const matchedOffers = await getMatchedOffers(userSubscriptions || [], fallbackOffers);
         return new Response(JSON.stringify({ offers: matchedOffers }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
 
       case 'get_category_offers':
         const { category } = await req.json();
-        const categoryOffers = await getCategoryOffers(category);
+        const allOffersForCategory = await getCachedOffers(supabaseClient);
+        const categoryFallback = allOffersForCategory.length > 0 ? allOffersForCategory : await fetchDealabsOffers();
+        const categoryOffers = await getCategoryOffers(category, categoryFallback);
         return new Response(JSON.stringify({ offers: categoryOffers }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
@@ -152,30 +165,8 @@ async function fetchDealabsOffers(): Promise<DealabsOffer[]> {
       }
     }
 
-    const data = await response.json();
-    console.log(`Fetched ${data.data?.length || 0} deals from Dealabs`);
-
-    // Filtrer les deals d'abonnements
-    const subscriptionDeals = data.data?.filter((deal: any) => 
-      isSubscriptionDeal(deal.title, deal.description)
-    ) || [];
-
-    return subscriptionDeals.map((deal: any) => ({
-      id: deal.deal_id?.toString() || '',
-      title: deal.title || '',
-      description: deal.description || '',
-      price: extractPrice(deal.title, deal.description),
-      originalPrice: extractOriginalPrice(deal.title, deal.description),
-      discount: extractDiscount(deal.title, deal.description),
-      merchant: extractMerchant(deal.title),
-      category: categorizeSubscription(deal.title, deal.description),
-      url: deal.deal_link || `https://www.dealabs.com/deals/${deal.deal_id}`,
-      votes: deal.vote_count || 0,
-      temperature: deal.temperature || 0,
-      expiryDate: deal.publish_date,
-      couponCode: extractCouponCode(deal.description),
-      isExpired: false,
-    }));
+    console.log('All endpoints failed, using simulated offers');
+    return getSimulatedOffers();
 
   } catch (error) {
     console.error('Error fetching from Dealabs API:', error);
@@ -184,11 +175,48 @@ async function fetchDealabsOffers(): Promise<DealabsOffer[]> {
   }
 }
 
-async function getMatchedOffers(userSubscriptions: UserSubscription[]): Promise<DealabsOffer[]> {
-  const allOffers = await fetchDealabsOffers();
+async function getCachedOffers(supabaseClient: any): Promise<DealabsOffer[]> {
+  try {
+    const { data, error } = await supabaseClient
+      .from('dealabs_offers_cache')
+      .select('*')
+      .gt('expiry_date', new Date().toISOString())
+      .eq('is_expired', false)
+      .order('temperature', { ascending: false })
+      .limit(20);
+
+    if (error) {
+      console.error('Error fetching cached offers:', error);
+      return [];
+    }
+
+    return data?.map((offer: any) => ({
+      id: offer.deal_id,
+      title: offer.title,
+      description: offer.description || '',
+      price: offer.price || '',
+      originalPrice: offer.original_price,
+      discount: offer.discount,
+      merchant: offer.merchant,
+      category: offer.category,
+      url: offer.url,
+      votes: offer.votes || 0,
+      temperature: offer.temperature || 0,
+      expiryDate: offer.expiry_date,
+      couponCode: offer.coupon_code,
+      isExpired: offer.is_expired || false,
+    })) || [];
+  } catch (error) {
+    console.error('Error in getCachedOffers:', error);
+    return [];
+  }
+}
+
+async function getMatchedOffers(userSubscriptions: UserSubscription[], allOffers?: DealabsOffer[]): Promise<DealabsOffer[]> {
+  const offers = allOffers || await fetchDealabsOffers();
   
   // Matcher les offres avec les abonnements de l'utilisateur
-  return allOffers.filter(offer => {
+  return offers.filter(offer => {
     return userSubscriptions.some(subscription => {
       const merchantMatch = offer.merchant.toLowerCase().includes(subscription.name.toLowerCase()) ||
                            subscription.name.toLowerCase().includes(offer.merchant.toLowerCase());
@@ -199,9 +227,9 @@ async function getMatchedOffers(userSubscriptions: UserSubscription[]): Promise<
   });
 }
 
-async function getCategoryOffers(category: string): Promise<DealabsOffer[]> {
-  const allOffers = await fetchDealabsOffers();
-  return allOffers.filter(offer => offer.category === category);
+async function getCategoryOffers(category: string, allOffers?: DealabsOffer[]): Promise<DealabsOffer[]> {
+  const offers = allOffers || await fetchDealabsOffers();
+  return offers.filter(offer => offer.category === category);
 }
 
 function isSubscriptionDeal(title: string, description: string): boolean {

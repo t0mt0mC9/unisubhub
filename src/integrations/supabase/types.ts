@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      dealabs_offers_cache: {
+        Row: {
+          category: string
+          coupon_code: string | null
+          created_at: string
+          deal_id: string
+          description: string | null
+          discount: string | null
+          expiry_date: string | null
+          id: string
+          is_expired: boolean | null
+          merchant: string
+          original_price: string | null
+          price: string | null
+          temperature: number | null
+          title: string
+          updated_at: string
+          url: string
+          votes: number | null
+        }
+        Insert: {
+          category: string
+          coupon_code?: string | null
+          created_at?: string
+          deal_id: string
+          description?: string | null
+          discount?: string | null
+          expiry_date?: string | null
+          id?: string
+          is_expired?: boolean | null
+          merchant: string
+          original_price?: string | null
+          price?: string | null
+          temperature?: number | null
+          title: string
+          updated_at?: string
+          url: string
+          votes?: number | null
+        }
+        Update: {
+          category?: string
+          coupon_code?: string | null
+          created_at?: string
+          deal_id?: string
+          description?: string | null
+          discount?: string | null
+          expiry_date?: string | null
+          id?: string
+          is_expired?: boolean | null
+          merchant?: string
+          original_price?: string | null
+          price?: string | null
+          temperature?: number | null
+          title?: string
+          updated_at?: string
+          url?: string
+          votes?: number | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
