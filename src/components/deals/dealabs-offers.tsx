@@ -279,26 +279,31 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
                   size="sm"
                   onClick={() => {
                     console.log('Clicking offer URL:', offer.url);
-                    console.log('Full offer object:', offer);
                     try {
-                      const opened = window.open(offer.url, '_blank', 'noopener,noreferrer');
-                      if (!opened) {
-                        console.error('Failed to open window - popup blocked?');
-                        // Fallback: try to navigate in the same tab
-                        window.location.href = offer.url;
-                      } else {
-                        console.log('Window opened successfully');
-                      }
-                    } catch (error) {
-                      console.error('Error opening URL:', error);
-                      // Fallback: create a link and click it
+                      // Ouvrir le lien dans un nouvel onglet de manière sécurisée
                       const link = document.createElement('a');
                       link.href = offer.url;
                       link.target = '_blank';
                       link.rel = 'noopener noreferrer';
+                      link.style.display = 'none';
                       document.body.appendChild(link);
                       link.click();
                       document.body.removeChild(link);
+                      
+                      console.log('Link opened successfully');
+                    } catch (error) {
+                      console.error('Error opening URL:', error);
+                      // Fallback: essayer window.open
+                      try {
+                        window.open(offer.url, '_blank', 'noopener,noreferrer');
+                      } catch (fallbackError) {
+                        console.error('Fallback also failed:', fallbackError);
+                        toast({
+                          title: "Erreur",
+                          description: "Impossible d'ouvrir le lien. Copiez-le manuellement: " + offer.url,
+                          variant: "destructive",
+                        });
+                      }
                     }
                   }}
                 >
