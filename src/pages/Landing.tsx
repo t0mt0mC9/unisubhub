@@ -172,6 +172,78 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* Offers Section */}
+      <section className="py-20 bg-gradient-to-br from-surface/30 to-background relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,hsl(var(--primary))_0%,transparent_50%)] opacity-5" />
+        <div className="container mx-auto px-4 relative">
+          <div className="text-center mb-16">
+            <Badge variant="outline" className="mb-4 border-primary/20 text-primary bg-primary/5">
+              🎁 Nouveau
+            </Badge>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              Découvrez les meilleures{" "}
+              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                offres d'abonnements
+              </span>
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              En plus de gérer vos abonnements existants, UniSubHub vous fait découvrir en temps réel 
+              toutes les promotions et offres spéciales disponibles sur vos services préférés. 
+              Économisez encore plus en profitant des meilleures opportunités du moment !
+            </p>
+          </div>
+
+          <div className="max-w-4xl mx-auto">
+            <Card className="border-primary/20 bg-gradient-to-br from-card/80 to-surface/80 backdrop-blur-sm shadow-glow">
+              <CardContent className="p-8">
+                <div className="grid md:grid-cols-3 gap-6 text-center">
+                  <div className="space-y-3">
+                    <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary to-primary-light flex items-center justify-center mx-auto">
+                      <TrendingUp className="h-6 w-6 text-white" />
+                    </div>
+                    <h3 className="text-lg font-semibold">Offres en temps réel</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Mise à jour quotidienne des meilleures promotions disponibles
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-success to-warning flex items-center justify-center mx-auto">
+                      <Target className="h-6 w-6 text-white" />
+                    </div>
+                    <h3 className="text-lg font-semibold">Recommandations ciblées</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Offres personnalisées basées sur vos abonnements actuels
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-accent to-primary flex items-center justify-center mx-auto">
+                      <Euro className="h-6 w-6 text-white" />
+                    </div>
+                    <h3 className="text-lg font-semibold">Économies maximales</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Jusqu'à 70% de réduction sur vos services favoris
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="text-center mt-8">
+                  <Button 
+                    variant="outline"
+                    className="border-primary/30 hover:bg-primary/5"
+                    onClick={() => window.location.href = '/auth'}
+                  >
+                    Voir les offres du moment
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section className="py-20 bg-surface/30">
         <div className="container mx-auto px-4">
