@@ -277,7 +277,30 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
                 <Button 
                   className="w-full" 
                   size="sm"
-                  onClick={() => window.open(offer.url, '_blank')}
+                  onClick={() => {
+                    console.log('Clicking offer URL:', offer.url);
+                    console.log('Full offer object:', offer);
+                    try {
+                      const opened = window.open(offer.url, '_blank', 'noopener,noreferrer');
+                      if (!opened) {
+                        console.error('Failed to open window - popup blocked?');
+                        // Fallback: try to navigate in the same tab
+                        window.location.href = offer.url;
+                      } else {
+                        console.log('Window opened successfully');
+                      }
+                    } catch (error) {
+                      console.error('Error opening URL:', error);
+                      // Fallback: create a link and click it
+                      const link = document.createElement('a');
+                      link.href = offer.url;
+                      link.target = '_blank';
+                      link.rel = 'noopener noreferrer';
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }
+                  }}
                 >
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Voir l'offre
