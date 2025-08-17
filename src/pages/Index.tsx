@@ -5,6 +5,7 @@ import { SpendingOverview } from "@/components/dashboard/spending-overview";
 import { SubscriptionCard } from "@/components/dashboard/subscription-card";
 import { AnalyticsStats } from "@/components/analytics/analytics-stats";
 import { AnalyticsCharts } from "@/components/analytics/analytics-charts";
+import { DealabsOffers } from "@/components/deals/dealabs-offers";
 import { SettingsPage } from "@/components/settings/settings-page";
 import { SubscriptionPlans } from "@/components/subscription/subscription-plans";
 import { AddSubscriptionDialog } from "@/components/add-subscription/add-subscription-dialog";
@@ -277,6 +278,9 @@ const Index = () => {
         
         <AnalyticsStats subscriptions={allSubscriptions} />
         <AnalyticsCharts subscriptions={allSubscriptions} />
+        
+        {/* Dealabs Offers Section */}
+        <DealabsOffers userSubscriptions={allSubscriptions} />
         
         {/* Bottom spacing for fixed navigation */}
         <div className="h-20" />
