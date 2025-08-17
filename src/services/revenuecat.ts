@@ -158,14 +158,47 @@ class RevenueCatService {
   async getOfferings(): Promise<any[]> {
     try {
       if (this.isNative) {
+        console.log('=== GETTING OFFERINGS - DEBUG ===');
+        
+        if (!this.initialized) {
+          console.log('RevenueCat not initialized, initializing...');
+          await this.initialize();
+        }
+        
         const { Purchases } = await import('@revenuecat/purchases-capacitor');
+        console.log('Fetching offerings from RevenueCat...');
+        
         const offerings = await Purchases.getOfferings();
+        console.log('✅ Offerings retrieved successfully');
+        console.log('Total offerings available:', Object.keys(offerings.all || {}).length);
+        
+        if (!offerings.all || Object.keys(offerings.all).length === 0) {
+          console.error('❌ No offerings found in RevenueCat');
+          console.error('This usually means:');
+          console.error('1. Products not configured in App Store Connect');
+          console.error('2. Products not submitted for review in App Store Connect');
+          console.error('3. RevenueCat configuration issue');
+          console.error('4. Bundle ID mismatch');
+          throw new Error('No offerings available - check App Store Connect configuration');
+        }
+        
         return offerings.all ? Object.values(offerings.all) : [];
       } else {
+        console.log('Using mock offerings for web platform');
         return MOCK_OFFERINGS;
       }
     } catch (error) {
-      console.error('Failed to get offerings:', error);
+      console.error('❌ Failed to get offerings:', error);
+      console.error('Error code:', (error as any).code);
+      console.error('Error message:', (error as any).message);
+      
+      // Si c'est l'erreur 23 (configuration), on lance une erreur plus explicite
+      if ((error as any).code === 23) {
+        throw new Error('Erreur de configuration RevenueCat - Vérifiez que vos produits sont soumis dans App Store Connect');
+      }
+      
+      // Pour les autres erreurs, on retourne les mock data pour éviter le crash
+      console.log('Returning mock offerings as fallback');
       return MOCK_OFFERINGS;
     }
   }
