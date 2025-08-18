@@ -130,7 +130,7 @@ class RevenueCatService {
         } else if (platform === 'android') {
           console.log('Configuring RevenueCat for Android...');
           await Purchases.configure({
-            apiKey: 'goog_YOUR_GOOGLE_API_KEY_HERE',
+            apiKey: 'goog_QaBdXTAklVmQkwWJafZhxgPCQCK',
           });
           console.log('✅ RevenueCat configured for Android');
         } else {
@@ -178,8 +178,10 @@ class RevenueCatService {
           console.error('1. Products not configured in App Store Connect');
           console.error('2. Products not submitted for review in App Store Connect');
           console.error('3. RevenueCat configuration issue');
-          console.error('4. Bundle ID mismatch');
-          throw new Error('No offerings available - check App Store Connect configuration');
+          console.error('4. Using sandbox environment - check App Store Connect sandbox setup');
+          
+          // Return empty array instead of throwing error
+          return [];
         }
         
         return offerings.all ? Object.values(offerings.all) : [];

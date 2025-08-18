@@ -36,7 +36,10 @@ export const MobileSubscriptionPlans = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    initializeRevenueCat();
+    initializeRevenueCat().catch(error => {
+      console.error("Failed to initialize RevenueCat in mobile plans:", error);
+      setLoading(false);
+    });
   }, []);
 
   const initializeRevenueCat = async () => {
