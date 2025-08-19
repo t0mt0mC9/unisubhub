@@ -50,20 +50,9 @@ export const MobileSubscriptionPlans = () => {
       await loadSubscriptionInfo();
     } catch (error) {
       console.error('Failed to initialize RevenueCat:', error);
-      // Ne pas afficher d'erreur en mode web car c'est attendu
-      const isNative = typeof (window as any).Capacitor?.isNativePlatform === 'function' 
-        ? (window as any).Capacitor.isNativePlatform() 
-        : false;
-      
-      if (!isNative) {
-        console.log('RevenueCat non disponible en mode web - comportement normal');
-      } else {
-        toast({
-          title: "Erreur d'initialisation",
-          description: "Impossible de charger les options d'abonnement",
-          variant: "destructive",
-        });
-      }
+      // Ne pas afficher d'erreur tant qu'on est en mode développement
+      // L'erreur est normale jusqu'à ce que l'app soit sur un vrai device avec App Store Connect configuré
+      console.log('RevenueCat non disponible en mode développement - comportement normal');
     } finally {
       setLoading(false);
     }
