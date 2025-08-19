@@ -79,8 +79,8 @@ export const StripeSubscriptionPlans = () => {
       if (error) throw error;
 
       if (data?.url) {
-        // Ouvrir Stripe checkout dans un nouvel onglet
-        window.open(data.url, '_blank');
+        // Rediriger vers Stripe checkout (plus fiable que les popups)
+        window.location.href = data.url;
       }
     } catch (error: any) {
       console.error('Purchase failed:', error);
