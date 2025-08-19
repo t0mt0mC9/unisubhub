@@ -43,6 +43,7 @@ export const MobileSubscriptionPlans = () => {
   }, []);
 
   const initializeRevenueCat = async () => {
+    setLoading(true);
     try {
       await revenueCatService.initialize();
       await loadOfferings();
@@ -57,6 +58,10 @@ export const MobileSubscriptionPlans = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRefresh = async () => {
+    await initializeRevenueCat();
   };
 
   const loadOfferings = async () => {
@@ -183,15 +188,22 @@ export const MobileSubscriptionPlans = () => {
 
   if (offerings.length === 0) {
     return (
-      <div className="text-center p-8">
+      <div className="text-center p-8 space-y-4">
         <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
         <h3 className="text-lg font-semibold mb-2">Aucun abonnement disponible</h3>
-        <p className="text-muted-foreground mb-4">
-          Les options d'abonnement ne sont pas disponibles pour le moment.
-        </p>
-        <Button variant="outline" onClick={loadOfferings}>
-          Réessayer
-        </Button>
+        <div className="space-y-2">
+          <p className="text-muted-foreground">
+            Les options d'abonnement ne sont pas disponibles en mode web.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Sur un appareil mobile, les vrais abonnements seront disponibles après avoir configuré le secret partagé RevenueCat.
+          </p>
+        </div>
+        <div className="flex gap-2 justify-center">
+          <Button variant="outline" onClick={handleRefresh}>
+            Actualiser
+          </Button>
+        </div>
       </div>
     );
   }
