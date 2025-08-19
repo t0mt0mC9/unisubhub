@@ -50,11 +50,20 @@ export const MobileSubscriptionPlans = () => {
       await loadSubscriptionInfo();
     } catch (error) {
       console.error('Failed to initialize RevenueCat:', error);
-      toast({
-        title: "Erreur d'initialisation",
-        description: "Impossible de charger les options d'abonnement",
-        variant: "destructive",
-      });
+      // Ne pas afficher d'erreur en mode web car c'est attendu
+      const isNative = typeof (window as any).Capacitor?.isNativePlatform === 'function' 
+        ? (window as any).Capacitor.isNativePlatform() 
+        : false;
+      
+      if (!isNative) {
+        console.log('RevenueCat non disponible en mode web - comportement normal');
+      } else {
+        toast({
+          title: "Erreur d'initialisation",
+          description: "Impossible de charger les options d'abonnement",
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }
