@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ToastAction } from "@/components/ui/toast";
 import { Check, Crown, Star, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -79,8 +80,24 @@ export const StripeSubscriptionPlans = () => {
       if (error) throw error;
 
       if (data?.url) {
-        // Rediriger vers Stripe checkout (plus fiable que les popups)
-        window.location.href = data.url;
+        // Essayer d'ouvrir dans un nouvel onglet
+        const newWindow = window.open(data.url, '_blank');
+        
+        // Si le popup est bloqué, proposer une alternative
+        if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+          toast({
+            title: "Popup bloqué",
+            description: "Votre navigateur bloque les popups. Cliquez ici pour continuer vers Stripe.",
+            action: (
+              <ToastAction 
+                altText="Continuer vers Stripe"
+                onClick={() => window.location.href = data.url}
+              >
+                Continuer vers Stripe
+              </ToastAction>
+            ),
+          });
+        }
       }
     } catch (error: any) {
       console.error('Purchase failed:', error);
