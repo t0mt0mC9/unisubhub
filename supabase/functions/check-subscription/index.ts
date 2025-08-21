@@ -96,10 +96,13 @@ serve(async (req) => {
     const trialDaysRemaining = Math.max(0, Math.ceil((trialEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
 
     logStep("Trial period calculation", { 
+      now: now.toISOString(),
       userCreatedAt: userCreatedAt.toISOString(), 
       trialEndDate: trialEndDate.toISOString(),
+      timeDiffMs: trialEndDate.getTime() - now.getTime(),
       isTrialActive,
-      trialDaysRemaining 
+      trialDaysRemaining,
+      userCreatedAtRaw: user.created_at
     });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
