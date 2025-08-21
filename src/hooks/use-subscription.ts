@@ -33,6 +33,14 @@ export const useSubscription = () => {
       
       if (error) {
         console.error('❌ Erreur lors de l\'appel de check-subscription:', error);
+        
+        // Si c'est une erreur 401 (session expirée), déconnecter l'utilisateur
+        if (error.status === 401 || error.message?.includes('Session expired')) {
+          console.log('🔄 Session expirée, déconnexion...');
+          await supabase.auth.signOut();
+          return null;
+        }
+        
         throw error;
       }
       
@@ -41,11 +49,15 @@ export const useSubscription = () => {
       return data;
     } catch (error: any) {
       console.error('Erreur lors de la vérification de l\'abonnement:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de vérifier votre abonnement",
-        variant: "destructive",
-      });
+      
+      // Si c'est une erreur de session, ne pas afficher le toast d'erreur
+      if (!(error.status === 401 || error.message?.includes('Session expired'))) {
+        toast({
+          title: "Erreur",
+          description: "Impossible de vérifier votre abonnement",
+          variant: "destructive",
+        });
+      }
       return null;
     } finally {
       setLoading(false);
