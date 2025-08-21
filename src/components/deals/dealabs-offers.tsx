@@ -277,17 +277,53 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
                 <Button 
                   className="w-full" 
                   size="sm"
-                  asChild
+                  onClick={(e) => {
+                    console.log('Button clicked, offer URL:', offer.url);
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    try {
+                      // Créer un lien temporaire et simuler un clic
+                      const link = document.createElement('a');
+                      link.href = offer.url;
+                      link.target = '_blank';
+                      link.rel = 'noopener noreferrer';
+                      
+                      // Ajouter au DOM temporairement pour que le clic fonctionne
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                      
+                      console.log('Link clicked successfully');
+                    } catch (error) {
+                      console.error('Error opening link:', error);
+                      
+                      // Fallback: essayer window.open
+                      try {
+                        window.open(offer.url, '_blank', 'noopener,noreferrer');
+                        console.log('Fallback window.open worked');
+                      } catch (fallbackError) {
+                        console.error('Both methods failed:', fallbackError);
+                        
+                        // Dernière tentative: copier dans le presse-papier
+                        navigator.clipboard?.writeText(offer.url).then(() => {
+                          toast({
+                            title: "Lien copié",
+                            description: "Le lien a été copié dans le presse-papier. Collez-le dans votre navigateur.",
+                          });
+                        }).catch(() => {
+                          toast({
+                            title: "Erreur",
+                            description: `Impossible d'ouvrir le lien. URL: ${offer.url}`,
+                            variant: "destructive",
+                          });
+                        });
+                      }
+                    }
+                  }}
                 >
-                  <a 
-                    href={offer.url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center"
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Voir l'offre
-                  </a>
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Voir l'offre
                 </Button>
               </CardContent>
             </Card>
