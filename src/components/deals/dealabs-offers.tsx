@@ -274,47 +274,17 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
                   )}
                 </div>
 
-                <div className="space-y-2">
-                  <div className="p-2 bg-muted/50 rounded-md">
-                    <p className="text-xs text-muted-foreground mb-1">Lien de l'offre:</p>
-                    <p className="text-xs font-mono break-all text-primary">{offer.url}</p>
-                  </div>
-                  
-                  <div className="flex gap-2">
-                    <Button 
-                      className="flex-1" 
-                      size="sm"
-                      onClick={() => {
-                        navigator.clipboard?.writeText(offer.url).then(() => {
-                          toast({
-                            title: "Lien copié",
-                            description: "Le lien a été copié dans le presse-papier",
-                          });
-                        }).catch(() => {
-                          toast({
-                            title: "Erreur",
-                            description: "Impossible de copier le lien",
-                            variant: "destructive",
-                          });
-                        });
-                      }}
-                    >
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Copier le lien
-                    </Button>
-                    
-                    <Button 
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        // Redirection directe dans le même onglet
-                        window.location.href = offer.url;
-                      }}
-                    >
-                      Aller à l'offre
-                    </Button>
-                  </div>
-                </div>
+                <Button 
+                  className="w-full" 
+                  size="sm"
+                  onClick={() => {
+                    console.log('Redirecting to offer:', offer.url);
+                    window.location.href = offer.url;
+                  }}
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Voir l'offre
+                </Button>
               </CardContent>
             </Card>
           ))}
