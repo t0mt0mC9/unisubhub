@@ -56,7 +56,7 @@ serve(async (req) => {
       throw new Error('Invalid token');
     }
 
-    const { action, userSubscriptions } = await req.json();
+    const { action, userSubscriptions, category } = await req.json();
 
     switch (action) {
       case 'get_offers':
@@ -86,7 +86,6 @@ serve(async (req) => {
         });
 
       case 'get_category_offers':
-        const { category } = await req.json();
         const allOffersForCategory = await getCachedOffers(supabaseClient);
         const categoryFallback = allOffersForCategory.length > 0 ? allOffersForCategory : await fetchDealabsOffers();
         const categoryOffers = await getCategoryOffers(category, categoryFallback);
