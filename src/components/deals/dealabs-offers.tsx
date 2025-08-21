@@ -274,57 +274,19 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
                   )}
                 </div>
 
-                <Button 
-                  className="w-full" 
-                  size="sm"
+                <a 
+                  href={offer.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-3"
                   onClick={(e) => {
-                    console.log('Button clicked, offer URL:', offer.url);
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    try {
-                      // Créer un lien temporaire et simuler un clic
-                      const link = document.createElement('a');
-                      link.href = offer.url;
-                      link.target = '_blank';
-                      link.rel = 'noopener noreferrer';
-                      
-                      // Ajouter au DOM temporairement pour que le clic fonctionne
-                      document.body.appendChild(link);
-                      link.click();
-                      document.body.removeChild(link);
-                      
-                      console.log('Link clicked successfully');
-                    } catch (error) {
-                      console.error('Error opening link:', error);
-                      
-                      // Fallback: essayer window.open
-                      try {
-                        window.open(offer.url, '_blank', 'noopener,noreferrer');
-                        console.log('Fallback window.open worked');
-                      } catch (fallbackError) {
-                        console.error('Both methods failed:', fallbackError);
-                        
-                        // Dernière tentative: copier dans le presse-papier
-                        navigator.clipboard?.writeText(offer.url).then(() => {
-                          toast({
-                            title: "Lien copié",
-                            description: "Le lien a été copié dans le presse-papier. Collez-le dans votre navigateur.",
-                          });
-                        }).catch(() => {
-                          toast({
-                            title: "Erreur",
-                            description: `Impossible d'ouvrir le lien. URL: ${offer.url}`,
-                            variant: "destructive",
-                          });
-                        });
-                      }
-                    }
+                    console.log('Direct link clicked:', offer.url);
+                    // Laisser le navigateur gérer la navigation naturellement
                   }}
                 >
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Voir l'offre
-                </Button>
+                </a>
               </CardContent>
             </Card>
           ))}
