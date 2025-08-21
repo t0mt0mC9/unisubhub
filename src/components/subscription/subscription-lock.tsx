@@ -1,8 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Lock, Crown, Clock, Gift } from "lucide-react";
+import { Lock, Crown, Clock, Gift, RefreshCw } from "lucide-react";
 import { UnifiedSubscriptionManager } from "./unified-subscription-manager";
+import { useSubscription } from "@/hooks/use-subscription";
 
 interface SubscriptionLockProps {
   onUpgrade?: () => void;
@@ -10,6 +11,14 @@ interface SubscriptionLockProps {
 }
 
 export const SubscriptionLock = ({ onUpgrade, trialDaysRemaining = 0 }: SubscriptionLockProps) => {
+  const { refresh, loading } = useSubscription();
+
+  const handleRefresh = async () => {
+    const data = await refresh();
+    if (data?.subscribed && onUpgrade) {
+      onUpgrade();
+    }
+  };
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
@@ -21,10 +30,19 @@ export const SubscriptionLock = ({ onUpgrade, trialDaysRemaining = 0 }: Subscrip
           <h1 className="text-2xl font-bold text-foreground mb-2">
             Essai gratuit terminé
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground mb-4">
             Votre période d'essai de 14 jours est maintenant terminée. 
             Passez à Premium pour continuer à utiliser UniSubHub.
           </p>
+          <Button 
+            onClick={handleRefresh} 
+            variant="outline" 
+            disabled={loading}
+            className="mb-4"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Vérifier mon abonnement
+          </Button>
         </div>
 
         {/* Premium Benefits */}
