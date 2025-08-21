@@ -63,14 +63,16 @@ serve(async (req) => {
         // Essayer d'abord le cache, puis les offres simulées
         const cachedOffers = await getCachedOffers(supabaseClient);
         if (cachedOffers.length > 0) {
-          console.log(`Using ${cachedOffers.length} cached offers`);
-          return new Response(JSON.stringify({ offers: cachedOffers }), {
+          const validCachedOffers = filterValidOffers(cachedOffers);
+          console.log(`Using ${validCachedOffers.length} valid cached offers`);
+          return new Response(JSON.stringify({ offers: validCachedOffers }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
         }
         
         const offers = await fetchDealabsOffers();
-        return new Response(JSON.stringify({ offers }), {
+        const validOffers = filterValidOffers(offers);
+        return new Response(JSON.stringify({ offers: validOffers }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
 
@@ -78,7 +80,8 @@ serve(async (req) => {
         const allOffersForMatching = await getCachedOffers(supabaseClient);
         const fallbackOffers = allOffersForMatching.length > 0 ? allOffersForMatching : await fetchDealabsOffers();
         const matchedOffers = await getMatchedOffers(userSubscriptions || [], fallbackOffers);
-        return new Response(JSON.stringify({ offers: matchedOffers }), {
+        const validMatchedOffers = filterValidOffers(matchedOffers);
+        return new Response(JSON.stringify({ offers: validMatchedOffers }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
 
@@ -87,7 +90,8 @@ serve(async (req) => {
         const allOffersForCategory = await getCachedOffers(supabaseClient);
         const categoryFallback = allOffersForCategory.length > 0 ? allOffersForCategory : await fetchDealabsOffers();
         const categoryOffers = await getCategoryOffers(category, categoryFallback);
-        return new Response(JSON.stringify({ offers: categoryOffers }), {
+        const validCategoryOffers = filterValidOffers(categoryOffers);
+        return new Response(JSON.stringify({ offers: validCategoryOffers }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
 
@@ -103,6 +107,31 @@ serve(async (req) => {
     });
   }
 });
+
+function isOfferExpired(offer: DealabsOffer): boolean {
+  const now = new Date();
+  
+  // Vérifier si l'offre est marquée comme expirée
+  if (offer.isExpired) {
+    return true;
+  }
+  
+  // Vérifier la date d'expiration
+  if (offer.expiryDate) {
+    const expiryDate = new Date(offer.expiryDate);
+    if (expiryDate <= now) {
+      return true;
+    }
+  }
+  
+  return false;
+}
+
+function filterValidOffers(offers: DealabsOffer[]): DealabsOffer[] {
+  const validOffers = offers.filter(offer => !isOfferExpired(offer));
+  console.log(`Filtered ${validOffers.length}/${offers.length} valid offers`);
+  return validOffers;
+}
 
 async function validateOfferUrl(url: string): Promise<boolean> {
   try {
