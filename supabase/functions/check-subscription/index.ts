@@ -50,6 +50,29 @@ serve(async (req) => {
       .eq("email", user.email)
       .single();
 
+    logStep("Existing subscriber check", { existingSubscriber });
+
+    // If user has a lifetime subscription in the database, preserve it
+    if (existingSubscriber?.subscription_type === 'lifetime' && existingSubscriber?.subscribed) {
+      logStep("Found existing lifetime subscription in database", { 
+        tier: existingSubscriber.subscription_tier,
+        type: existingSubscriber.subscription_type
+      });
+      
+      return new Response(JSON.stringify({
+        subscribed: true,
+        subscription_tier: existingSubscriber.subscription_tier,
+        subscription_type: existingSubscriber.subscription_type,
+        subscription_end: existingSubscriber.subscription_end,
+        trial_active: false,
+        trial_days_remaining: 0,
+        trial_end_date: null
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
     const now = new Date();
     const userCreatedAt = new Date(user.created_at);
     const trialEndDate = new Date(userCreatedAt.getTime() + 14 * 24 * 60 * 60 * 1000); // 14 jours après création
