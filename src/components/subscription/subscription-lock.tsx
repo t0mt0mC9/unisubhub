@@ -6,6 +6,7 @@ import { UnifiedSubscriptionManager } from "./unified-subscription-manager";
 import { useSubscription } from "@/hooks/use-subscription";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { cleanupAuthState } from "@/lib/auth-cleanup";
 
 interface SubscriptionLockProps {
   onUpgrade?: () => void;
@@ -26,19 +27,32 @@ export const SubscriptionLock = ({ onUpgrade, trialDaysRemaining = 0 }: Subscrip
   const handleForceReauth = async () => {
     try {
       toast({
-        title: "Actualisation de la session...",
-        description: "Reconnexion en cours pour actualiser votre abonnement",
+        title: "Nettoyage de la session...",
+        description: "Réinitialisation complète de l'authentification en cours",
       });
       
-      // Déconnexion puis reconnexion automatique
-      await supabase.auth.signOut();
+      console.log('🔄 Début du nettoyage d\'authentification...');
       
-      // La redirection vers la landing page se fera automatiquement
+      // 1. Nettoyer complètement l'état d'authentification
+      cleanupAuthState();
+      
+      // 2. Tenter une déconnexion globale (ignore les erreurs)
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+        console.log('✅ Déconnexion globale réussie');
+      } catch (err) {
+        console.log('⚠️ Erreur lors de la déconnexion globale (ignorée):', err);
+      }
+      
+      // 3. Forcer un rafraîchissement complet de la page
+      console.log('🔄 Redirection vers la page de connexion...');
+      window.location.href = '/auth';
+      
     } catch (error) {
-      console.error('Erreur lors de la déconnexion:', error);
+      console.error('❌ Erreur lors du nettoyage:', error);
       toast({
         title: "Erreur",
-        description: "Impossible de se déconnecter. Veuillez rafraîchir la page.",
+        description: "Impossible de nettoyer la session. Veuillez rafraîchir manuellement la page.",
         variant: "destructive",
       });
     }
@@ -70,11 +84,11 @@ export const SubscriptionLock = ({ onUpgrade, trialDaysRemaining = 0 }: Subscrip
             
             <Button 
               onClick={handleForceReauth} 
-              variant="secondary"
+              variant="destructive"
               size="sm"
             >
               <LogOut className="h-4 w-4 mr-2" />
-              Actualiser la session
+              Nettoyer et reconnecter
             </Button>
           </div>
         </div>
