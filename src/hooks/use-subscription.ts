@@ -29,6 +29,23 @@ export const useSubscription = () => {
     try {
       setLoading(true);
       console.log('🔍 Vérification de l\'abonnement...');
+      
+      // Vérifier d'abord si l'utilisateur est connecté
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        console.log('❌ Utilisateur non connecté:', userError?.message);
+        setSubscriptionData({
+          subscribed: false,
+          subscription_tier: null,
+          subscription_type: null,
+          subscription_end: null,
+          trial_active: false,
+          trial_days_remaining: 0,
+          trial_end_date: null
+        });
+        return null;
+      }
+      
       const { data, error } = await supabase.functions.invoke('check-subscription');
       
       if (error) {
@@ -65,7 +82,12 @@ export const useSubscription = () => {
   };
 
   useEffect(() => {
-    checkSubscription();
+    // Attendre un peu pour que la session soit stable
+    const timer = setTimeout(() => {
+      checkSubscription();
+    }, 1000);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   // Determine if user has access (either subscribed or trial active)

@@ -48,6 +48,22 @@ const App = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Fonction pour déterminer si l'utilisateur a accès
+  const userHasAccess = () => {
+    if (!user) return false;
+    
+    // Si l'utilisateur a un abonnement actif selon le hook
+    if (hasAccess) return true;
+    
+    // Sinon, vérifier l'essai gratuit basé sur la date de création
+    const userCreatedAt = new Date(user.created_at);
+    const now = new Date();
+    const daysSinceCreation = Math.floor((now.getTime() - userCreatedAt.getTime()) / (1000 * 60 * 60 * 24));
+    
+    // Donner accès pendant 14 jours après création
+    return daysSinceCreation < 14;
+  };
+
   if (showSplash) {
     return <SplashScreen onFinish={() => setShowSplash(false)} />;
   }
@@ -85,7 +101,7 @@ const App = () => {
           <Routes>
             <Route 
               path="/" 
-              element={user ? (hasAccess ? <Index /> : <SubscriptionLock />) : <Landing />} 
+              element={user ? (userHasAccess() ? <Index /> : <SubscriptionLock />) : <Landing />} 
             />
             <Route 
               path="/landing" 
@@ -101,11 +117,11 @@ const App = () => {
             />
             <Route 
               path="/expense-analysis" 
-              element={user ? (hasAccess ? <ExpenseAnalysis /> : <SubscriptionLock />) : <Navigate to="/auth" replace />} 
+              element={user ? (userHasAccess() ? <ExpenseAnalysis /> : <SubscriptionLock />) : <Navigate to="/auth" replace />} 
             />
             <Route 
               path="/analytics" 
-              element={user ? (hasAccess ? <ExpenseAnalysis /> : <SubscriptionLock />) : <Navigate to="/auth" replace />} 
+              element={user ? (userHasAccess() ? <ExpenseAnalysis /> : <SubscriptionLock />) : <Navigate to="/auth" replace />} 
             />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
