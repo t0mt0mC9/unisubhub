@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Starting daily offers update...');
+    console.log('Starting daily offers update with link validation...');
     
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -36,13 +36,38 @@ serve(async (req) => {
     const offersData = await response.json();
     console.log(`Retrieved ${offersData.offers?.length || 0} offers`);
 
-    // Sauvegarder les offres dans une table cache (optionnel)
+    // Valider et marquer les offres expirées dans le cache existant
+    const { data: cachedOffers } = await supabaseClient
+      .from('dealabs_offers_cache')
+      .select('*')
+      .eq('is_expired', false);
+
+    if (cachedOffers && cachedOffers.length > 0) {
+      console.log(`Validating ${cachedOffers.length} cached offers...`);
+      
+      for (const cachedOffer of cachedOffers) {
+        try {
+          const isValid = await validateUrl(cachedOffer.url);
+          if (!isValid) {
+            await supabaseClient
+              .from('dealabs_offers_cache')
+              .update({ is_expired: true })
+              .eq('deal_id', cachedOffer.deal_id);
+            console.log(`Marked offer ${cachedOffer.deal_id} as expired (invalid URL)`);
+          }
+        } catch (error) {
+          console.log(`Error validating cached offer ${cachedOffer.deal_id}:`, error);
+        }
+      }
+    }
+
+    // Sauvegarder les nouvelles offres dans une table cache
     if (offersData.offers && offersData.offers.length > 0) {
-      // Nettoyer les anciennes offres
+      // Nettoyer les anciennes offres (plus de 7 jours)
       const { error: deleteError } = await supabaseClient
         .from('dealabs_offers_cache')
         .delete()
-        .lt('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+        .lt('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
 
       if (deleteError) {
         console.log('Warning: Could not delete old offers:', deleteError);
@@ -77,6 +102,20 @@ serve(async (req) => {
         console.log('Successfully cached offers in database');
       }
     }
+
+async function validateUrl(url: string): Promise<boolean> {
+  try {
+    const response = await fetch(url, { 
+      method: 'HEAD', 
+      redirect: 'follow',
+      signal: AbortSignal.timeout(8000) // 8 secondes timeout
+    });
+    return response.ok && response.status < 400;
+  } catch (error) {
+    console.log(`URL validation failed for ${url}:`, error);
+    return false;
+  }
+}
 
     return new Response(JSON.stringify({ 
       success: true, 

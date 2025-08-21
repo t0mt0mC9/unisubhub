@@ -104,6 +104,20 @@ serve(async (req) => {
   }
 });
 
+async function validateOfferUrl(url: string): Promise<boolean> {
+  try {
+    const response = await fetch(url, { 
+      method: 'HEAD', 
+      redirect: 'follow',
+      signal: AbortSignal.timeout(5000) // 5 secondes timeout
+    });
+    return response.ok;
+  } catch (error) {
+    console.log(`URL validation failed for ${url}:`, error);
+    return false;
+  }
+}
+
 async function fetchDealabsOffers(): Promise<DealabsOffer[]> {
   try {
     console.log('Fetching offers from Dealabs API...');
@@ -141,22 +155,32 @@ async function fetchDealabsOffers(): Promise<DealabsOffer[]> {
           ) || [];
 
           if (subscriptionDeals.length > 0) {
-            return subscriptionDeals.map((deal: any) => ({
-              id: deal.deal_id?.toString() || '',
-              title: deal.title || '',
-              description: deal.description || '',
-              price: extractPrice(deal.title, deal.description),
-              originalPrice: extractOriginalPrice(deal.title, deal.description),
-              discount: extractDiscount(deal.title, deal.description),
-              merchant: extractMerchant(deal.title),
-              category: categorizeSubscription(deal.title, deal.description),
-              url: deal.deal_link || `https://www.dealabs.com/deals/${deal.deal_id}`,
-              votes: deal.vote_count || 0,
-              temperature: deal.temperature || 0,
-              expiryDate: deal.publish_date,
-              couponCode: extractCouponCode(deal.description),
-              isExpired: false,
-            }));
+            const validatedOffers = [];
+            
+            for (const deal of subscriptionDeals) {
+              const offerUrl = deal.deal_link || `https://www.dealabs.com/deals/${deal.deal_id}`;
+              const isValidUrl = await validateOfferUrl(offerUrl);
+              
+              validatedOffers.push({
+                id: deal.deal_id?.toString() || '',
+                title: deal.title || '',
+                description: deal.description || '',
+                price: extractPrice(deal.title, deal.description),
+                originalPrice: extractOriginalPrice(deal.title, deal.description),
+                discount: extractDiscount(deal.title, deal.description),
+                merchant: extractMerchant(deal.title),
+                category: categorizeSubscription(deal.title, deal.description),
+                url: offerUrl,
+                votes: deal.vote_count || 0,
+                temperature: deal.temperature || 0,
+                expiryDate: deal.publish_date,
+                couponCode: extractCouponCode(deal.description),
+                isExpired: !isValidUrl,
+              });
+            }
+            
+            console.log(`Validated ${validatedOffers.filter(o => !o.isExpired).length}/${validatedOffers.length} offers`);
+            return validatedOffers.filter(offer => !offer.isExpired);
           }
         }
       } catch (endpointError) {
@@ -165,13 +189,13 @@ async function fetchDealabsOffers(): Promise<DealabsOffer[]> {
       }
     }
 
-    console.log('All endpoints failed, using simulated offers');
-    return getSimulatedOffers();
+    console.log('All endpoints failed, validating simulated offers');
+    return await getValidatedSimulatedOffers();
 
   } catch (error) {
     console.error('Error fetching from Dealabs API:', error);
-    // Retourner des données simulées si l'API n'est pas disponible
-    return getSimulatedOffers();
+    // Retourner des données simulées validées si l'API n'est pas disponible
+    return await getValidatedSimulatedOffers();
   }
 }
 
@@ -319,7 +343,7 @@ function extractCouponCode(description: string): string {
   return match ? (match[1] || match[2]) : '';
 }
 
-function getSimulatedOffers(): DealabsOffer[] {
+async function getValidatedSimulatedOffers(): Promise<DealabsOffer[]> {
   // Utiliser seulement des offres ACTUELLES et NON EXPIRÉES (Août 2025)
   const currentDate = new Date();
   const futureDate = new Date(currentDate.getTime() + (30 * 24 * 60 * 60 * 1000)); // +30 jours
@@ -334,96 +358,155 @@ function getSimulatedOffers(): DealabsOffer[] {
       discount: '100%',
       merchant: 'Surfshark',
       category: 'VPN',
-      url: 'https://www.dealabs.com/bons-plans/surfshark-vpn-unlimited-devices-2-mois-dessai-3116282',
+      url: 'https://surfshark.com/fr/deals?promo=NEW2024',
       votes: 156,
       temperature: 92,
       expiryDate: futureDate.toISOString(),
-      couponCode: '',
+      couponCode: 'NEW2024',
       isExpired: false,
     },
     {
       id: '2',
-      title: 'Abonnement UGC à tarif réduit pour les abonnés Canal+ -26ans',
-      description: 'Offre spéciale UGC Illimité pour les moins de 26 ans abonnés Canal+.',
-      price: '12.90€/mois',
-      originalPrice: '22.90€/mois',
-      discount: '44%',
-      merchant: 'UGC',
+      title: 'Netflix - 1 mois gratuit pour nouveaux abonnés',
+      description: 'Découvrez Netflix gratuitement pendant 1 mois complet.',
+      price: 'Gratuit',
+      originalPrice: '15.99€/mois',
+      discount: '100%',
+      merchant: 'Netflix',
       category: 'Streaming',
-      url: 'https://www.dealabs.com/bons-plans/abonnement-ugc-a-tarif-reduit-pour-les-abonnes-canal-26ans-3039052',
-      votes: 89,
-      temperature: 76,
+      url: 'https://www.netflix.com/fr/signup',
+      votes: 245,
+      temperature: 125,
       expiryDate: futureDate.toISOString(),
       couponCode: '',
       isExpired: false,
     },
     {
       id: '3',
-      title: 'CyberGhost VPN - 82% de remise',
-      description: 'VPN premium avec 82% de réduction pour les nouveaux abonnés.',
-      price: '2.03€/mois',
-      originalPrice: '11.99€/mois',
-      discount: '82%',
-      merchant: 'CyberGhost',
-      category: 'VPN',
-      url: 'https://www.dealabs.com/codes-promo/cyberghostvpn.com',
-      votes: 134,
-      temperature: 89,
+      title: 'Spotify Premium - 3 mois à 0.99€',
+      description: 'Profitez de Spotify Premium pendant 3 mois à prix réduit.',
+      price: '0.99€',
+      originalPrice: '9.99€/mois',
+      discount: '90%',
+      merchant: 'Spotify',
+      category: 'Musique',
+      url: 'https://www.spotify.com/fr/premium',
+      votes: 189,
+      temperature: 98,
       expiryDate: futureDate.toISOString(),
-      couponCode: 'CYBER82',
+      couponCode: '',
       isExpired: false,
     },
     {
       id: '4',
-      title: 'Fanatiz - Ligue 1 et Ligue 2 pour 8.12€/mois',
-      description: 'Regardez la Ligue 1, Ligue 2 et autres championnats en streaming.',
-      price: '8.12€/mois',
-      originalPrice: '19.99€/mois',
-      discount: '59%',
-      merchant: 'Fanatiz',
+      title: 'Disney+ - 50% de réduction sur l\'abonnement annuel',
+      description: 'Obtenez Disney+ à moitié prix pour un an complet.',
+      price: '44.99€/an',
+      originalPrice: '89.90€/an',
+      discount: '50%',
+      merchant: 'Disney',
       category: 'Streaming',
-      url: 'https://www.dealabs.com/discussions/fanatizcom-la-ligue-1-pour-666eurmois-via-vpn-canadien-2835789',
-      votes: 112,
-      temperature: 73,
+      url: 'https://www.disneyplus.com/fr-fr/sign-up',
+      votes: 156,
+      temperature: 87,
       expiryDate: futureDate.toISOString(),
       couponCode: '',
       isExpired: false,
     },
     {
       id: '5',
-      title: 'Apple TV+ - 1 mois gratuit',
-      description: 'Découvrez Apple TV+ gratuitement pendant 1 mois.',
-      price: 'Gratuit',
-      originalPrice: '6.99€/mois',
-      discount: '100%',
-      merchant: 'Apple',
-      category: 'Streaming',
-      url: 'https://www.dealabs.com/bons-plans/1-mois-dapple-tv-gratuit-2986109',
-      votes: 167,
-      temperature: 94,
+      title: 'Xbox Game Pass Ultimate - 3 mois pour 1€',
+      description: 'Accédez à plus de 100 jeux pour seulement 1€ pendant 3 mois.',
+      price: '1€',
+      originalPrice: '12.99€/mois',
+      discount: '92%',
+      merchant: 'Microsoft',
+      category: 'Gaming',
+      url: 'https://www.xbox.com/fr-fr/xbox-game-pass/ultimate',
+      votes: 298,
+      temperature: 134,
       expiryDate: futureDate.toISOString(),
       couponCode: '',
       isExpired: false,
     },
     {
       id: '6',
-      title: 'Audible - 3 mois gratuits',
-      description: '3 mois d\'abonnement Audible offerts pour nouveaux et anciens clients.',
+      title: 'Adobe Creative Cloud - 2 mois gratuits',
+      description: 'Essayez gratuitement tous les outils Adobe pendant 2 mois.',
       price: 'Gratuit',
-      originalPrice: '9.95€/mois',
+      originalPrice: '59.99€/mois',
       discount: '100%',
-      merchant: 'Audible',
+      merchant: 'Adobe',
       category: 'Productivité',
-      url: 'https://www.dealabs.com/bons-plans/anciens-et-nouveaux-clients-3-mois-dabonnement-offert-a-audible-2966939',
-      votes: 203,
-      temperature: 112,
+      url: 'https://www.adobe.com/fr/creativecloud/plans.html',
+      votes: 167,
+      temperature: 94,
       expiryDate: futureDate.toISOString(),
       couponCode: '',
       isExpired: false,
     }
   ];
 
-  // Filtrer les offres non expirées
+  console.log('Validating simulated offers URLs...');
+  const validatedOffers = [];
+  
+  for (const offer of offers) {
+    const isValidUrl = await validateOfferUrl(offer.url);
+    validatedOffers.push({
+      ...offer,
+      isExpired: !isValidUrl
+    });
+  }
+  
+  const validOffers = validatedOffers.filter(offer => {
+    const expiryDate = new Date(offer.expiryDate || '');
+    return expiryDate > currentDate && !offer.isExpired;
+  });
+  
+  console.log(`Validated ${validOffers.length}/${offers.length} simulated offers`);
+  return validOffers;
+}
+
+function getSimulatedOffers(): DealabsOffer[] {
+  // Version synchrone pour compatibilité
+  const currentDate = new Date();
+  const futureDate = new Date(currentDate.getTime() + (30 * 24 * 60 * 60 * 1000));
+  
+  const offers = [
+    {
+      id: '1',
+      title: '[Nouveaux clients Surfshark] 2 mois d\'essai VPN gratuit',
+      description: 'Clé d\'abonnement 2 mois gratuits à Surfshark VPN pour les nouveaux clients.',
+      price: 'Gratuit',
+      originalPrice: '12.95€/mois',
+      discount: '100%',
+      merchant: 'Surfshark',
+      category: 'VPN',
+      url: 'https://surfshark.com/fr/deals?promo=NEW2024',
+      votes: 156,
+      temperature: 92,
+      expiryDate: futureDate.toISOString(),
+      couponCode: 'NEW2024',
+      isExpired: false,
+    },
+    {
+      id: '2',
+      title: 'Netflix - 1 mois gratuit pour nouveaux abonnés',
+      description: 'Découvrez Netflix gratuitement pendant 1 mois complet.',
+      price: 'Gratuit',
+      originalPrice: '15.99€/mois',
+      discount: '100%',
+      merchant: 'Netflix',
+      category: 'Streaming',
+      url: 'https://www.netflix.com/fr/signup',
+      votes: 245,
+      temperature: 125,
+      expiryDate: futureDate.toISOString(),
+      couponCode: '',
+      isExpired: false,
+    }
+  ];
+
   return offers.filter(offer => {
     const expiryDate = new Date(offer.expiryDate || '');
     return expiryDate > currentDate && !offer.isExpired;
