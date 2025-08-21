@@ -286,27 +286,36 @@ async function getMatchedOffers(userSubscriptions: UserSubscription[], allOffers
   const matchedOffers = offers.filter(offer => {
     const offerTitle = offer.title.toLowerCase();
     const offerMerchant = offer.merchant.toLowerCase();
-    const offerCategory = offer.category.toLowerCase();
     
-    // Correspondance exacte par nom de service/merchant
-    const exactNameMatch = subscriptionNames.some(subName => 
-      offerMerchant.includes(subName) || 
-      offerTitle.includes(subName) ||
-      subName.includes(offerMerchant)
-    );
+    // Correspondance exacte par nom de service/merchant (priorité absolue)
+    const exactNameMatch = subscriptionNames.some(subName => {
+      const cleanSubName = subName.trim().toLowerCase();
+      const cleanMerchant = offerMerchant.trim().toLowerCase();
+      
+      // Correspondance exacte ou inclusion bidirectionnelle
+      const merchantMatch = cleanMerchant === cleanSubName || 
+                           cleanMerchant.includes(cleanSubName) || 
+                           cleanSubName.includes(cleanMerchant);
+      const titleMatch = offerTitle.includes(cleanSubName);
+      
+      if (merchantMatch || titleMatch) {
+        console.log(`MATCH: "${offer.title}" with user subscription "${subName}" - Merchant: ${merchantMatch}, Title: ${titleMatch}`);
+        return true;
+      }
+      return false;
+    });
     
-    // Correspondance par catégorie
-    const categoryMatch = subscriptionCategories.includes(offerCategory);
-    
-    // Log pour debug
-    if (exactNameMatch || categoryMatch) {
-      console.log(`Match found: ${offer.title} - Name: ${exactNameMatch}, Category: ${categoryMatch}`);
+    // Log pour les offres rejetées
+    if (!exactNameMatch) {
+      console.log(`REJECTED: "${offer.title}" (${offerMerchant}) - no exact match with user subscriptions`);
     }
     
-    return exactNameMatch || categoryMatch;
+    // SEULEMENT correspondance exacte par nom, pas de correspondance par catégorie seule
+    return exactNameMatch;
   });
 
   console.log(`Found ${matchedOffers.length} matched offers out of ${offers.length} total offers`);
+  console.log('Matched offer titles:', matchedOffers.map(o => o.title));
   
   // Trier par température décroissante (popularité)
   return matchedOffers.sort((a, b) => b.temperature - a.temperature);
