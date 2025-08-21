@@ -274,19 +274,47 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
                   )}
                 </div>
 
-                <a 
-                  href={offer.url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-3"
-                  onClick={(e) => {
-                    console.log('Direct link clicked:', offer.url);
-                    // Laisser le navigateur gérer la navigation naturellement
-                  }}
-                >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Voir l'offre
-                </a>
+                <div className="space-y-2">
+                  <div className="p-2 bg-muted/50 rounded-md">
+                    <p className="text-xs text-muted-foreground mb-1">Lien de l'offre:</p>
+                    <p className="text-xs font-mono break-all text-primary">{offer.url}</p>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Button 
+                      className="flex-1" 
+                      size="sm"
+                      onClick={() => {
+                        navigator.clipboard?.writeText(offer.url).then(() => {
+                          toast({
+                            title: "Lien copié",
+                            description: "Le lien a été copié dans le presse-papier",
+                          });
+                        }).catch(() => {
+                          toast({
+                            title: "Erreur",
+                            description: "Impossible de copier le lien",
+                            variant: "destructive",
+                          });
+                        });
+                      }}
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Copier le lien
+                    </Button>
+                    
+                    <Button 
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        // Redirection directe dans le même onglet
+                        window.location.href = offer.url;
+                      }}
+                    >
+                      Aller à l'offre
+                    </Button>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           ))}
