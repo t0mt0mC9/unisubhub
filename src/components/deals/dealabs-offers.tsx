@@ -290,8 +290,8 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
                   className="w-full" 
                   size="sm"
                   onClick={() => {
-                    const dealabsUrl = getDealabsUrl(offer.title, offer.merchant);
-                    window.open(dealabsUrl, '_blank');
+                    console.log('Opening offer URL:', offer.url);
+                    window.open(offer.url, '_blank', 'noopener,noreferrer');
                   }}
                 >
                   <ExternalLink className="h-4 w-4 mr-2" />
