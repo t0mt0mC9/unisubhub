@@ -30,7 +30,10 @@ const Index = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [displayedMockSubscriptions, setDisplayedMockSubscriptions] = useState<any[]>([]);
   const [analyticsTab, setAnalyticsTab] = useState<'offers' | 'analytics'>('offers');
-  const spendingData = calculateTotalSpending(displayedMockSubscriptions);
+  
+  // Filter subscriptions based on search term
+  const allSubscriptions = [...displayedMockSubscriptions, ...userSubscriptions];
+  const spendingData = calculateTotalSpending(allSubscriptions);
   const { toast } = useToast();
 
   // Initialize mock subscriptions with localStorage persistence
@@ -53,8 +56,6 @@ const Index = () => {
     }
   };
 
-  // Filter subscriptions based on search term
-  const allSubscriptions = [...displayedMockSubscriptions, ...userSubscriptions];
   const filteredSubscriptions = allSubscriptions.filter(subscription =>
     subscription.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     subscription.category.toLowerCase().includes(searchTerm.toLowerCase())
