@@ -71,28 +71,37 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
   useEffect(() => {
     // Démarrer avec les offres correspondantes par défaut
     fetchOffers('get_matched_offers');
-    // Actualiser les offres toutes les 5 minutes
+  }, []);
+
+  // Effect séparé pour gérer les changements de filtre
+  useEffect(() => {
+    if (filter === 'matched') {
+      fetchOffers('get_matched_offers');
+    } else if (filter === 'all') {
+      fetchOffers('get_offers');
+    } else {
+      fetchOffers('get_category_offers', filter);
+    }
+  }, [filter]);
+
+  // Effect pour l'actualisation automatique (sans dépendances qui changent fréquemment)
+  useEffect(() => {
     const interval = setInterval(() => {
-      fetchOffers(filter === 'matched' ? 'get_matched_offers' : filter === 'all' ? 'get_offers' : 'get_category_offers', filter !== 'all' && filter !== 'matched' ? filter : undefined);
-    }, 5 * 60 * 1000);
+      if (filter === 'matched') {
+        fetchOffers('get_matched_offers');
+      } else if (filter === 'all') {
+        fetchOffers('get_offers');
+      } else {
+        fetchOffers('get_category_offers', filter);
+      }
+    }, 5 * 60 * 1000); // 5 minutes
 
     return () => clearInterval(interval);
-  }, [filter, userSubscriptions]);
+  }, [filter]);
 
   const handleFilterChange = (newFilter: typeof filter) => {
     setFilter(newFilter);
-    
-    switch (newFilter) {
-      case 'all':
-        fetchOffers('get_offers');
-        break;
-      case 'matched':
-        fetchOffers('get_matched_offers');
-        break;
-      default:
-        fetchOffers('get_category_offers', newFilter);
-        break;
-    }
+    // L'appel fetchOffers sera fait automatiquement par le useEffect qui écoute les changements de filter
   };
 
   const getTemperatureColor = (temperature: number) => {
