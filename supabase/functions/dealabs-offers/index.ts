@@ -266,18 +266,50 @@ async function getCachedOffers(supabaseClient: any): Promise<DealabsOffer[]> {
 }
 
 async function getMatchedOffers(userSubscriptions: UserSubscription[], allOffers?: DealabsOffer[]): Promise<DealabsOffer[]> {
+  console.log(`Matching offers for ${userSubscriptions.length} user subscriptions`);
+  
+  // Si pas d'abonnements utilisateur, retourner vide
+  if (userSubscriptions.length === 0) {
+    console.log('No user subscriptions provided');
+    return [];
+  }
+
   const offers = allOffers || await fetchDealabsOffers();
   
-  // Matcher les offres avec les abonnements de l'utilisateur
-  return offers.filter(offer => {
-    return userSubscriptions.some(subscription => {
-      const merchantMatch = offer.merchant.toLowerCase().includes(subscription.name.toLowerCase()) ||
-                           subscription.name.toLowerCase().includes(offer.merchant.toLowerCase());
-      const categoryMatch = offer.category === subscription.category;
-      
-      return merchantMatch || categoryMatch;
-    });
+  // Créer une correspondance plus précise entre les abonnements utilisateur et les offres
+  const subscriptionNames = userSubscriptions.map(sub => sub.name.toLowerCase());
+  const subscriptionCategories = userSubscriptions.map(sub => sub.category.toLowerCase());
+  
+  console.log('User subscription names:', subscriptionNames);
+  console.log('User subscription categories:', subscriptionCategories);
+  
+  const matchedOffers = offers.filter(offer => {
+    const offerTitle = offer.title.toLowerCase();
+    const offerMerchant = offer.merchant.toLowerCase();
+    const offerCategory = offer.category.toLowerCase();
+    
+    // Correspondance exacte par nom de service/merchant
+    const exactNameMatch = subscriptionNames.some(subName => 
+      offerMerchant.includes(subName) || 
+      offerTitle.includes(subName) ||
+      subName.includes(offerMerchant)
+    );
+    
+    // Correspondance par catégorie
+    const categoryMatch = subscriptionCategories.includes(offerCategory);
+    
+    // Log pour debug
+    if (exactNameMatch || categoryMatch) {
+      console.log(`Match found: ${offer.title} - Name: ${exactNameMatch}, Category: ${categoryMatch}`);
+    }
+    
+    return exactNameMatch || categoryMatch;
   });
+
+  console.log(`Found ${matchedOffers.length} matched offers out of ${offers.length} total offers`);
+  
+  // Trier par température décroissante (popularité)
+  return matchedOffers.sort((a, b) => b.temperature - a.temperature);
 }
 
 async function getCategoryOffers(category: string, allOffers?: DealabsOffer[]): Promise<DealabsOffer[]> {

@@ -36,7 +36,7 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
   const { toast } = useToast();
   const [offers, setOffers] = useState<DealabsOffer[]>([]);
   const [loading, setLoading] = useState(false);
-  const [filter, setFilter] = useState<'all' | 'matched' | 'streaming' | 'musique' | 'vpn' | 'gaming'>('all');
+  const [filter, setFilter] = useState<'all' | 'matched' | 'streaming' | 'musique' | 'vpn' | 'gaming'>('matched');
 
   const fetchOffers = async (type: string = 'get_offers', category?: string) => {
     setLoading(true);
@@ -69,14 +69,15 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
   };
 
   useEffect(() => {
-    fetchOffers();
+    // Démarrer avec les offres correspondantes par défaut
+    fetchOffers('get_matched_offers');
     // Actualiser les offres toutes les 5 minutes
     const interval = setInterval(() => {
       fetchOffers(filter === 'matched' ? 'get_matched_offers' : filter === 'all' ? 'get_offers' : 'get_category_offers', filter !== 'all' && filter !== 'matched' ? filter : undefined);
     }, 5 * 60 * 1000);
 
     return () => clearInterval(interval);
-  }, [filter]);
+  }, [filter, userSubscriptions]);
 
   const handleFilterChange = (newFilter: typeof filter) => {
     setFilter(newFilter);
@@ -218,9 +219,11 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
             <Gift className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Aucune offre trouvée</h3>
             <p className="text-muted-foreground">
-              {filter === 'matched' 
-                ? "Aucune offre ne correspond à vos abonnements actuels"
-                : "Aucune offre disponible pour le moment"
+              {userSubscriptions.length === 0 
+                ? "Ajoutez des abonnements pour voir les offres correspondantes"
+                : filter === 'matched' 
+                  ? "Aucune offre ne correspond à vos abonnements actuels"
+                  : "Aucune offre disponible pour le moment"
               }
             </p>
           </CardContent>
