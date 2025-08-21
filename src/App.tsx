@@ -13,6 +13,8 @@ import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
 import { BankCallback } from "./pages/BankCallback";
 import ExpenseAnalysis from "./pages/ExpenseAnalysis";
+import { useSubscription } from "@/hooks/use-subscription";
+import { SubscriptionLock } from "@/components/subscription/subscription-lock";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +23,7 @@ const App = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
+  const { hasAccess, isLocked, loading: subscriptionLoading } = useSubscription();
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -46,7 +49,7 @@ const App = () => {
     return <SplashScreen onFinish={() => setShowSplash(false)} />;
   }
 
-  if (loading) {
+  if (loading || subscriptionLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -66,7 +69,7 @@ const App = () => {
           <Routes>
             <Route 
               path="/" 
-              element={user ? <Index /> : <Landing />} 
+              element={user ? (hasAccess ? <Index /> : <SubscriptionLock />) : <Landing />} 
             />
             <Route 
               path="/auth" 
@@ -78,11 +81,11 @@ const App = () => {
             />
             <Route 
               path="/expense-analysis" 
-              element={user ? <ExpenseAnalysis /> : <Navigate to="/auth" replace />} 
+              element={user ? (hasAccess ? <ExpenseAnalysis /> : <SubscriptionLock />) : <Navigate to="/auth" replace />} 
             />
             <Route 
               path="/analytics" 
-              element={user ? <ExpenseAnalysis /> : <Navigate to="/auth" replace />} 
+              element={user ? (hasAccess ? <ExpenseAnalysis /> : <SubscriptionLock />) : <Navigate to="/auth" replace />} 
             />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
