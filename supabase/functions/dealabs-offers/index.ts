@@ -365,8 +365,21 @@ function extractMerchant(title: string): string {
   const match = title.match(merchantRegex);
   if (match) return match[1] || match[2];
   
-  // Essayer d'extraire le nom du service
-  const services = ['Netflix', 'Spotify', 'Disney+', 'Amazon Prime', 'YouTube', 'NordVPN', 'ExpressVPN'];
+  // Liste étendue de services populaires
+  const services = [
+    'Netflix', 'Spotify', 'Disney+', 'Amazon Prime', 'YouTube', 'Canal+',
+    'NordVPN', 'ExpressVPN', 'Surfshark', 'CyberGhost',
+    'Office 365', 'Microsoft 365', 'Adobe', 'Photoshop', 'Canva',
+    'Xbox Game Pass', 'PlayStation Plus', 'Nintendo', 'Steam',
+    'Dropbox', 'Google One', 'iCloud', 'OneDrive',
+    'Paramount+', 'HBO Max', 'Crunchyroll', 'Molotov',
+    'Apple Music', 'Deezer', 'Tidal', 'Amazon Music',
+    'BeIN Sports', 'Eurosport', 'RMC Sport',
+    'Le Monde', 'Le Figaro', 'Libération', 'Mediapart',
+    'Headspace', 'Calm', 'Nike Training', 'Strava',
+    'Notion', 'Figma', 'Sketch'
+  ];
+  
   for (const service of services) {
     if (title.toLowerCase().includes(service.toLowerCase())) {
       return service;
@@ -379,32 +392,72 @@ function extractMerchant(title: string): string {
 function categorizeSubscription(title: string, description: string): string {
   const text = (title + ' ' + description).toLowerCase();
   
+  // Streaming vidéo
   if (text.includes('netflix') || text.includes('disney') || text.includes('prime video') || 
-      text.includes('canal') || text.includes('molotov') || text.includes('streaming')) {
+      text.includes('canal+') || text.includes('molotov') || text.includes('streaming') ||
+      text.includes('paramount+') || text.includes('hbo') || text.includes('crunchyroll') ||
+      text.includes('france.tv') || text.includes('tf1+') || text.includes('m6+') ||
+      text.includes('youtube premium') || text.includes('twitch')) {
     return 'Streaming';
   }
   
+  // Musique
   if (text.includes('spotify') || text.includes('apple music') || text.includes('deezer') || 
-      text.includes('musique')) {
+      text.includes('amazon music') || text.includes('tidal') || text.includes('qobuz') ||
+      text.includes('musique') || text.includes('audio')) {
     return 'Musique';
   }
   
+  // VPN et sécurité
   if (text.includes('vpn') || text.includes('nordvpn') || text.includes('expressvpn') || 
-      text.includes('surfshark')) {
+      text.includes('surfshark') || text.includes('cyberghost') || text.includes('protonvpn') ||
+      text.includes('private internet access') || text.includes('sécurité')) {
     return 'VPN';
   }
   
-  if (text.includes('office') || text.includes('adobe') || text.includes('creative') || 
-      text.includes('productivité')) {
+  // Productivité et logiciels
+  if (text.includes('office') || text.includes('adobe') || text.includes('creative cloud') || 
+      text.includes('photoshop') || text.includes('microsoft 365') || text.includes('notion') ||
+      text.includes('canva') || text.includes('dropbox') || text.includes('google one') ||
+      text.includes('productivité') || text.includes('stockage') || text.includes('cloud')) {
     return 'Productivité';
   }
   
+  // Gaming
   if (text.includes('xbox') || text.includes('playstation') || text.includes('gaming') || 
-      text.includes('jeux')) {
+      text.includes('jeux') || text.includes('game pass') || text.includes('ps plus') ||
+      text.includes('nintendo') || text.includes('steam') || text.includes('epic games')) {
     return 'Gaming';
   }
   
-  return 'Autre';
+  // Sport et fitness
+  if (text.includes('beinsports') || text.includes('eurosport') || text.includes('sport') ||
+      text.includes('fitness') || text.includes('nike training') || text.includes('adidas') ||
+      text.includes('strava') || text.includes('peloton') || text.includes('myfitnesspal')) {
+    return 'Sport';
+  }
+  
+  // Actualités et presse
+  if (text.includes('le monde') || text.includes('figaro') || text.includes('liberation') ||
+      text.includes('lemonde') || text.includes('journal') || text.includes('presse') ||
+      text.includes('actualités') || text.includes('news') || text.includes('mediapart')) {
+    return 'Actualités';
+  }
+  
+  // Bien-être et lifestyle
+  if (text.includes('headspace') || text.includes('calm') || text.includes('meditation') ||
+      text.includes('bien-être') || text.includes('mindfulness') || text.includes('yoga') ||
+      text.includes('santé')) {
+    return 'Bien-être';
+  }
+  
+  // Design et créatif
+  if (text.includes('figma') || text.includes('sketch') || text.includes('invision') ||
+      text.includes('design') || text.includes('créatif') || text.includes('illustration')) {
+    return 'Design';
+  }
+  
+  return 'Divers';
 }
 
 function extractCouponCode(description: string): string {
