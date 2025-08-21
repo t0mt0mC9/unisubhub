@@ -322,7 +322,28 @@ async function getMatchedOffers(userSubscriptions: UserSubscription[], allOffers
 
 async function getCategoryOffers(category: string, allOffers?: DealabsOffer[]): Promise<DealabsOffer[]> {
   const offers = allOffers || await fetchDealabsOffers();
-  return offers.filter(offer => offer.category === category);
+  console.log(`Filtering offers for category: ${category}`);
+  console.log(`Available offers categories:`, [...new Set(offers.map(o => o.category))]);
+  
+  // Normaliser la catégorie pour la comparaison (insensible à la casse)
+  const normalizedCategory = category.toLowerCase();
+  const categoryMap: { [key: string]: string } = {
+    'streaming': 'Streaming',
+    'musique': 'Musique', 
+    'vpn': 'VPN',
+    'gaming': 'Gaming',
+    'productivité': 'Productivité',
+    'sport': 'Sport',
+    'actualités': 'Actualités',
+    'bien-être': 'Bien-être',
+    'design': 'Design'
+  };
+  
+  const targetCategory = categoryMap[normalizedCategory] || category;
+  const filteredOffers = offers.filter(offer => offer.category === targetCategory);
+  
+  console.log(`Found ${filteredOffers.length} offers for category ${targetCategory}`);
+  return filteredOffers;
 }
 
 function isSubscriptionDeal(title: string, description: string): boolean {
