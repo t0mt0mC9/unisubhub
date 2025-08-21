@@ -1,9 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Lock, Crown, Clock, Gift, RefreshCw } from "lucide-react";
+import { Lock, Crown, Clock, Gift, RefreshCw, LogOut } from "lucide-react";
 import { UnifiedSubscriptionManager } from "./unified-subscription-manager";
 import { useSubscription } from "@/hooks/use-subscription";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface SubscriptionLockProps {
   onUpgrade?: () => void;
@@ -12,11 +14,33 @@ interface SubscriptionLockProps {
 
 export const SubscriptionLock = ({ onUpgrade, trialDaysRemaining = 0 }: SubscriptionLockProps) => {
   const { refresh, loading } = useSubscription();
+  const { toast } = useToast();
 
   const handleRefresh = async () => {
     const data = await refresh();
     if (data?.subscribed && onUpgrade) {
       onUpgrade();
+    }
+  };
+
+  const handleForceReauth = async () => {
+    try {
+      toast({
+        title: "Actualisation de la session...",
+        description: "Reconnexion en cours pour actualiser votre abonnement",
+      });
+      
+      // Déconnexion puis reconnexion automatique
+      await supabase.auth.signOut();
+      
+      // La redirection vers la landing page se fera automatiquement
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de se déconnecter. Veuillez rafraîchir la page.",
+        variant: "destructive",
+      });
     }
   };
   return (
@@ -34,15 +58,25 @@ export const SubscriptionLock = ({ onUpgrade, trialDaysRemaining = 0 }: Subscrip
             Votre période d'essai de 14 jours est maintenant terminée. 
             Passez à Premium pour continuer à utiliser UniSubHub.
           </p>
-          <Button 
-            onClick={handleRefresh} 
-            variant="outline" 
-            disabled={loading}
-            className="mb-4"
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Vérifier mon abonnement
-          </Button>
+          <div className="flex gap-2 justify-center">
+            <Button 
+              onClick={handleRefresh} 
+              variant="outline" 
+              disabled={loading}
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              Vérifier mon abonnement
+            </Button>
+            
+            <Button 
+              onClick={handleForceReauth} 
+              variant="secondary"
+              size="sm"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Actualiser la session
+            </Button>
+          </div>
         </div>
 
         {/* Premium Benefits */}
