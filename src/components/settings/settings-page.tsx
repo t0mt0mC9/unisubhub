@@ -13,14 +13,9 @@ import {
   Settings, 
   Bell, 
   Euro, 
-  Moon, 
-  Sun, 
-  Smartphone, 
-  Mail, 
   Shield, 
   User, 
   LogOut,
-  Download,
   Trash2,
   HelpCircle
 } from "lucide-react";
@@ -37,7 +32,7 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
   const [renewalAlerts, setRenewalAlerts] = useState(true);
   const [currency, setCurrency] = useState("EUR");
   const [budgetLimit, setBudgetLimit] = useState("100");
-  const [darkMode, setDarkMode] = useState(false);
+  
   
   const { toast } = useToast();
 
@@ -48,12 +43,6 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
     });
   };
 
-  const handleExportData = () => {
-    toast({
-      title: "Export en cours",
-      description: "Vos données seront téléchargées dans quelques instants",
-    });
-  };
 
   const handleDeleteAccount = async () => {
     try {
@@ -226,32 +215,6 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
         </CardContent>
       </Card>
 
-      {/* Appearance */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Smartphone className="h-5 w-5" />
-            Apparence
-          </CardTitle>
-          <CardDescription>
-            Personnalisez l'apparence de l'application
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>Mode sombre</Label>
-              <div className="text-sm text-muted-foreground">
-                Basculer vers le thème sombre
-              </div>
-            </div>
-            <Switch
-              checked={darkMode}
-              onCheckedChange={setDarkMode}
-            />
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Data & Privacy */}
       <Card>
@@ -265,11 +228,6 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Button variant="outline" onClick={handleExportData} className="w-full">
-            <Download className="mr-2 h-4 w-4" />
-            Exporter mes données
-          </Button>
-          
           <Button variant="outline" onClick={onShowPrivacyPolicy} className="w-full">
             <HelpCircle className="mr-2 h-4 w-4" />
             Politique de confidentialité
