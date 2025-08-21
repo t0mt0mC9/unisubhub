@@ -55,6 +55,12 @@ const App = () => {
       return false;
     }
     
+    // BYPASS TEMPORAIRE pour tom.lifert@gmail.com
+    if (user.email === 'tom.lifert@gmail.com') {
+      console.log('🎯 BYPASS ACTIVÉ pour tom.lifert@gmail.com');
+      return true;
+    }
+    
     console.log('👤 Utilisateur connecté:', {
       email: user.email,
       created_at: user.created_at,
