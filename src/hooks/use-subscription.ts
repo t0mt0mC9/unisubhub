@@ -28,10 +28,15 @@ export const useSubscription = () => {
   const checkSubscription = async () => {
     try {
       setLoading(true);
+      console.log('🔍 Vérification de l\'abonnement...');
       const { data, error } = await supabase.functions.invoke('check-subscription');
       
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erreur lors de l\'appel de check-subscription:', error);
+        throw error;
+      }
       
+      console.log('✅ Données d\'abonnement reçues:', data);
       setSubscriptionData(data);
       return data;
     } catch (error: any) {
@@ -56,6 +61,15 @@ export const useSubscription = () => {
   
   // Check if trial has expired and user hasn't subscribed
   const isLocked = !subscriptionData.subscribed && !subscriptionData.trial_active;
+  
+  console.log('📊 État de l\'abonnement:', {
+    subscribed: subscriptionData.subscribed,
+    trial_active: subscriptionData.trial_active,
+    subscription_tier: subscriptionData.subscription_tier,
+    subscription_type: subscriptionData.subscription_type,
+    hasAccess,
+    isLocked
+  });
 
   return {
     subscriptionData,
