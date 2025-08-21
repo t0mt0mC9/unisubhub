@@ -50,18 +50,45 @@ const App = () => {
 
   // Fonction pour déterminer si l'utilisateur a accès
   const userHasAccess = () => {
-    if (!user) return false;
+    if (!user) {
+      console.log('🔒 Pas d\'utilisateur connecté');
+      return false;
+    }
+    
+    console.log('👤 Utilisateur connecté:', {
+      email: user.email,
+      created_at: user.created_at,
+      hasAccess: hasAccess,
+      subscriptionData: subscriptionLoading ? 'loading...' : 'loaded'
+    });
     
     // Si l'utilisateur a un abonnement actif selon le hook
-    if (hasAccess) return true;
+    if (hasAccess) {
+      console.log('✅ Accès accordé via abonnement actif');
+      return true;
+    }
     
     // Sinon, vérifier l'essai gratuit basé sur la date de création
     const userCreatedAt = new Date(user.created_at);
     const now = new Date();
     const daysSinceCreation = Math.floor((now.getTime() - userCreatedAt.getTime()) / (1000 * 60 * 60 * 24));
     
+    console.log('📅 Vérification essai gratuit:', {
+      userCreatedAt: userCreatedAt.toISOString(),
+      now: now.toISOString(),
+      daysSinceCreation,
+      hasTrialAccess: daysSinceCreation < 14
+    });
+    
     // Donner accès pendant 14 jours après création
-    return daysSinceCreation < 14;
+    const trialAccess = daysSinceCreation < 14;
+    if (trialAccess) {
+      console.log('✅ Accès accordé via essai gratuit');
+    } else {
+      console.log('❌ Essai gratuit expiré');
+    }
+    
+    return trialAccess;
   };
 
   if (showSplash) {
