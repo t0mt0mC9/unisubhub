@@ -1,5 +1,15 @@
 {
-  "identifier" : "CEADB9F2",
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "635532F9",
   "nonRenewingSubscriptions" : [
 
   ],
@@ -7,30 +17,78 @@
     {
       "displayPrice" : "89.99",
       "familyShareable" : false,
-      "identifier" : "premium_lifetime",
+      "internalID" : "E62D966D",
       "localizations" : [
         {
-          "description" : "Accès à vie aux fonctionnalités premium",
-          "displayName" : "Premium à vie",
-          "locale" : "fr"
+          "description" : "",
+          "displayName" : "",
+          "locale" : "en_US"
         }
       ],
-      "productID" : "com.unisubhub.PAV02",
-      "referenceName" : "Premium Lifetime",
+      "productID" : "com.unisubhub.premium",
+      "referenceName" : "Plan illimité",
       "type" : "NonConsumable"
     }
   ],
   "settings" : {
-
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Purchase"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Verification"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Store Sync"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Subscription Status"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Transaction"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Manage Subscriptions Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Refund Request Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Offer Code Redeem Sheet"
+      }
+    ]
   },
   "subscriptionGroups" : [
     {
-      "displayName" : "Premium Subscriptions",
-      "identifier" : "21751580",
+      "id" : "4C55D4C3",
       "localizations" : [
 
       ],
-      "name" : "premium_subscriptions",
+      "name" : "Abonnement",
       "subscriptions" : [
         {
           "adHocOffers" : [
@@ -42,26 +100,29 @@
           "displayPrice" : "4.99",
           "familyShareable" : false,
           "groupNumber" : 1,
-          "identifier" : "premium_monthly",
+          "internalID" : "2428D5BB",
           "introductoryOffer" : null,
           "localizations" : [
             {
-              "description" : "Accès complet aux fonctionnalités premium",
-              "displayName" : "Premium Mensuel",
-              "locale" : "fr"
+              "description" : "",
+              "displayName" : "",
+              "locale" : "en_US"
             }
           ],
-          "productID" : "com.unisubhub.PM02",
+          "productID" : "com.unisubhub.monthly",
           "recurringSubscriptionPeriod" : "P1M",
-          "referenceName" : "Premium Monthly",
-          "subscriptionGroupIdentifier" : "21751580",
-          "type" : "RecurringSubscription"
+          "referenceName" : "Plan par mois",
+          "subscriptionGroupID" : "4C55D4C3",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
         }
       ]
     }
   ],
   "version" : {
-    "major" : 3,
+    "major" : 4,
     "minor" : 0
   }
 }
