@@ -72,6 +72,10 @@ const App = () => {
               element={user ? (hasAccess ? <Index /> : <SubscriptionLock />) : <Landing />} 
             />
             <Route 
+              path="/landing" 
+              element={<Landing />} 
+            />
+            <Route 
               path="/auth" 
               element={!user ? <Auth /> : <Navigate to="/" replace />} 
             />
