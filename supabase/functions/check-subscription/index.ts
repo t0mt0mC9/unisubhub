@@ -206,7 +206,15 @@ serve(async (req) => {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logStep("ERROR in check-subscription", { message: errorMessage });
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    return new Response(JSON.stringify({ 
+      error: errorMessage,
+      // En cas d'erreur, donner un accès temporaire pour éviter de bloquer les nouveaux utilisateurs
+      subscribed: false,
+      trial_active: true,
+      trial_days_remaining: 14,
+      subscription_tier: 'Trial',
+      subscription_type: 'trial'
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });

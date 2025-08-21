@@ -14,7 +14,9 @@ import NotFound from "./pages/NotFound";
 import { BankCallback } from "./pages/BankCallback";
 import ExpenseAnalysis from "./pages/ExpenseAnalysis";
 import { useSubscription } from "@/hooks/use-subscription";
+import { useOnboarding } from "@/hooks/use-onboarding";
 import { SubscriptionLock } from "@/components/subscription/subscription-lock";
+import { OnboardingOverlay } from "@/components/onboarding/onboarding-overlay";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +26,7 @@ const App = () => {
   const [loading, setLoading] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
   const { hasAccess, isLocked, loading: subscriptionLoading } = useSubscription();
+  const { showOnboarding, loading: onboardingLoading, completeOnboarding } = useOnboarding();
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -49,7 +52,7 @@ const App = () => {
     return <SplashScreen onFinish={() => setShowSplash(false)} />;
   }
 
-  if (loading || subscriptionLoading) {
+  if (loading || subscriptionLoading || onboardingLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -57,6 +60,19 @@ const App = () => {
           <p className="text-muted-foreground">Chargement...</p>
         </div>
       </div>
+    );
+  }
+
+  // Afficher l'onboarding pour les nouveaux utilisateurs connectés
+  if (user && showOnboarding) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <OnboardingOverlay onComplete={completeOnboarding} />
+        </TooltipProvider>
+      </QueryClientProvider>
     );
   }
 
