@@ -278,8 +278,8 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
                   className="w-full" 
                   size="sm"
                   onClick={() => {
-                    console.log('Redirecting to offer:', offer.url);
-                    window.location.href = offer.url;
+                    console.log('Opening offer URL:', offer.url);
+                    window.open(offer.url, '_blank', 'noopener,noreferrer');
                   }}
                 >
                   <ExternalLink className="h-4 w-4 mr-2" />
