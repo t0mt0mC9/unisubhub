@@ -70,7 +70,13 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
 
   useEffect(() => {
     fetchOffers();
-  }, []);
+    // Actualiser les offres toutes les 5 minutes
+    const interval = setInterval(() => {
+      fetchOffers(filter === 'matched' ? 'get_matched_offers' : filter === 'all' ? 'get_offers' : 'get_category_offers', filter !== 'all' && filter !== 'matched' ? filter : undefined);
+    }, 5 * 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, [filter]);
 
   const handleFilterChange = (newFilter: typeof filter) => {
     setFilter(newFilter);
@@ -103,6 +109,12 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
       case 'productivité': return '💼';
       default: return '📱';
     }
+  };
+
+  const getDealabsUrl = (offerTitle: string, merchant: string) => {
+    // Créer une URL de recherche Dealabs basée sur le titre et le marchand
+    const searchQuery = encodeURIComponent(`${merchant} ${offerTitle}`);
+    return `https://www.dealabs.com/search?q=${searchQuery}`;
   };
 
   return (
@@ -278,8 +290,9 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
                   className="w-full" 
                   size="sm"
                   onClick={() => {
-                    console.log('Opening offer URL:', offer.url);
-                    window.open(offer.url, '_blank', 'noopener,noreferrer');
+                    const dealabsUrl = getDealabsUrl(offer.title, offer.merchant);
+                    console.log('Redirecting to Dealabs:', dealabsUrl);
+                    window.location.href = dealabsUrl;
                   }}
                 >
                   <ExternalLink className="h-4 w-4 mr-2" />
