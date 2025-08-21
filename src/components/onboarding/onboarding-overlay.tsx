@@ -2,7 +2,11 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { X, ChevronRight, ChevronLeft, BarChart3, CreditCard, Settings, Sparkles } from "lucide-react";
+import { X, ChevronRight, ChevronLeft, BarChart3, CreditCard, Settings, Sparkles, List } from "lucide-react";
+import { SubscriptionSelector } from "./subscription-selector";
+import { PopularSubscription } from "@/data/popular-subscriptions";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface OnboardingOverlayProps {
   onComplete: () => void;
@@ -54,6 +58,13 @@ const onboardingSteps = [
   },
   {
     id: 3,
+    title: "Sélectionnez vos abonnements",
+    description: "Choisissez les services auxquels vous êtes déjà abonné(e) pour commencer.",
+    icon: <List className="h-8 w-8 text-primary" />,
+    content: "subscription-selector" // Special identifier for dynamic content
+  },
+  {
+    id: 4,
     title: "Ajoutez vos abonnements",
     description: "Saisissez manuellement ou connectez votre banque pour une détection automatique.",
     icon: <CreditCard className="h-8 w-8 text-primary" />,
@@ -76,7 +87,7 @@ const onboardingSteps = [
     )
   },
   {
-    id: 4,
+    id: 5,
     title: "Analyses et recommandations",
     description: "Découvrez des insights personnalisés pour optimiser vos dépenses.",
     icon: <Settings className="h-8 w-8 text-primary" />,
@@ -103,13 +114,56 @@ const onboardingSteps = [
 
 export const OnboardingOverlay = ({ onComplete }: OnboardingOverlayProps) => {
   const [currentStep, setCurrentStep] = useState(0);
+  const [selectedSubscriptions, setSelectedSubscriptions] = useState<PopularSubscription[]>([]);
+  const { toast } = useToast();
   const step = onboardingSteps[currentStep];
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    // If we're on the subscription selector step and have selections, save them
+    if (currentStep === 2 && selectedSubscriptions.length > 0) {
+      await saveSelectedSubscriptions();
+    }
+    
     if (currentStep < onboardingSteps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
       onComplete();
+    }
+  };
+
+  const saveSelectedSubscriptions = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const subscriptionsToSave = selectedSubscriptions.map(sub => ({
+        user_id: user.id,
+        name: sub.name,
+        price: sub.avgPrice,
+        currency: sub.currency,
+        billing_cycle: sub.billingCycle,
+        category: sub.category,
+        next_billing_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
+        status: 'active'
+      }));
+
+      const { error } = await supabase
+        .from('subscriptions')
+        .insert(subscriptionsToSave);
+
+      if (error) throw error;
+
+      toast({
+        title: "Abonnements ajoutés !",
+        description: `${selectedSubscriptions.length} abonnement(s) ont été ajoutés à votre liste.`
+      });
+    } catch (error) {
+      console.error('Error saving subscriptions:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible d'ajouter les abonnements. Vous pourrez les ajouter plus tard.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -121,6 +175,29 @@ export const OnboardingOverlay = ({ onComplete }: OnboardingOverlayProps) => {
 
   const handleSkip = () => {
     onComplete();
+  };
+
+  const handleSubscriptionToggle = (subscription: PopularSubscription) => {
+    setSelectedSubscriptions(prev => {
+      const isSelected = prev.some(selected => selected.id === subscription.id);
+      if (isSelected) {
+        return prev.filter(selected => selected.id !== subscription.id);
+      } else {
+        return [...prev, subscription];
+      }
+    });
+  };
+
+  const renderStepContent = () => {
+    if (step.content === "subscription-selector") {
+      return (
+        <SubscriptionSelector
+          selectedSubscriptions={selectedSubscriptions}
+          onSubscriptionToggle={handleSubscriptionToggle}
+        />
+      );
+    }
+    return step.content;
   };
 
   return (
@@ -154,7 +231,7 @@ export const OnboardingOverlay = ({ onComplete }: OnboardingOverlayProps) => {
         </CardHeader>
         
         <CardContent className="space-y-6">
-          {step.content}
+          {renderStepContent()}
           
           <div className="flex justify-between items-center pt-4">
             <Button
@@ -172,7 +249,13 @@ export const OnboardingOverlay = ({ onComplete }: OnboardingOverlayProps) => {
             </div>
             
             <Button onClick={handleNext} className="flex items-center space-x-1">
-              <span>{currentStep === onboardingSteps.length - 1 ? "C'est parti !" : "Suivant"}</span>
+              <span>
+                {currentStep === onboardingSteps.length - 1 
+                  ? "C'est parti !" 
+                  : currentStep === 2 && selectedSubscriptions.length > 0
+                    ? `Ajouter (${selectedSubscriptions.length})`
+                    : "Suivant"}
+              </span>
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
