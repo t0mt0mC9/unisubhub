@@ -112,9 +112,23 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
   };
 
   const getDealabsUrl = (offerTitle: string, merchant: string) => {
-    // Créer une URL de recherche Dealabs basée sur le titre et le marchand
-    const searchQuery = encodeURIComponent(`${merchant} ${offerTitle}`);
-    return `https://www.dealabs.com/search?q=${searchQuery}`;
+    // Nettoyer le titre pour extraire les mots-clés pertinents
+    const cleanTitle = offerTitle
+      .replace(/\[.*?\]/g, '') // Supprimer les crochets
+      .replace(/\d+\s*mois/g, '') // Supprimer "X mois"
+      .replace(/gratuit|free/gi, 'promo') // Remplacer "gratuit" par "promo"
+      .replace(/reduction|réduction/gi, 'promo')
+      .trim();
+    
+    // Créer une recherche optimisée
+    const searchTerms = `${merchant} ${cleanTitle}`.toLowerCase()
+      .split(' ')
+      .filter(word => word.length > 2) // Garder seulement les mots > 2 caractères
+      .slice(0, 4) // Limiter à 4 mots pour une recherche plus précise
+      .join(' ');
+    
+    const searchQuery = encodeURIComponent(searchTerms);
+    return `https://www.dealabs.com/search?q=${searchQuery}&order=hot`;
   };
 
   return (
@@ -290,8 +304,9 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
                   className="w-full" 
                   size="sm"
                   onClick={() => {
-                    console.log('Opening offer URL:', offer.url);
-                    window.open(offer.url, '_blank', 'noopener,noreferrer');
+                    const dealabsUrl = getDealabsUrl(offer.title, offer.merchant);
+                    console.log('Opening Dealabs search URL:', dealabsUrl);
+                    window.open(dealabsUrl, '_blank', 'noopener,noreferrer');
                   }}
                 >
                   <ExternalLink className="h-4 w-4 mr-2" />
