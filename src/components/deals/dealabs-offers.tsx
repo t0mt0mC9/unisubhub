@@ -278,33 +278,8 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
                   className="w-full" 
                   size="sm"
                   onClick={() => {
-                    console.log('Clicking offer URL:', offer.url);
-                    try {
-                      // Ouvrir le lien dans un nouvel onglet de manière sécurisée
-                      const link = document.createElement('a');
-                      link.href = offer.url;
-                      link.target = '_blank';
-                      link.rel = 'noopener noreferrer';
-                      link.style.display = 'none';
-                      document.body.appendChild(link);
-                      link.click();
-                      document.body.removeChild(link);
-                      
-                      console.log('Link opened successfully');
-                    } catch (error) {
-                      console.error('Error opening URL:', error);
-                      // Fallback: essayer window.open
-                      try {
-                        window.open(offer.url, '_blank', 'noopener,noreferrer');
-                      } catch (fallbackError) {
-                        console.error('Fallback also failed:', fallbackError);
-                        toast({
-                          title: "Erreur",
-                          description: "Impossible d'ouvrir le lien. Copiez-le manuellement: " + offer.url,
-                          variant: "destructive",
-                        });
-                      }
-                    }
+                    console.log('Opening offer URL:', offer.url);
+                    window.open(offer.url, '_blank', 'noopener,noreferrer');
                   }}
                 >
                   <ExternalLink className="h-4 w-4 mr-2" />
