@@ -218,13 +218,13 @@ async function fetchDealabsOffers(): Promise<DealabsOffer[]> {
       }
     }
 
-    console.log('All endpoints failed, using curated offers from Dealabs');
-    return await getCuratedDealabsOffers();
+    console.log('All Dealabs API endpoints failed - no real offers available');
+    return [];
 
   } catch (error) {
     console.error('Error fetching from Dealabs API:', error);
-    // Retourner des offres curées si l'API n'est pas disponible
-    return await getCuratedDealabsOffers();
+    // Retourner un tableau vide si l'API Dealabs n'est pas accessible
+    return [];
   }
 }
 
@@ -372,110 +372,3 @@ function extractCouponCode(description: string): string {
   return match ? (match[1] || match[2]) : '';
 }
 
-async function getCuratedDealabsOffers(): Promise<DealabsOffer[]> {
-  // Offres curées basées sur de vraies promotions disponibles sur Dealabs
-  const currentDate = new Date();
-  const futureDate = new Date(currentDate.getTime() + (45 * 24 * 60 * 60 * 1000)); // +45 jours
-  
-  const offers = [
-    {
-      id: 'dealabs_1',
-      title: 'Spotify Premium - 3 mois pour 0.99€ (Nouveaux abonnés)',
-      description: 'Profitez de Spotify Premium pendant 3 mois complets à prix réduit. Offre valable pour les nouveaux abonnés uniquement.',
-      price: '0.99€',
-      originalPrice: '9.99€/mois',
-      discount: '90%',
-      merchant: 'Spotify',
-      category: 'Musique',
-      url: 'https://www.dealabs.com/search?q=spotify+premium+reduction&order=hot',
-      votes: 189,
-      temperature: 98,
-      expiryDate: futureDate.toISOString(),
-      couponCode: '',
-      isExpired: false,
-    },
-    {
-      id: 'dealabs_2',
-      title: 'NordVPN - 2 ans + 3 mois offerts (-69%)',
-      description: 'Abonnement NordVPN 2 ans avec 3 mois gratuits supplémentaires. Protection complète et serveurs rapides.',
-      price: '3.19€/mois',
-      originalPrice: '10.59€/mois',
-      discount: '69%',
-      merchant: 'NordVPN',
-      category: 'VPN',
-      url: 'https://www.dealabs.com/search?q=nordvpn+promotion&order=hot',
-      votes: 267,
-      temperature: 156,
-      expiryDate: futureDate.toISOString(),
-      couponCode: 'NORD69',
-      isExpired: false,
-    },
-    {
-      id: 'dealabs_3',
-      title: 'Disney+ - 50% de réduction sur l\'abonnement annuel',
-      description: 'Obtenez Disney+ à moitié prix pour un an complet. Accès à tout le catalogue Disney, Marvel, Star Wars.',
-      price: '44.99€/an',
-      originalPrice: '89.90€/an',
-      discount: '50%',
-      merchant: 'Disney',
-      category: 'Streaming',
-      url: 'https://www.dealabs.com/search?q=disney+plus+reduction&order=hot',
-      votes: 156,
-      temperature: 87,
-      expiryDate: futureDate.toISOString(),
-      couponCode: '',
-      isExpired: false,
-    },
-    {
-      id: 'dealabs_4',
-      title: 'Xbox Game Pass Ultimate - 3 mois pour 1€',
-      description: 'Accédez à plus de 100 jeux pour seulement 1€ pendant 3 mois. Inclut EA Play et Xbox Live Gold.',
-      price: '1€',
-      originalPrice: '12.99€/mois',
-      discount: '92%',
-      merchant: 'Microsoft',
-      category: 'Gaming',
-      url: 'https://www.dealabs.com/search?q=xbox+game+pass+ultimate&order=hot',
-      votes: 298,
-      temperature: 134,
-      expiryDate: futureDate.toISOString(),
-      couponCode: '',
-      isExpired: false,
-    },
-    {
-      id: 'dealabs_5',
-      title: 'Adobe Creative Cloud - 1 mois gratuit (Nouveaux utilisateurs)',
-      description: 'Essayez gratuitement tous les outils Adobe pendant 1 mois complet. Photoshop, Illustrator, Premiere Pro inclus.',
-      price: 'Gratuit',
-      originalPrice: '59.99€/mois',
-      discount: '100%',
-      merchant: 'Adobe',
-      category: 'Productivité',
-      url: 'https://www.dealabs.com/search?q=adobe+creative+cloud+gratuit&order=hot',
-      votes: 167,
-      temperature: 94,
-      expiryDate: futureDate.toISOString(),
-      couponCode: '',
-      isExpired: false,
-    },
-    {
-      id: 'dealabs_6',
-      title: 'Canal+ - 2 mois à 9.99€/mois au lieu de 25.99€',
-      description: 'Profitez de Canal+ avec tout le sport, cinéma et séries à prix réduit pendant 2 mois.',
-      price: '9.99€/mois',
-      originalPrice: '25.99€/mois',
-      discount: '62%',
-      merchant: 'Canal+',
-      category: 'Streaming',
-      url: 'https://www.dealabs.com/search?q=canal+plus+promotion&order=hot',
-      votes: 124,
-      temperature: 78,
-      expiryDate: futureDate.toISOString(),
-      couponCode: '',
-      isExpired: false,
-    }
-  ];
-
-  console.log(`Using ${offers.length} curated Dealabs offers`);
-  return offers;
-}
