@@ -277,13 +277,17 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
                 <Button 
                   className="w-full" 
                   size="sm"
-                  onClick={() => {
-                    console.log('Opening offer URL:', offer.url);
-                    window.open(offer.url, '_blank', 'noopener,noreferrer');
-                  }}
+                  asChild
                 >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Voir l'offre
+                  <a 
+                    href={offer.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Voir l'offre
+                  </a>
                 </Button>
               </CardContent>
             </Card>
