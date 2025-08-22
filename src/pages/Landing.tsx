@@ -316,7 +316,7 @@ const Landing = () => {
                 {/* Découvrir les offres */}
                 <div className="bg-gradient-to-br from-background to-surface rounded-lg border border-border/50 p-4 text-center">
                   <img 
-                    src={screenshotOffers}
+                    src="/lovable-uploads/270f901b-add0-4d7b-8c29-1a1229260964.png"
                     alt="Découvrez des offres à prix réduits sur vos abonnements"
                     className="w-full h-auto rounded-lg shadow-lg mx-auto"
                   />
@@ -327,7 +327,7 @@ const Landing = () => {
                 {/* Analytics Screenshot */}
                 <div className="bg-gradient-to-br from-background to-surface rounded-lg border border-border/50 p-4 text-center">
                   <img 
-                    src={screenshotAnalytics}
+                    src="/lovable-uploads/4e98fe7c-6a26-476c-b4bd-9871073ad504.png"
                     alt="Analysez votre consommation avec des graphiques interactifs"
                     className="w-full h-auto rounded-lg shadow-lg mx-auto"
                   />
@@ -338,7 +338,7 @@ const Landing = () => {
                 {/* Suivi des dépenses */}
                 <div className="bg-gradient-to-br from-background to-surface rounded-lg border border-border/50 p-4 text-center">
                   <img 
-                    src={screenshotTracking}
+                    src="/lovable-uploads/9f0bae2c-190d-47d1-90d7-42b0a3161453.png"
                     alt="Suivez votre consommation avec des analyses détaillées"
                     className="w-full h-auto rounded-lg shadow-lg mx-auto"
                   />
@@ -351,7 +351,7 @@ const Landing = () => {
                 {/* Ajout d'abonnements */}
                 <div className="bg-gradient-to-br from-background to-surface rounded-lg border border-border/50 p-4 text-center">
                   <img 
-                    src={screenshotAdd}
+                    src="/lovable-uploads/ad996069-d307-4051-877a-984d6f7152f7.png"
                     alt="Ajoutez vos abonnements manuellement ou par connexion bancaire"
                     className="w-full h-auto rounded-lg shadow-lg mx-auto"
                   />
@@ -362,7 +362,7 @@ const Landing = () => {
                 {/* Identification des abonnements */}
                 <div className="bg-gradient-to-br from-background to-surface rounded-lg border border-border/50 p-4 text-center">
                   <img 
-                    src={screenshotIdentify}
+                    src="/lovable-uploads/d74ff95c-050c-4415-9d1f-f65167d2ea5c.png"
                     alt="Identifiez vos abonnements récurrents facilement"
                     className="w-full h-auto rounded-lg shadow-lg mx-auto"
                   />
@@ -373,7 +373,7 @@ const Landing = () => {
                 {/* Parrainage */}
                 <div className="bg-gradient-to-br from-background to-surface rounded-lg border border-border/50 p-4 text-center">
                   <img 
-                    src={screenshotReferral}
+                    src="/lovable-uploads/270f901b-add0-4d7b-8c29-1a1229260964.png"
                     alt="Parrainez vos amis et obtenez des mois gratuits"
                     className="w-full h-auto rounded-lg shadow-lg mx-auto"
                   />
