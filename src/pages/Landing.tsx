@@ -313,7 +313,7 @@ const Landing = () => {
           <div className="relative max-w-7xl mx-auto">
             <div className="bg-gradient-to-br from-surface via-card to-surface-elevated rounded-2xl p-8 border border-border shadow-2xl">
               <div className="grid md:grid-cols-3 lg:grid-cols-3 gap-6 mb-6">
-                {/* Découvrir les offres */}
+                {/* Découvrir les offres - Image 1: offres Dealabs */}
                 <div className="bg-gradient-to-br from-background to-surface rounded-lg border border-border/50 p-4 text-center">
                   <img 
                     src="/lovable-uploads/270f901b-add0-4d7b-8c29-1a1229260964.png"
@@ -324,7 +324,7 @@ const Landing = () => {
                   <p className="text-sm text-muted-foreground">Découvrez des réductions sur vos abonnements</p>
                 </div>
 
-                {/* Analytics Screenshot */}
+                {/* Analytics - Image 2: score d'optimisation */}
                 <div className="bg-gradient-to-br from-background to-surface rounded-lg border border-border/50 p-4 text-center">
                   <img 
                     src="/lovable-uploads/4e98fe7c-6a26-476c-b4bd-9871073ad504.png"
@@ -335,7 +335,7 @@ const Landing = () => {
                   <p className="text-sm text-muted-foreground">Score d'optimisation et graphiques détaillés</p>
                 </div>
 
-                {/* Suivi des dépenses */}
+                {/* Suivi des dépenses - Image 3: analyses détaillées */}
                 <div className="bg-gradient-to-br from-background to-surface rounded-lg border border-border/50 p-4 text-center">
                   <img 
                     src="/lovable-uploads/9f0bae2c-190d-47d1-90d7-42b0a3161453.png"
@@ -348,7 +348,7 @@ const Landing = () => {
               </div>
 
               <div className="grid md:grid-cols-3 lg:grid-cols-3 gap-6">
-                {/* Ajout d'abonnements */}
+                {/* Ajout d'abonnements - Image 4: formulaire d'ajout */}
                 <div className="bg-gradient-to-br from-background to-surface rounded-lg border border-border/50 p-4 text-center">
                   <img 
                     src="/lovable-uploads/ad996069-d307-4051-877a-984d6f7152f7.png"
@@ -359,7 +359,7 @@ const Landing = () => {
                   <p className="text-sm text-muted-foreground">Manuel ou connexion bancaire automatique</p>
                 </div>
 
-                {/* Identification des abonnements */}
+                {/* Identification - Image 5: sélection d'abonnements */}
                 <div className="bg-gradient-to-br from-background to-surface rounded-lg border border-border/50 p-4 text-center">
                   <img 
                     src="/lovable-uploads/d74ff95c-050c-4415-9d1f-f65167d2ea5c.png"
@@ -370,7 +370,7 @@ const Landing = () => {
                   <p className="text-sm text-muted-foreground">Détection automatique de vos abonnements</p>
                 </div>
 
-                {/* Parrainage */}
+                {/* Parrainage - Image 6: invitation d'amis */}
                 <div className="bg-gradient-to-br from-background to-surface rounded-lg border border-border/50 p-4 text-center">
                   <img 
                     src="/lovable-uploads/270f901b-add0-4d7b-8c29-1a1229260964.png"
