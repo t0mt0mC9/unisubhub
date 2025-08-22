@@ -313,10 +313,21 @@ const Landing = () => {
           <div className="relative max-w-7xl mx-auto">
             <div className="bg-gradient-to-br from-surface via-card to-surface-elevated rounded-2xl p-8 border border-border shadow-2xl">
               <div className="grid md:grid-cols-3 lg:grid-cols-3 gap-6 mb-6">
-                {/* Découvrir les offres - Image 1: offres Dealabs */}
+                {/* Programme de parrainage - Image 1 */}
                 <div className="bg-gradient-to-br from-background to-surface rounded-lg border border-border/50 p-4 text-center">
                   <img 
-                    src="/lovable-uploads/270f901b-add0-4d7b-8c29-1a1229260964.png"
+                    src="/lovable-uploads/92ba3481-36ee-47cc-9713-1e9b6bb87537.png"
+                    alt="Parrainez vos amis et obtenez des mois d'abonnements gratuits"
+                    className="w-full h-auto rounded-lg shadow-lg mx-auto"
+                  />
+                  <h4 className="text-lg font-semibold mt-4 mb-2">Programme de Parrainage</h4>
+                  <p className="text-sm text-muted-foreground">Invitez vos amis et gagnez des mois gratuits</p>
+                </div>
+
+                {/* Offres Dealabs - Image 2 */}
+                <div className="bg-gradient-to-br from-background to-surface rounded-lg border border-border/50 p-4 text-center">
+                  <img 
+                    src="/lovable-uploads/a2ca3511-d5fa-4a85-ac5d-d27f71abde25.png"
                     alt="Découvrez des offres à prix réduits sur vos abonnements"
                     className="w-full h-auto rounded-lg shadow-lg mx-auto"
                   />
@@ -324,34 +335,34 @@ const Landing = () => {
                   <p className="text-sm text-muted-foreground">Découvrez des réductions sur vos abonnements</p>
                 </div>
 
-                {/* Analytics - Image 2: score d'optimisation */}
+                {/* Score d'optimisation - Image 3 */}
                 <div className="bg-gradient-to-br from-background to-surface rounded-lg border border-border/50 p-4 text-center">
-                  <img 
-                    src="/lovable-uploads/4e98fe7c-6a26-476c-b4bd-9871073ad504.png"
+                  <img
+                    src="/lovable-uploads/c90fca77-7cfb-438a-bb33-bb48f79f5646.png"
                     alt="Analysez votre consommation avec des graphiques interactifs"
                     className="w-full h-auto rounded-lg shadow-lg mx-auto"
                   />
                   <h4 className="text-lg font-semibold mt-4 mb-2">Analyses Interactives</h4>
                   <p className="text-sm text-muted-foreground">Score d'optimisation et graphiques détaillés</p>
                 </div>
+              </div>
 
-                {/* Suivi des dépenses - Image 3: analyses détaillées */}
+              <div className="grid md:grid-cols-3 lg:grid-cols-3 gap-6">
+                {/* Analyses détaillées - Image 4 */}
                 <div className="bg-gradient-to-br from-background to-surface rounded-lg border border-border/50 p-4 text-center">
                   <img 
-                    src="/lovable-uploads/9f0bae2c-190d-47d1-90d7-42b0a3161453.png"
+                    src="/lovable-uploads/35054287-e657-4a3b-bce6-abf0c243a4d7.png"
                     alt="Suivez votre consommation avec des analyses détaillées"
                     className="w-full h-auto rounded-lg shadow-lg mx-auto"
                   />
                   <h4 className="text-lg font-semibold mt-4 mb-2">Suivi Détaillé</h4>
                   <p className="text-sm text-muted-foreground">Analyses par catégorie et recommandations</p>
                 </div>
-              </div>
 
-              <div className="grid md:grid-cols-3 lg:grid-cols-3 gap-6">
-                {/* Ajout d'abonnements - Image 4: formulaire d'ajout */}
+                {/* Ajout d'abonnements - Image 5 */}
                 <div className="bg-gradient-to-br from-background to-surface rounded-lg border border-border/50 p-4 text-center">
                   <img 
-                    src="/lovable-uploads/ad996069-d307-4051-877a-984d6f7152f7.png"
+                    src="/lovable-uploads/acffa7a9-4c1a-4033-a482-3899648b5152.png"
                     alt="Ajoutez vos abonnements manuellement ou par connexion bancaire"
                     className="w-full h-auto rounded-lg shadow-lg mx-auto"
                   />
@@ -359,26 +370,15 @@ const Landing = () => {
                   <p className="text-sm text-muted-foreground">Manuel ou connexion bancaire automatique</p>
                 </div>
 
-                {/* Identification - Image 5: sélection d'abonnements */}
+                {/* Identification - Image 6 */}
                 <div className="bg-gradient-to-br from-background to-surface rounded-lg border border-border/50 p-4 text-center">
                   <img 
-                    src="/lovable-uploads/d74ff95c-050c-4415-9d1f-f65167d2ea5c.png"
+                    src="/lovable-uploads/9d98e4fc-a2ca-4c8c-948b-e01ef055b369.png"
                     alt="Identifiez vos abonnements récurrents facilement"
                     className="w-full h-auto rounded-lg shadow-lg mx-auto"
                   />
                   <h4 className="text-lg font-semibold mt-4 mb-2">Identification Intelligente</h4>
                   <p className="text-sm text-muted-foreground">Détection automatique de vos abonnements</p>
-                </div>
-
-                {/* Parrainage - Image 6: invitation d'amis */}
-                <div className="bg-gradient-to-br from-background to-surface rounded-lg border border-border/50 p-4 text-center">
-                  <img 
-                    src="/lovable-uploads/270f901b-add0-4d7b-8c29-1a1229260964.png"
-                    alt="Parrainez vos amis et obtenez des mois gratuits"
-                    className="w-full h-auto rounded-lg shadow-lg mx-auto"
-                  />
-                  <h4 className="text-lg font-semibold mt-4 mb-2">Programme de Parrainage</h4>
-                  <p className="text-sm text-muted-foreground">Invitez vos amis et gagnez des récompenses</p>
                 </div>
               </div>
               
