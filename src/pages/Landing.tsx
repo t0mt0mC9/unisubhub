@@ -20,6 +20,14 @@ import {
   Zap
 } from "lucide-react";
 
+// Import screenshots
+import screenshotOffers from "@/assets/screenshot-offers.png";
+import screenshotAnalytics from "@/assets/screenshot-analytics.png";
+import screenshotTracking from "@/assets/screenshot-tracking.png";
+import screenshotAdd from "@/assets/screenshot-add.png";
+import screenshotIdentify from "@/assets/screenshot-identify.png";
+import screenshotReferral from "@/assets/screenshot-referral.png";
+
 const Landing = () => {
   const [hoveredFeature, setHoveredFeature] = useState<number | null>(null);
 
@@ -302,40 +310,75 @@ const Landing = () => {
             </p>
           </div>
 
-          <div className="relative max-w-6xl mx-auto">
+          <div className="relative max-w-7xl mx-auto">
             <div className="bg-gradient-to-br from-surface via-card to-surface-elevated rounded-2xl p-8 border border-border shadow-2xl">
-              <div className="grid md:grid-cols-3 gap-6">
-                {/* Dashboard Screenshot */}
+              <div className="grid md:grid-cols-3 lg:grid-cols-3 gap-6 mb-6">
+                {/* Découvrir les offres */}
                 <div className="bg-gradient-to-br from-background to-surface rounded-lg border border-border/50 p-4 text-center">
                   <img 
-                    src="/lovable-uploads/4e98fe7c-6a26-476c-b4bd-9871073ad504.png" 
-                    alt="Dashboard UniSubHub - Vue d'ensemble des abonnements"
+                    src={screenshotOffers}
+                    alt="Découvrez des offres à prix réduits sur vos abonnements"
                     className="w-full h-auto rounded-lg shadow-lg mx-auto"
                   />
-                  <h4 className="text-lg font-semibold mt-4 mb-2">Dashboard Principal</h4>
-                  <p className="text-sm text-muted-foreground">Vue d'ensemble de tous vos abonnements</p>
+                  <h4 className="text-lg font-semibold mt-4 mb-2">Offres Exclusives</h4>
+                  <p className="text-sm text-muted-foreground">Découvrez des réductions sur vos abonnements</p>
                 </div>
 
                 {/* Analytics Screenshot */}
                 <div className="bg-gradient-to-br from-background to-surface rounded-lg border border-border/50 p-4 text-center">
                   <img 
-                    src="/lovable-uploads/9f0bae2c-190d-47d1-90d7-42b0a3161453.png" 
-                    alt="Analytics UniSubHub - Score d'optimisation"
+                    src={screenshotAnalytics}
+                    alt="Analysez votre consommation avec des graphiques interactifs"
                     className="w-full h-auto rounded-lg shadow-lg mx-auto"
                   />
-                  <h4 className="text-lg font-semibold mt-4 mb-2">Analyses Avancées</h4>
-                  <p className="text-sm text-muted-foreground">Score d'optimisation et tendances</p>
+                  <h4 className="text-lg font-semibold mt-4 mb-2">Analyses Interactives</h4>
+                  <p className="text-sm text-muted-foreground">Score d'optimisation et graphiques détaillés</p>
                 </div>
 
-                {/* Recommendations Screenshot */}
+                {/* Suivi des dépenses */}
                 <div className="bg-gradient-to-br from-background to-surface rounded-lg border border-border/50 p-4 text-center">
                   <img 
-                    src="/lovable-uploads/270f901b-add0-4d7b-8c29-1a1229260964.png" 
-                    alt="Recommandations UniSubHub - Optimisation personnalisée"
+                    src={screenshotTracking}
+                    alt="Suivez votre consommation avec des analyses détaillées"
                     className="w-full h-auto rounded-lg shadow-lg mx-auto"
                   />
-                  <h4 className="text-lg font-semibold mt-4 mb-2">Recommandations IA</h4>
-                  <p className="text-sm text-muted-foreground">Suggestions personnalisées d'économies</p>
+                  <h4 className="text-lg font-semibold mt-4 mb-2">Suivi Détaillé</h4>
+                  <p className="text-sm text-muted-foreground">Analyses par catégorie et recommandations</p>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-3 lg:grid-cols-3 gap-6">
+                {/* Ajout d'abonnements */}
+                <div className="bg-gradient-to-br from-background to-surface rounded-lg border border-border/50 p-4 text-center">
+                  <img 
+                    src={screenshotAdd}
+                    alt="Ajoutez vos abonnements manuellement ou par connexion bancaire"
+                    className="w-full h-auto rounded-lg shadow-lg mx-auto"
+                  />
+                  <h4 className="text-lg font-semibold mt-4 mb-2">Ajout Flexible</h4>
+                  <p className="text-sm text-muted-foreground">Manuel ou connexion bancaire automatique</p>
+                </div>
+
+                {/* Identification des abonnements */}
+                <div className="bg-gradient-to-br from-background to-surface rounded-lg border border-border/50 p-4 text-center">
+                  <img 
+                    src={screenshotIdentify}
+                    alt="Identifiez vos abonnements récurrents facilement"
+                    className="w-full h-auto rounded-lg shadow-lg mx-auto"
+                  />
+                  <h4 className="text-lg font-semibold mt-4 mb-2">Identification Intelligente</h4>
+                  <p className="text-sm text-muted-foreground">Détection automatique de vos abonnements</p>
+                </div>
+
+                {/* Parrainage */}
+                <div className="bg-gradient-to-br from-background to-surface rounded-lg border border-border/50 p-4 text-center">
+                  <img 
+                    src={screenshotReferral}
+                    alt="Parrainez vos amis et obtenez des mois gratuits"
+                    className="w-full h-auto rounded-lg shadow-lg mx-auto"
+                  />
+                  <h4 className="text-lg font-semibold mt-4 mb-2">Programme de Parrainage</h4>
+                  <p className="text-sm text-muted-foreground">Invitez vos amis et gagnez des récompenses</p>
                 </div>
               </div>
               
