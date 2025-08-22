@@ -216,7 +216,7 @@ export const MobileSubscriptionPlans = () => {
             Paiements mobiles
           </CardTitle>
           <CardDescription>
-            Paiements sécurisés via Apple App Store ou Google Play Store
+            Paiements sécurisés via Apple App Store
           </CardDescription>
         </CardHeader>
       </Card>
