@@ -10,19 +10,7 @@ export interface Subscription {
   daysUntilRenewal?: number;
 }
 
-export const mockSubscriptions: Subscription[] = [
-  {
-    id: '1',
-    name: 'Netflix',
-    price: 15.99,
-    currency: '€',
-    renewalDate: '15 août 2024',
-    category: 'Streaming',
-    icon: '🎬',
-    status: 'active',
-    daysUntilRenewal: 12
-  }
-];
+export const mockSubscriptions: Subscription[] = [];
 
 export const calculateTotalSpending = (subscriptions: Subscription[]) => {
   const activeSubscriptions = subscriptions.filter(sub => sub.status === 'active' || sub.status === 'trial');

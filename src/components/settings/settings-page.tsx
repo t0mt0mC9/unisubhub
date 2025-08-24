@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -33,14 +33,61 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
   const [currency, setCurrency] = useState("EUR");
   const [budgetLimit, setBudgetLimit] = useState("100");
   
-  
   const { toast } = useToast();
 
-  const handleSaveSettings = () => {
-    toast({
-      title: "Paramètres sauvegardés",
-      description: "Vos préférences ont été mises à jour avec succès",
-    });
+  // Charger les paramètres sauvegardés au montage du composant
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const savedCurrency = localStorage.getItem(`preferred_currency_${user.id}`);
+          const savedBudget = localStorage.getItem(`budget_limit_${user.id}`);
+          const savedNotifications = localStorage.getItem(`notifications_${user.id}`);
+          
+          if (savedCurrency) setCurrency(savedCurrency);
+          if (savedBudget) setBudgetLimit(savedBudget);
+          if (savedNotifications) {
+            const notifSettings = JSON.parse(savedNotifications);
+            setNotifications(notifSettings.notifications);
+            setEmailNotifications(notifSettings.emailNotifications);
+            setBudgetAlerts(notifSettings.budgetAlerts);
+            setRenewalAlerts(notifSettings.renewalAlerts);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading settings:', error);
+      }
+    };
+    loadSettings();
+  }, []);
+
+  const handleSaveSettings = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // Sauvegarder la devise préférée dans localStorage
+        localStorage.setItem(`preferred_currency_${user.id}`, currency);
+        localStorage.setItem(`budget_limit_${user.id}`, budgetLimit);
+        localStorage.setItem(`notifications_${user.id}`, JSON.stringify({
+          notifications,
+          emailNotifications,
+          budgetAlerts,
+          renewalAlerts
+        }));
+      }
+      
+      toast({
+        title: "Paramètres sauvegardés",
+        description: "Vos préférences ont été mises à jour avec succès",
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de sauvegarder les paramètres",
+        variant: "destructive",
+      });
+    }
   };
 
 

@@ -22,7 +22,7 @@ interface AnalyticsStatsProps {
 
 export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
   const { toast } = useToast();
-  // Calculs des statistiques
+  // Calculs des statistiques basés sur les vraies données utilisateur
   const totalMonthly = subscriptions.reduce((sum, sub) => {
     const monthlyPrice = sub.billing_cycle === 'yearly' ? sub.price / 12 : 
                         sub.billing_cycle === 'weekly' ? sub.price * 4.33 : sub.price;

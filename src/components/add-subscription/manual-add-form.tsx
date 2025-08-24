@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,7 @@ import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useUserSettings } from "@/hooks/use-user-settings";
 
 interface ManualAddFormProps {
   onSuccess: () => void;
@@ -39,17 +40,23 @@ const billingCycles = [
 
 export const ManualAddForm = ({ onSuccess }: ManualAddFormProps) => {
   const [loading, setLoading] = useState(false);
+  const { settings } = useUserSettings();
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     price: "",
-    currency: "EUR",
+    currency: settings.currency,
     billing_cycle: "monthly",
     category: "",
     next_billing_date: new Date(),
     website_url: ""
   });
   const { toast } = useToast();
+
+  // Met à jour la devise quand les paramètres changent
+  useEffect(() => {
+    setFormData(prev => ({ ...prev, currency: settings.currency }));
+  }, [settings.currency]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,6 +74,20 @@ export const ManualAddForm = ({ onSuccess }: ManualAddFormProps) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Utilisateur non connecté");
+
+      console.log('Inserting subscription with data:', {
+        user_id: user.id,
+        name: formData.name,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        currency: formData.currency,
+        billing_cycle: formData.billing_cycle,
+        category: formData.category,
+        next_billing_date: formData.next_billing_date.toISOString().split('T')[0],
+        website_url: formData.website_url,
+        auto_detected: false,
+        status: "active"
+      });
 
       const { error } = await supabase.from("subscriptions").insert({
         user_id: user.id,

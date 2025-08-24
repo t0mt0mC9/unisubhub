@@ -14,6 +14,7 @@ import { PrivacyPolicyPage } from "@/components/privacy/privacy-policy-page";
 import PremiumPage from "@/components/subscription/premium-page";
 import { OnboardingOverlay } from "@/components/onboarding/onboarding-overlay";
 import { mockSubscriptions, calculateTotalSpending } from "@/data/mock-subscriptions";
+import { useUserSettings } from "@/hooks/use-user-settings";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,6 +31,8 @@ const Index = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [displayedMockSubscriptions, setDisplayedMockSubscriptions] = useState<any[]>([]);
   const [analyticsTab, setAnalyticsTab] = useState<'offers' | 'analytics'>('offers');
+  
+  const { settings, getCurrencySymbol } = useUserSettings();
   
   // Filter subscriptions based on search term
   const allSubscriptions = [...displayedMockSubscriptions, ...userSubscriptions];
@@ -180,16 +183,13 @@ const Index = () => {
               </Button>
             )}
           </div>
-          <Button variant="outline" size="lg">
-            <Filter className="h-4 w-4" />
-          </Button>
         </div>
 
         {/* Spending Overview */}
         <SpendingOverview
           totalMonthly={spendingData.totalMonthly}
           totalYearly={spendingData.totalYearly}
-          currency="€"
+          currency={getCurrencySymbol()}
           monthlyChange={spendingData.monthlyChange}
           activeSubscriptions={spendingData.activeCount}
         />

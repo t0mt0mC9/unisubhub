@@ -22,14 +22,21 @@ interface AnalyticsChartsProps {
 }
 
 export const AnalyticsCharts = ({ subscriptions }: AnalyticsChartsProps) => {
-  // Données pour le graphique d'évolution mensuelle
+  // Calcul du montant total mensuel basé sur les vraies données
+  const currentMonthlyTotal = subscriptions.reduce((sum, sub) => {
+    const monthlyPrice = sub.billing_cycle === 'yearly' ? sub.price / 12 : 
+                        sub.billing_cycle === 'weekly' ? sub.price * 4.33 : sub.price;
+    return sum + monthlyPrice;
+  }, 0);
+
+  // Données pour le graphique d'évolution mensuelle (avec données réelles pour le mois actuel)
   const monthlyData = [
-    { month: "Sep", amount: 45.60, subscriptions: 8 },
-    { month: "Oct", amount: 52.30, subscriptions: 9 },
-    { month: "Nov", amount: 48.90, subscriptions: 9 },
-    { month: "Déc", amount: 67.80, subscriptions: 11 },
-    { month: "Jan", amount: 71.20, subscriptions: 12 },
-    { month: "Fév", amount: 68.50, subscriptions: 11 },
+    { month: "Sep", amount: 0, subscriptions: 0 },
+    { month: "Oct", amount: 0, subscriptions: 0 },
+    { month: "Nov", amount: 0, subscriptions: 0 },
+    { month: "Déc", amount: 0, subscriptions: 0 },
+    { month: "Jan", amount: 0, subscriptions: 0 },
+    { month: "Fév", amount: currentMonthlyTotal, subscriptions: subscriptions.length },
   ];
 
   // Données par catégorie pour le graphique en secteurs
