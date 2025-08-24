@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ interface AnalyticsStatsProps {
 
 export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
   const { toast } = useToast();
+  const [expandedRecommendation, setExpandedRecommendation] = useState<number | null>(null);
   // Calculs des statistiques basés sur les vraies données utilisateur
   const totalMonthly = subscriptions.reduce((sum, sub) => {
     const monthlyPrice = sub.billing_cycle === 'yearly' ? sub.price / 12 : 
@@ -98,32 +100,24 @@ export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
     }
   };
 
-  const handleRecommendationDetails = (recommendation: any) => {
-    let detailMessage = "";
-    
+  const getRecommendationDetails = (recommendation: any) => {
     switch (recommendation.type) {
       case "cost":
-        detailMessage = `Analysez vos abonnements les plus coûteux : ${expensiveSubscriptions.map(sub => sub.name).join(", ")}. Considérez des alternatives moins chères ou négociez des tarifs.`;
-        break;
+        return `Analysez vos abonnements les plus coûteux : ${expensiveSubscriptions.map(sub => sub.name).join(", ")}. Considérez des alternatives moins chères ou négociez des tarifs.`;
       case "duplicate":
         const streamingServices = subscriptions.filter(sub => sub.category === "Streaming");
-        detailMessage = `Services de streaming détectés : ${streamingServices.map(sub => sub.name).join(", ")}. Vous pourriez garder seulement 1-2 services principaux.`;
-        break;
+        return `Services de streaming détectés : ${streamingServices.map(sub => sub.name).join(", ")}. Vous pourriez garder seulement 1-2 services principaux.`;
       case "billing":
-        detailMessage = `Abonnements mensuels qui seraient moins chers en annuel : ${subscriptions.filter(sub => sub.billing_cycle === 'monthly').slice(0, 3).map(sub => sub.name).join(", ")}.`;
-        break;
+        return `Abonnements mensuels qui seraient moins chers en annuel : ${subscriptions.filter(sub => sub.billing_cycle === 'monthly').slice(0, 3).map(sub => sub.name).join(", ")}.`;
       case "usage":
-        detailMessage = `Services coûteux à analyser : ${expensiveSubscriptions.slice(0, 3).map(sub => `${sub.name} (${sub.price}€)`).join(", ")}. Vérifiez votre usage réel.`;
-        break;
+        return `Services coûteux à analyser : ${expensiveSubscriptions.slice(0, 3).map(sub => `${sub.name} (${sub.price}€)`).join(", ")}. Vérifiez votre usage réel.`;
       default:
-        detailMessage = "Consultez vos abonnements pour plus d'optimisations possibles.";
+        return "Consultez vos abonnements pour plus d'optimisations possibles.";
     }
+  };
 
-    toast({
-      title: recommendation.title,
-      description: detailMessage,
-      duration: 5000,
-    });
+  const handleToggleDetails = (recId: number) => {
+    setExpandedRecommendation(expandedRecommendation === recId ? null : recId);
   };
 
   return (
@@ -216,26 +210,34 @@ export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
                 <div className={`p-2 rounded-full ${rec.bgColor}`}>
                   <Icon className={`h-4 w-4 ${rec.color}`} />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <h4 className="font-medium text-sm">{rec.title}</h4>
-                    <Badge 
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <h4 className="font-medium text-sm">{rec.title}</h4>
+                      <Badge 
+                        variant="outline" 
+                        className={`text-xs ${getImpactColor(rec.impact)} text-white border-none`}
+                      >
+                        {rec.impact}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-2">{rec.description}</p>
+                    <Button 
                       variant="outline" 
-                      className={`text-xs ${getImpactColor(rec.impact)} text-white border-none`}
+                      size="sm" 
+                      className="text-xs h-7"
+                      onClick={() => handleToggleDetails(rec.id)}
                     >
-                      {rec.impact}
-                    </Badge>
+                      {expandedRecommendation === rec.id ? 'Masquer détails' : 'Voir détails'}
+                    </Button>
+                    
+                    {expandedRecommendation === rec.id && (
+                      <div className="mt-3 p-3 bg-muted/50 rounded-md border-l-4 border-primary">
+                        <p className="text-sm text-foreground">
+                          {getRecommendationDetails(rec)}
+                        </p>
+                      </div>
+                    )}
                   </div>
-                  <p className="text-sm text-muted-foreground mb-2">{rec.description}</p>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="text-xs h-7"
-                    onClick={() => handleRecommendationDetails(rec)}
-                  >
-                    Voir détails
-                  </Button>
-                </div>
               </div>
             );
           })}
