@@ -64,7 +64,7 @@ const MOCK_OFFERINGS: MockOffering[] = [
         product: {
           identifier: 'com.unisubhub.PAV02',
           description: 'Accès à vie aux fonctionnalités premium',
-          title: 'Premium à vie',
+          title: 'Plan à vie',
           priceString: '89,99 €',
           price: 89.99,
           currencyCode: 'EUR',

@@ -157,13 +157,9 @@ export const MobileSubscriptionPlans = () => {
     }
     if (productId.includes('lifetime') || productId === 'com.unisubhub.PAV02') {
       return [
-        "Analyses détaillées illimitées",
-        "Recommandations d'optimisation", 
-        "Alertes personnalisées",
-        "Support prioritaire",
+        "Avantages du plan mensuel",
         "Abonnements illimités",
-        "Fonctionnalités premium",
-        "Paiement unique - à vie"
+        "Paiement unique"
       ];
     }
     return ["Fonctionnalités de base"];
