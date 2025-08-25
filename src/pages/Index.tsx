@@ -244,6 +244,7 @@ const Index = () => {
                   icon={subscription.icon || '📱'}
                   status={subscription.status || 'active'}
                   daysUntilRenewal={subscription.daysUntilRenewal}
+                  billingCycle={subscription.billing_cycle}
                   subscription={subscription}
                   onRefresh={loadSubscriptions}
                   onDeleteMockSubscription={handleDeleteMockSubscription}

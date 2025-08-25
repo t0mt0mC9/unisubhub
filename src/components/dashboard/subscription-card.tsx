@@ -23,6 +23,7 @@ interface SubscriptionCardProps {
   subscription?: any; // Pour passer l'objet complet à l'édition
   onRefresh?: () => void;
   onDeleteMockSubscription?: (id: string) => void;
+  billingCycle?: string; // Ajouter le cycle de facturation
 }
 
 export function SubscriptionCard({
@@ -38,7 +39,8 @@ export function SubscriptionCard({
   className,
   subscription,
   onRefresh,
-  onDeleteMockSubscription
+  onDeleteMockSubscription,
+  billingCycle
 }: SubscriptionCardProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   
@@ -70,6 +72,15 @@ export function SubscriptionCard({
       return format(date, "d MMMM yyyy", { locale: fr });
     } catch (error) {
       return dateString;
+    }
+  };
+
+  const getBillingCycleLabel = (cycle: string) => {
+    switch (cycle) {
+      case 'yearly': return '/an';
+      case 'monthly': return '/mois';
+      case 'weekly': return '/semaine';
+      default: return '/mois';
     }
   };
 
@@ -114,7 +125,7 @@ export function SubscriptionCard({
           <span className="text-lg font-bold text-foreground">
             {price.toFixed(2)} {currency}
           </span>
-          <span className="text-sm text-muted-foreground">/mois</span>
+          <span className="text-sm text-muted-foreground">{getBillingCycleLabel(billingCycle || subscription?.billing_cycle || 'monthly')}</span>
         </div>
         
         <Badge className={getStatusColor(status)} variant="secondary">
