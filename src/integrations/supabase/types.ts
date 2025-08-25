@@ -101,45 +101,6 @@ export type Database = {
         }
         Relationships: []
       }
-      referrals: {
-        Row: {
-          completed_at: string | null
-          created_at: string
-          id: string
-          referral_code: string
-          referred_email: string
-          referred_user_id: string | null
-          referrer_user_id: string
-          reward_granted: boolean
-          rewarded_at: string | null
-          status: string
-        }
-        Insert: {
-          completed_at?: string | null
-          created_at?: string
-          id?: string
-          referral_code: string
-          referred_email: string
-          referred_user_id?: string | null
-          referrer_user_id: string
-          reward_granted?: boolean
-          rewarded_at?: string | null
-          status?: string
-        }
-        Update: {
-          completed_at?: string | null
-          created_at?: string
-          id?: string
-          referral_code?: string
-          referred_email?: string
-          referred_user_id?: string | null
-          referrer_user_id?: string
-          reward_granted?: boolean
-          rewarded_at?: string | null
-          status?: string
-        }
-        Relationships: []
-      }
       subscribers: {
         Row: {
           created_at: string
@@ -241,14 +202,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      check_referral_rewards: {
-        Args: { target_user_id: string }
-        Returns: undefined
-      }
-      generate_referral_code: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never

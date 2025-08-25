@@ -7,25 +7,18 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { LogIn, UserPlus, Loader2, Gift } from "lucide-react";
+import { LogIn, UserPlus, Loader2 } from "lucide-react";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [referralCode, setReferralCode] = useState("");
+  // Removed referralCode state
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("signin");
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Check for referral code in URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const refCode = urlParams.get('ref');
-    if (refCode) {
-      setReferralCode(refCode);
-    }
-  }, []);
+  // Removed referral code logic
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,30 +102,7 @@ const Auth = () => {
         }
       }
 
-      // If there's a referral code, record the referral after successful signup
-      if (referralCode && data.user) {
-        try {
-          const { error: referralError } = await supabase
-            .from('referrals')
-            .update({ 
-              referred_user_id: data.user.id,
-              status: 'completed'
-            })
-            .eq('referral_code', referralCode)
-            .eq('status', 'pending');
-
-          if (referralError) {
-            console.error('Error updating referral:', referralError);
-          } else {
-            toast({
-              title: "Parrainage enregistré !",
-              description: "Votre compte a été lié au parrainage avec succès",
-            });
-          }
-        } catch (referralError) {
-          console.error('Error processing referral:', referralError);
-        }
-      }
+      // Referral system removed
 
       toast({
         title: "Inscription réussie",
@@ -281,25 +251,7 @@ const Auth = () => {
                       minLength={6}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="referral-code" className="flex items-center gap-2">
-                      <Gift className="h-4 w-4" />
-                      Code de parrainage (optionnel)
-                    </Label>
-                    <Input
-                      id="referral-code"
-                      type="text"
-                      placeholder="Entrez votre code de parrainage"
-                      value={referralCode}
-                      onChange={(e) => setReferralCode(e.target.value)}
-                      disabled={loading}
-                    />
-                    {referralCode && (
-                      <p className="text-sm text-muted-foreground">
-                        🎉 Code de parrainage détecté ! Vous bénéficierez des avantages du parrainage.
-                      </p>
-                    )}
-                  </div>
+                  {/* Referral code input removed */}
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Créer un compte
