@@ -215,18 +215,6 @@ export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
               </p>
             </div>
           )}
-          
-          {expensiveSubscriptions.length > 0 && (
-            <div className="bg-orange-50 p-3 rounded-lg border border-orange-200">
-              <div className="flex items-center gap-2 mb-2">
-                <AlertTriangle className="h-4 w-4 text-orange-600" />
-                <span className="font-medium text-orange-800">Abonnements coûteux</span>
-              </div>
-              <p className="text-sm text-orange-700">
-                {expensiveSubscriptions.length} abonnement(s) supérieur(s) à 20€/mois
-              </p>
-            </div>
-          )}
         </CardContent>
       </Card>
 
