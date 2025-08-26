@@ -144,18 +144,11 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center">
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <Gift className="h-6 w-6 text-primary" />
             Offres Dealabs
           </h2>
-          <Button 
-            onClick={() => fetchOffers(filter === 'matched' ? 'get_matched_offers' : 'get_offers')}
-            disabled={loading}
-            variant="outline"
-          >
-            {loading ? 'Actualisation...' : 'Actualiser'}
-          </Button>
         </div>
 
         <div className="flex flex-wrap gap-2">
