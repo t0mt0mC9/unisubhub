@@ -18,7 +18,7 @@ interface SubscriptionCardProps {
   renewalDate: string;
   category: string;
   icon: string;
-  status: 'active' | 'trial' | 'expired' | 'cancelled';
+  status: 'active' | 'cancelled';
   daysUntilRenewal?: number;
   className?: string;
   subscription?: any; // Pour passer l'objet complet à l'édition
@@ -48,8 +48,6 @@ export function SubscriptionCard({
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active': return 'bg-success text-success-foreground';
-      case 'trial': return 'bg-warning text-warning-foreground';
-      case 'expired': return 'bg-destructive text-destructive-foreground';
       case 'cancelled': return 'bg-muted text-muted-foreground';
       default: return 'bg-muted text-muted-foreground';
     }
@@ -124,7 +122,7 @@ export function SubscriptionCard({
         </div>
         
         <Badge className={getStatusColor(status)} variant="secondary">
-          {status === 'trial' ? 'Essai' : status === 'active' ? 'Actif' : status}
+          {status === 'active' ? 'Actif' : 'Résilié'}
         </Badge>
       </div>
       
