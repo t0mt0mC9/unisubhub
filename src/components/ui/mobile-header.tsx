@@ -1,22 +1,18 @@
 import { Button } from "@/components/ui/button";
-import { Bell, Settings, User } from "lucide-react";
+import { Settings, User } from "lucide-react";
 
 interface MobileHeaderProps {
   title: string;
-  showNotifications?: boolean;
   showSettings?: boolean;
   showProfile?: boolean;
-  onNotificationsClick?: () => void;
   onSettingsClick?: () => void;
   onProfileClick?: () => void;
 }
 
 export function MobileHeader({ 
   title, 
-  showNotifications = true, 
   showSettings = true, 
   showProfile = true,
-  onNotificationsClick,
   onSettingsClick,
   onProfileClick
 }: MobileHeaderProps) {
@@ -30,17 +26,6 @@ export function MobileHeader({
         </div>
         
         <div className="flex items-center space-x-2">
-          {showNotifications && (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="relative"
-              onClick={onNotificationsClick}
-            >
-              <Bell className="h-5 w-5" />
-              <div className="absolute -top-1 -right-1 h-3 w-3 bg-destructive rounded-full" />
-            </Button>
-          )}
           
           {showSettings && (
             <Button 

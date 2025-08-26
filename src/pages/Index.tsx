@@ -413,12 +413,6 @@ const Index = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <MobileHeader 
         title={getPageTitle()} 
-        onNotificationsClick={() => {
-          toast({
-            title: "Notifications",
-            description: "Aucune nouvelle notification",
-          });
-        }}
         onSettingsClick={() => setActiveTab('settings')}
         onProfileClick={() => setActiveTab('profile')}
       />
