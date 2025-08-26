@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { format, parseISO, isValid } from "date-fns";
 import { fr } from "date-fns/locale";
 import { getDaysUntilBilling, isBillingDueSoon, calculateNextBillingDate } from "@/lib/billing-utils";
+import { CategoryIcon } from "@/lib/category-icons";
 
 interface SubscriptionCardProps {
   id?: string;
@@ -94,8 +95,8 @@ export function SubscriptionCard({
     <Card className={cn("p-4 hover:shadow-md transition-all duration-300", className)}>
       <div className="flex items-start justify-between">
         <div className="flex items-center space-x-3">
-          <div className="w-12 h-12 rounded-xl bg-surface-elevated flex items-center justify-center text-2xl">
-            {icon}
+          <div className="w-12 h-12 rounded-xl bg-surface-elevated flex items-center justify-center">
+            <CategoryIcon category={category} size={24} />
           </div>
           <div className="flex-1">
             <h3 className="font-semibold text-foreground">{name}</h3>
