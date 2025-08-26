@@ -89,7 +89,7 @@ export const EditSubscriptionDialog = ({ open, onOpenChange, subscription, onSuc
           currency: formData.currency,
           billing_cycle: formData.billing_cycle,
           category: formData.category,
-          next_billing_date: formData.next_billing_date.toISOString().split('T')[0],
+          next_billing_date: format(formData.next_billing_date, 'yyyy-MM-dd'),
           website_url: formData.website_url,
           status: formData.status
         })
