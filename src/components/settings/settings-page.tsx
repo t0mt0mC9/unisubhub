@@ -114,32 +114,6 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
 
   return (
     <div className="space-y-6">
-      {/* Profile Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="h-5 w-5" />
-            Profil utilisateur
-          </CardTitle>
-          <CardDescription>
-            Gérez vos informations personnelles
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="display-name">Nom d'affichage</Label>
-            <Input id="display-name" placeholder="Votre nom" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" placeholder="votre@email.com" />
-          </div>
-          <Button onClick={handleSaveSettings}>
-            Sauvegarder les modifications
-          </Button>
-        </CardContent>
-      </Card>
-
       {/* Notifications */}
       <Card>
         <CardHeader>
