@@ -35,6 +35,31 @@ const Index = () => {
   
   const { settings, getCurrencySymbol } = useUserSettings();
   
+  // Récupérer les informations utilisateur pour le message de bienvenue
+  const [user, setUser] = useState<any>(null);
+  
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    
+    getUser();
+  }, []);
+
+  const getUserDisplayName = () => {
+    if (!user) return '';
+    
+    // Essayer d'abord les user_metadata
+    const fullName = user.user_metadata?.full_name;
+    if (fullName) {
+      return fullName.split(' ')[0]; // Prendre juste le prénom
+    }
+    
+    // Fallback sur l'email si pas de nom
+    return user.email?.split('@')[0] || '';
+  };
+
   // Filter subscriptions based on search term
   const allSubscriptions = [...displayedMockSubscriptions, ...userSubscriptions];
   const spendingData = calculateTotalSpending(allSubscriptions);
@@ -185,6 +210,18 @@ const Index = () => {
             )}
           </div>
         </div>
+
+        {/* Message de bienvenue personnalisé */}
+        {user && (
+          <div className="text-center mb-6">
+            <h1 className="text-2xl font-bold text-foreground">
+              Bonjour {getUserDisplayName()} 👋
+            </h1>
+            <p className="text-muted-foreground">
+              Gérez vos abonnements facilement avec UniSubHub
+            </p>
+          </div>
+        )}
 
         {/* Spending Overview */}
         <SpendingOverview
