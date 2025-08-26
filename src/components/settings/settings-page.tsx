@@ -30,53 +30,9 @@ interface SettingsPageProps {
 }
 
 export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPageProps) => {
-  const [currency, setCurrency] = useState("EUR");
   const { toast } = useToast();
   const { settings, updateSettings, loading } = useNotifications();
 
-  // Charger la devise depuis localStorage au montage du composant
-  useEffect(() => {
-    const loadCurrency = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const savedCurrency = localStorage.getItem(`preferred_currency_${user.id}`);
-          if (savedCurrency) setCurrency(savedCurrency);
-        }
-      } catch (error) {
-        console.error('Error loading currency:', error);
-      }
-    };
-    loadCurrency();
-  }, []);
-
-  const handleSaveSettings = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        // Sauvegarder la devise préférée dans localStorage
-        localStorage.setItem(`preferred_currency_${user.id}`, currency);
-        
-        // Sauvegarder les paramètres de notification via le hook
-        const success = await updateSettings({ budgetLimit: settings.budgetLimit });
-        
-        if (success) {
-          toast({
-            title: "Paramètres sauvegardés",
-            description: "Vos préférences ont été mises à jour avec succès",
-          });
-        } else {
-          throw new Error('Failed to update settings');
-        }
-      }
-    } catch (error) {
-      toast({
-        title: "Erreur",
-        description: "Impossible de sauvegarder les paramètres",
-        variant: "destructive",
-      });
-    }
-  };
 
 
   const handleDeleteAccount = async () => {
@@ -203,35 +159,20 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
         </CardContent>
       </Card>
 
-      {/* Budget & Currency */}
+      {/* Budget */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Euro className="h-5 w-5" />
-            Budget et devise
+            <DollarSign className="h-5 w-5" />
+            Budget mensuel
           </CardTitle>
           <CardDescription>
-            Configurez votre budget mensuel et votre devise
+            Configurez votre budget mensuel à ne pas dépasser
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="currency">Devise préférée</Label>
-            <Select value={currency} onValueChange={setCurrency}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="EUR">Euro (€)</SelectItem>
-                <SelectItem value="USD">Dollar américain ($)</SelectItem>
-                <SelectItem value="GBP">Livre sterling (£)</SelectItem>
-                <SelectItem value="CHF">Franc suisse (CHF)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="budget">Budget mensuel (€)</Label>
+            <Label htmlFor="budget">Budget mensuel à ne pas dépasser (€)</Label>
             <Input
               id="budget"
               type="number"
