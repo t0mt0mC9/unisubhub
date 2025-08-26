@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { User, Mail, Calendar, Settings, LogOut } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { User, Mail, Calendar, Settings, LogOut, Eye, EyeOff } from "lucide-react";
 
 interface ProfilePageProps {
   onSignOut: () => void;
@@ -17,6 +18,18 @@ export function ProfilePage({ onSignOut }: ProfilePageProps) {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false
+  });
+  const [passwordLoading, setPasswordLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -88,6 +101,83 @@ export function ProfilePage({ onSignOut }: ProfilePageProps) {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePasswordChange = async () => {
+    if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez remplir tous les champs",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast({
+        title: "Erreur",
+        description: "Les nouveaux mots de passe ne correspondent pas",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 6) {
+      toast({
+        title: "Erreur",
+        description: "Le nouveau mot de passe doit contenir au moins 6 caractères",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setPasswordLoading(true);
+
+    try {
+      // D'abord, vérifier l'ancien mot de passe en essayant de se reconnecter
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user?.email || '',
+        password: passwordForm.currentPassword,
+      });
+
+      if (signInError) {
+        toast({
+          title: "Erreur",
+          description: "Mot de passe actuel incorrect",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Changer le mot de passe
+      const { error } = await supabase.auth.updateUser({
+        password: passwordForm.newPassword
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Mot de passe modifié",
+        description: "Votre mot de passe a été mis à jour avec succès",
+      });
+
+      // Réinitialiser le formulaire et fermer le dialogue
+      setPasswordForm({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+      setShowPasswordDialog(false);
+
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Impossible de modifier le mot de passe",
+        variant: "destructive",
+      });
+    } finally {
+      setPasswordLoading(false);
     }
   };
 
@@ -228,12 +318,7 @@ export function ProfilePage({ onSignOut }: ProfilePageProps) {
           <Button 
             variant="outline" 
             className="w-full justify-start"
-            onClick={() => {
-              toast({
-                title: "Changer le mot de passe",
-                description: "Fonctionnalité bientôt disponible",
-              });
-            }}
+            onClick={() => setShowPasswordDialog(true)}
           >
             <Settings className="mr-2 h-4 w-4" />
             Changer le mot de passe
@@ -251,6 +336,130 @@ export function ProfilePage({ onSignOut }: ProfilePageProps) {
           </Button>
         </CardContent>
       </Card>
+
+      {/* Dialogue de changement de mot de passe */}
+      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Changer le mot de passe</DialogTitle>
+            <DialogDescription>
+              Saisissez votre mot de passe actuel et choisissez un nouveau mot de passe sécurisé.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <Label htmlFor="current-password">Mot de passe actuel *</Label>
+              <div className="relative">
+                <Input
+                  id="current-password"
+                  type={showPasswords.current ? "text" : "password"}
+                  value={passwordForm.currentPassword}
+                  onChange={(e) => setPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))}
+                  placeholder="Votre mot de passe actuel"
+                  className="pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPasswords(prev => ({ ...prev, current: !prev.current }))}
+                >
+                  {showPasswords.current ? (
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="new-password">Nouveau mot de passe *</Label>
+              <div className="relative">
+                <Input
+                  id="new-password"
+                  type={showPasswords.new ? "text" : "password"}
+                  value={passwordForm.newPassword}
+                  onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
+                  placeholder="Votre nouveau mot de passe"
+                  className="pr-10"
+                  minLength={6}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPasswords(prev => ({ ...prev, new: !prev.new }))}
+                >
+                  {showPasswords.new ? (
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Le mot de passe doit contenir au moins 6 caractères
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="confirm-password">Confirmer le nouveau mot de passe *</Label>
+              <div className="relative">
+                <Input
+                  id="confirm-password"
+                  type={showPasswords.confirm ? "text" : "password"}
+                  value={passwordForm.confirmPassword}
+                  onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                  placeholder="Confirmez votre nouveau mot de passe"
+                  className="pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPasswords(prev => ({ ...prev, confirm: !prev.confirm }))}
+                >
+                  {showPasswords.confirm ? (
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex space-x-2 pt-4">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowPasswordDialog(false);
+                setPasswordForm({
+                  currentPassword: '',
+                  newPassword: '',
+                  confirmPassword: ''
+                });
+              }}
+              className="flex-1"
+              disabled={passwordLoading}
+            >
+              Annuler
+            </Button>
+            <Button
+              onClick={handlePasswordChange}
+              disabled={passwordLoading}
+              className="flex-1"
+            >
+              {passwordLoading ? "Modification..." : "Changer le mot de passe"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
