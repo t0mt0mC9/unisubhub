@@ -106,6 +106,12 @@ class RevenueCatService {
             apiKey: 'appl_GQGNOrPGOAqUKRTcAhDYoCAZPZN'
           });
           console.log('✅ RevenueCat configured for iOS');
+        } else if (platform === 'android') {
+          console.log('Configuring RevenueCat for Android...');
+          await Purchases.configure({
+            apiKey: 'goog_LuYBBYxfEbapYRFKJHvBgKDPvBl'
+          });
+          console.log('✅ RevenueCat configured for Android');
           
           // Test immédiat de l'API
           try {
@@ -127,12 +133,6 @@ class RevenueCatService {
             throw testError;
           }
           
-        } else if (platform === 'android') {
-          console.log('Configuring RevenueCat for Android...');
-          await Purchases.configure({
-            apiKey: 'goog_QaBdXTAklVmQkwWJafZhxgPCQCK',
-          });
-          console.log('✅ RevenueCat configured for Android');
         } else {
           console.warn('❌ Unsupported platform for RevenueCat:', platform);
           throw new Error(`Unsupported platform: ${platform}`);
