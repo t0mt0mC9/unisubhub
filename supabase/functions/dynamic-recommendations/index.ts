@@ -45,35 +45,38 @@ serve(async (req) => {
       `${deal.title} - ${deal.price || 'Prix variable'} (${deal.merchant})`
     ).join(', ') || '';
 
-    const prompt = `Analyze the following user subscriptions and provide smart optimization recommendations in French:
+    const prompt = `Analysez les abonnements suivants et fournissez 3-4 recommandations d'optimisation spécifiques en français.
 
-Subscriptions: ${subscriptionsList}
+Abonnements utilisateur: ${subscriptionsList}
 
-Current market deals: ${dealsContext}
+Offres du marché: ${dealsContext}
 
-Please provide 3-4 specific recommendations in JSON format with this structure:
+Concentrez-vous sur:
+1. Identification d'abonnements coûteux vs alternatives du marché
+2. Détection de services en double dans la même catégorie
+3. Optimisation cycle de facturation (mensuel vs annuel)
+4. Services alternatifs avec meilleur rapport qualité-prix
+5. Recommandations basées sur les offres actuelles du marché
+
+Répondez uniquement avec un JSON valide dans ce format exact:
 {
   "recommendations": [
     {
-      "id": number,
-      "type": "cost" | "duplicate" | "billing" | "usage" | "alternative",
-      "title": "short title",
-      "description": "brief description",
-      "impact": "Élevé" | "Moyen" | "Faible",
-      "details": "detailed explanation with specific actions",
-      "potential_savings": "estimated monthly savings in euros if applicable"
+      "id": 1,
+      "type": "cost",
+      "title": "titre court",
+      "description": "description brève",
+      "impact": "Élevé",
+      "details": "explication détaillée avec actions spécifiques",
+      "potential_savings": "économies mensuelles estimées en euros"
     }
   ]
 }
 
-Focus on:
-1. Identifying expensive subscriptions vs market alternatives
-2. Detecting duplicate services in same category
-3. Billing cycle optimization (monthly vs yearly)
-4. Alternative services with better value
-5. Based on current market deals when relevant
+Types disponibles: cost, duplicate, billing, usage, alternative
+Impact disponible: Élevé, Moyen, Faible
 
-Be specific and actionable. Only include realistic recommendations.`;
+Soyez spécifique et actionnable. Incluez seulement des recommandations réalistes.`;
 
     // Appel à Perplexity API
     const perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
