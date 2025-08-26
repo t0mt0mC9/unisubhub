@@ -14,8 +14,10 @@ import {
   Euro,
   Calendar,
   Users,
-  Zap
+  Zap,
+  ArrowRightLeft
 } from "lucide-react";
+import { useDynamicRecommendations } from "@/hooks/use-dynamic-recommendations";
 
 interface AnalyticsStatsProps {
   subscriptions: any[];
@@ -24,6 +26,9 @@ interface AnalyticsStatsProps {
 export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
   const { toast } = useToast();
   const [expandedRecommendation, setExpandedRecommendation] = useState<number | null>(null);
+  
+  // Utiliser les recommandations dynamiques
+  const { recommendations: dynamicRecommendations, loading: recommendationsLoading } = useDynamicRecommendations(subscriptions);
   // Calculs des statistiques basés sur les vraies données utilisateur
   const totalMonthly = subscriptions.reduce((sum, sub) => {
     const monthlyPrice = sub.billing_cycle === 'yearly' ? sub.price / 12 : 
@@ -47,17 +52,18 @@ export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
     return monthlyPrice > 20;
   });
 
-  // Recommandations d'optimisation
-  const recommendations = [
+  // Utiliser les recommandations dynamiques ou fallback statique
+  const recommendations = dynamicRecommendations.length > 0 ? dynamicRecommendations : [
     {
       id: 1,
       type: "cost",
       title: "Économie potentielle identifiée",
       description: `Vous pourriez économiser ~${Math.round(totalMonthly * 0.15)}€/mois en optimisant vos abonnements`,
       impact: "Élevé",
-      icon: Euro,
+      icon: "Euro",
       color: "text-green-600",
-      bgColor: "bg-green-100"
+      bgColor: "bg-green-100",
+      details: `Analysez vos abonnements les plus coûteux : ${expensiveSubscriptions.map(sub => sub.name).join(", ")}. Considérez des alternatives moins chères ou négociez des tarifs.`
     },
     {
       id: 2,
@@ -65,29 +71,10 @@ export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
       title: "Services similaires détectés",
       description: "Vous avez plusieurs services de streaming, considérez regrouper",
       impact: "Moyen",
-      icon: Users,
+      icon: "Users",
       color: "text-orange-600",
-      bgColor: "bg-orange-100"
-    },
-    {
-      id: 3,
-      type: "billing",
-      title: "Optimisation facturation",
-      description: "3 abonnements seraient moins chers en forfait annuel",
-      impact: "Moyen",
-      icon: Calendar,
-      color: "text-blue-600",
-      bgColor: "bg-blue-100"
-    },
-    {
-      id: 4,
-      type: "usage",
-      title: "Abonnements sous-utilisés",
-      description: "Analysez l'usage de vos services les plus coûteux",
-      impact: "Élevé",
-      icon: Target,
-      color: "text-purple-600",
-      bgColor: "bg-purple-100"
+      bgColor: "bg-orange-100",
+      details: `Services de streaming détectés : ${subscriptions.filter(sub => sub.category === "Streaming").map(sub => sub.name).join(", ")}. Vous pourriez garder seulement 1-2 services principaux.`
     }
   ];
 
@@ -159,6 +146,17 @@ export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
     return "text-red-600";
   };
 
+  const getIconComponent = (iconName: string) => {
+    switch (iconName) {
+      case 'Euro': return Euro;
+      case 'Users': return Users;
+      case 'Calendar': return Calendar;
+      case 'Target': return Target;
+      case 'ArrowRightLeft': return ArrowRightLeft;
+      default: return Lightbulb;
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Métriques principales */}
@@ -224,14 +222,20 @@ export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
           <CardTitle className="flex items-center gap-2">
             <Lightbulb className="h-5 w-5 text-primary" />
             Recommandations d'optimisation
+            {recommendationsLoading && (
+              <div className="ml-2 w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+            )}
           </CardTitle>
           <CardDescription>
-            Suggestions personnalisées pour réduire vos coûts
+            {recommendationsLoading 
+              ? "Analyse des prix du marché en cours..." 
+              : "Suggestions personnalisées basées sur les prix du marché"
+            }
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {recommendations.map((rec) => {
-            const Icon = rec.icon;
+            const Icon = getIconComponent(rec.icon);
             return (
               <div key={rec.id} className="flex items-start space-x-3 p-3 rounded-lg border">
                 <div className={`p-2 rounded-full ${rec.bgColor}`}>
@@ -257,13 +261,18 @@ export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
                       {expandedRecommendation === rec.id ? 'Masquer détails' : 'Voir détails'}
                     </Button>
                     
-                    {expandedRecommendation === rec.id && (
-                      <div className="mt-3 p-3 bg-muted/50 rounded-md border-l-4 border-primary">
-                        <p className="text-sm text-foreground">
-                          {getRecommendationDetails(rec)}
-                        </p>
-                      </div>
-                    )}
+                     {expandedRecommendation === rec.id && (
+                       <div className="mt-3 p-3 bg-muted/50 rounded-md border-l-4 border-primary">
+                         <p className="text-sm text-foreground">
+                           {rec.details || getRecommendationDetails(rec)}
+                         </p>
+                         {rec.potential_savings && (
+                           <div className="mt-2 text-xs text-green-600 font-medium">
+                             💰 Économie estimée : {rec.potential_savings}/mois
+                           </div>
+                         )}
+                       </div>
+                     )}
                   </div>
               </div>
             );
