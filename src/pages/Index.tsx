@@ -282,45 +282,14 @@ const Index = () => {
     <div className="flex-1 overflow-y-auto">
       <div className="p-4 space-y-6">
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-foreground mb-2">Analyses & Offres</h2>
-          <p className="text-muted-foreground">Optimisez vos abonnements avec nos recommandations</p>
+          <h2 className="text-2xl font-bold text-foreground mb-2">Analyses détaillées</h2>
+          <p className="text-muted-foreground">Analysez vos dépenses d'abonnements</p>
         </div>
         
-        {/* Navigation tabs */}
-        <div className="flex space-x-1 bg-muted/50 p-1 rounded-lg">
-          <button
-            onClick={() => setAnalyticsTab('offers')}
-            className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-              analyticsTab === 'offers'
-                ? 'bg-background text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            🎁 Offres d'abonnements
-          </button>
-          <button
-            onClick={() => setAnalyticsTab('analytics')}
-            className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-              analyticsTab === 'analytics'
-                ? 'bg-background text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            📊 Analyses détaillées
-          </button>
+        <div className="space-y-6">
+          <AnalyticsStats subscriptions={allSubscriptions} />
+          <AnalyticsCharts subscriptions={allSubscriptions} />
         </div>
-
-        {/* Content based on selected tab */}
-        {analyticsTab === 'offers' ? (
-          <div className="space-y-6">
-            <DealabsOffers userSubscriptions={allSubscriptions} />
-          </div>
-        ) : (
-          <div className="space-y-6">
-            <AnalyticsStats subscriptions={allSubscriptions} />
-            <AnalyticsCharts subscriptions={allSubscriptions} />
-          </div>
-        )}
         
         {/* Bottom spacing for fixed navigation */}
         <div className="h-20" />
