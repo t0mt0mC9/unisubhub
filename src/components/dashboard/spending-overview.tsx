@@ -28,19 +28,20 @@ export function SpendingOverview({
             <p className="text-2xl font-bold text-primary-foreground">
               {totalMonthly.toFixed(2)} {currency}
             </p>
+            
+            {/* Évolution par rapport au mois précédent */}
+            <div className="mt-2 flex items-center space-x-1">
+              {isPositiveChange ? (
+                <TrendingUp className="h-4 w-4 text-primary-foreground/80" />
+              ) : (
+                <TrendingDown className="h-4 w-4 text-primary-foreground/80" />
+              )}
+              <span className="text-sm text-primary-foreground/80">
+                {isPositiveChange ? '+' : ''}{monthlyChange.toFixed(1)}% vs mois précédent
+              </span>
+            </div>
           </div>
           <DollarSign className="h-8 w-8 text-primary-foreground/80" />
-        </div>
-        
-        <div className="mt-2 flex items-center space-x-1">
-          {isPositiveChange ? (
-            <TrendingUp className="h-4 w-4 text-primary-foreground/80" />
-          ) : (
-            <TrendingDown className="h-4 w-4 text-primary-foreground/80" />
-          )}
-          <span className="text-sm text-primary-foreground/80">
-            {Math.abs(monthlyChange)}% ce mois
-          </span>
         </div>
       </Card>
 
