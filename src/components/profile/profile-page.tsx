@@ -224,10 +224,7 @@ export function ProfilePage({ onSignOut }: ProfilePageProps) {
 
       {/* Actions du compte */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Gestion du compte</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 pt-6">
           <Button 
             variant="outline" 
             className="w-full justify-start"
