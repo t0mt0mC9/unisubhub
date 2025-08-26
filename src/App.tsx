@@ -11,7 +11,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
-import { BankCallback } from "./pages/BankCallback";
+
 import ExpenseAnalysis from "./pages/ExpenseAnalysis";
 import { useSubscription } from "@/hooks/use-subscription";
 import { useOnboarding } from "@/hooks/use-onboarding";
@@ -143,10 +143,6 @@ const App = () => {
             <Route 
               path="/auth" 
               element={!user ? <Auth /> : <Navigate to="/" replace />} 
-            />
-            <Route 
-              path="/bank-callback" 
-              element={<BankCallback />} 
             />
             <Route 
               path="/expense-analysis" 
