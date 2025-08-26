@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.c6cdb938779042f1abd39729bbdbc721',
+  appId: 'com.unisubhub.app',
   appName: 'UniSubHub',
   webDir: 'dist',
   // server: {
