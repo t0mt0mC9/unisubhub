@@ -19,8 +19,6 @@ import {
   LogOut,
   Trash2,
   HelpCircle,
-  BellRing,
-  Mail,
   DollarSign,
   Calendar
 } from "lucide-react";
@@ -155,44 +153,6 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5 flex items-center gap-2">
-              <BellRing className="h-4 w-4 text-primary" />
-              <div>
-                <Label>Notifications push</Label>
-                <div className="text-sm text-muted-foreground">
-                  Recevoir des notifications sur votre appareil
-                </div>
-              </div>
-            </div>
-            <Switch
-              checked={settings.pushNotifications}
-              onCheckedChange={(checked) => updateSettings({ pushNotifications: checked })}
-              disabled={loading}
-            />
-          </div>
-          
-          <Separator />
-          
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5 flex items-center gap-2">
-              <Mail className="h-4 w-4 text-primary" />
-              <div>
-                <Label>Notifications email</Label>
-                <div className="text-sm text-muted-foreground">
-                  Recevoir des résumés mensuels par email
-                </div>
-              </div>
-            </div>
-            <Switch
-              checked={settings.emailNotifications}
-              onCheckedChange={(checked) => updateSettings({ emailNotifications: checked })}
-              disabled={loading}
-            />
-          </div>
-          
-          <Separator />
-          
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5 flex items-center gap-2">
               <DollarSign className="h-4 w-4 text-primary" />
               <div>
                 <Label>Alertes budget</Label>
@@ -246,24 +206,6 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
             />
           </div>
           
-          <Separator />
-          
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5 flex items-center gap-2">
-              <Mail className="h-4 w-4 text-primary" />
-              <div>
-                <Label>Résumé mensuel</Label>
-                <div className="text-sm text-muted-foreground">
-                  Recevoir un résumé détaillé chaque mois
-                </div>
-              </div>
-            </div>
-            <Switch
-              checked={settings.monthlySummary}
-              onCheckedChange={(checked) => updateSettings({ monthlySummary: checked })}
-              disabled={loading}
-            />
-          </div>
         </CardContent>
       </Card>
 
