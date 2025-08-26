@@ -306,15 +306,6 @@ export const MobileSubscriptionPlans = () => {
         }
       </div>
 
-      {/* Bouton de restauration */}
-      <div className="text-center">
-        <Button variant="outline" onClick={handleRestore}>
-          Restaurer mes achats
-        </Button>
-        <p className="text-xs text-muted-foreground mt-2">
-          Si vous avez déjà acheté un abonnement, cliquez ici pour le restaurer.
-        </p>
-      </div>
     </div>
   );
 };
