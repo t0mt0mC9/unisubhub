@@ -20,7 +20,8 @@ import {
   Trash2,
   HelpCircle,
   DollarSign,
-  Calendar
+  Calendar,
+  Mail
 } from "lucide-react";
 
 interface SettingsPageProps {
@@ -202,6 +203,25 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
             <Switch
               checked={settings.offerNotifications}
               onCheckedChange={(checked) => updateSettings({ offerNotifications: checked })}
+              disabled={loading}
+            />
+          </div>
+          
+          <Separator />
+          
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5 flex items-center gap-2">
+              <Mail className="h-4 w-4 text-primary" />
+              <div>
+                <Label>Résumé mensuel</Label>
+                <div className="text-sm text-muted-foreground">
+                  Recevoir un résumé détaillé chaque mois par email
+                </div>
+              </div>
+            </div>
+            <Switch
+              checked={settings.monthlySummary}
+              onCheckedChange={(checked) => updateSettings({ monthlySummary: checked })}
               disabled={loading}
             />
           </div>
