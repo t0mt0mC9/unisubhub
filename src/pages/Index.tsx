@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { updateExpiredBillingDates } from "@/lib/subscription-updater";
 import { Search, Filter, Plus, BarChart3, Settings, LogOut, X, Bell } from "lucide-react";
 
 
@@ -136,7 +137,15 @@ const Index = () => {
   };
 
   useEffect(() => {
-    loadSubscriptions();
+    const initializeApp = async () => {
+      // Actualiser les dates de facturation expirées au démarrage
+      await updateExpiredBillingDates();
+      
+      // Charger les abonnements après la mise à jour
+      await loadSubscriptions();
+    };
+
+    initializeApp();
 
     // Listen for real-time updates
     const channel = supabase
