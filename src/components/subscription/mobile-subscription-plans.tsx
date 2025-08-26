@@ -204,16 +204,13 @@ export const MobileSubscriptionPlans = () => {
 
   return (
     <div className="space-y-6">
-      {/* Info sur les paiements mobiles */}
+      {/* Info sur les paiements sécurisés */}
       <Card className="border-primary/20 bg-primary/5">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-primary">
             <Smartphone className="h-5 w-5" />
-            Paiements mobiles
+            Paiements sécurisés
           </CardTitle>
-          <CardDescription>
-            Paiements sécurisés via Apple App Store
-          </CardDescription>
         </CardHeader>
       </Card>
 
