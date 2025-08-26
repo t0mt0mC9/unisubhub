@@ -80,7 +80,7 @@ const onboardingSteps = [
         </div>
         <div className="text-center text-sm text-muted-foreground">
           <p>• Détection automatique par IA</p>
-          <p>• Notifications de renouvellement</p>
+          <p>• Notifications de facturation</p>
           <p>• Recommandations d'économies</p>
         </div>
       </div>

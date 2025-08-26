@@ -8,6 +8,7 @@ import { EditSubscriptionDialog } from "@/components/subscription/edit-subscript
 import { cn } from "@/lib/utils";
 import { format, parseISO, isValid } from "date-fns";
 import { fr } from "date-fns/locale";
+import { getDaysUntilBilling, isBillingDueSoon, calculateNextBillingDate } from "@/lib/billing-utils";
 
 interface SubscriptionCardProps {
   id?: string;
@@ -84,7 +85,12 @@ export function SubscriptionCard({
     }
   };
 
-  const isExpiringSoon = daysUntilRenewal !== undefined && daysUntilRenewal <= 7;
+  // Calculer les jours jusqu'à la prochaine facturation
+  const billingDate = new Date(renewalDate);
+  const daysUntilBilling = getDaysUntilBilling(billingDate);
+  const isBillingSoon = isBillingDueSoon(billingDate);
+
+  const isExpiringSoon = daysUntilBilling <= 7;
 
   return (
     <Card className={cn("p-4 hover:shadow-md transition-all duration-300", className)}>
@@ -135,13 +141,13 @@ export function SubscriptionCard({
       
       <div className="mt-3 flex items-center justify-between text-sm">
         <span className="text-muted-foreground">
-          Renouvellement: {formatDate(renewalDate)}
+          Prochaine facturation: {formatDate(renewalDate)}
         </span>
         
-        {isExpiringSoon && (
+        {isBillingSoon && (
           <div className="flex items-center space-x-1 text-warning">
             <AlertTriangle className="h-4 w-4" />
-            <span>{daysUntilRenewal}j</span>
+            <span>{daysUntilBilling}j</span>
           </div>
         )}
       </div>

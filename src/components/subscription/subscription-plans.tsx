@@ -205,7 +205,7 @@ export const SubscriptionPlans = () => {
               </div>
               {subscriptionData.subscription_end && subscriptionData.subscription_type === 'monthly' && (
                 <div className="flex items-center justify-between">
-                  <span className="text-green-700">Renouvellement :</span>
+                  <span className="text-green-700">Prochaine facturation :</span>
                   <span className="text-green-800 font-medium">
                     {formatSubscriptionEnd(subscriptionData.subscription_end)}
                   </span>

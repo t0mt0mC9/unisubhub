@@ -47,7 +47,7 @@ const Landing = () => {
     {
       icon: Bell,
       title: "Alertes intelligentes",
-      description: "Recevez des notifications avant les renouvellements et détectez les abonnements inutilisés.",
+      description: "Recevez des notifications avant les facturations et détectez les abonnements inutilisés.",
       gradient: "from-warning to-destructive"
     },
     {

@@ -176,7 +176,7 @@ export const SubscriptionStatus = ({
           ) : subscriptionEnd && (
             <div className="flex items-center justify-between">
               <span className={isExpiringSoon() ? 'text-yellow-700' : 'text-green-700'}>
-                {isExpiringSoon() ? 'Expire le :' : 'Renouvellement :'}
+                {isExpiringSoon() ? 'Expire le :' : 'Prochaine facturation :'}
               </span>
               <span className={`font-medium ${isExpiringSoon() ? 'text-yellow-800' : 'text-green-800'}`}>
                 {formatDate(subscriptionEnd)}

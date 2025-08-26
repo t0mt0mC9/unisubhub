@@ -149,9 +149,9 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
             <div className="space-y-0.5 flex items-center gap-2">
               <Calendar className="h-4 w-4 text-primary" />
               <div>
-                <Label>Rappels renouvellement</Label>
+                <Label>Rappels facturation</Label>
                 <div className="text-sm text-muted-foreground">
-                  Rappels la veille du renouvellement
+                  Rappels la veille de la facturation
                 </div>
               </div>
             </div>
