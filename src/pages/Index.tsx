@@ -262,13 +262,18 @@ const Index = () => {
     </div>
   );
 
-  const renderAddSubscription = () => (
+  const renderOffers = () => (
     <div className="flex-1 overflow-y-auto pb-20">
-      <div className="p-4">
-        <AddSubscriptionDialog 
-          open={true} 
-          onOpenChange={() => setActiveTab('dashboard')} 
-        />
+      <div className="p-4 space-y-6">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-foreground mb-2">Offres d'abonnements</h2>
+          <p className="text-muted-foreground">Découvrez les meilleures offres du moment</p>
+        </div>
+        
+        <DealabsOffers userSubscriptions={allSubscriptions} />
+        
+        {/* Bottom spacing for fixed navigation */}
+        <div className="h-6" />
       </div>
     </div>
   );
@@ -348,7 +353,7 @@ const Index = () => {
     
     switch (activeTab) {
       case 'dashboard': return 'UniSubHub';
-      case 'add': return 'Ajouter';
+      case 'offers': return 'Offres';
       case 'analytics': return 'Analyses';
       case 'settings': return 'Paramètres';
       case 'subscription': return 'Premium';
@@ -364,7 +369,7 @@ const Index = () => {
     
     switch (activeTab) {
       case 'dashboard': return renderDashboard();
-      case 'add': return renderAddSubscription();
+      case 'offers': return renderOffers();
       case 'analytics': return renderAnalytics();
       case 'settings': return renderSettings();
       case 'subscription': return renderSubscription();
