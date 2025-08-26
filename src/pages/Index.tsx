@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Search, Filter, Plus, BarChart3, Settings, LogOut, X, Bell } from "lucide-react";
-import { TestNotificationButton } from "@/components/test-notification-button";
+
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -196,16 +196,15 @@ const Index = () => {
         />
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="flex justify-center">
           <Button 
-            className="col-span-1" 
+            className="flex-1 max-w-xs" 
             size="lg"
             onClick={() => setShowAddDialog(true)}
           >
             <Plus className="mr-2 h-4 w-4" />
             Ajouter
           </Button>
-          <TestNotificationButton />
         </div>
 
         {/* Subscriptions List */}
