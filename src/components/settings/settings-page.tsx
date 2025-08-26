@@ -21,7 +21,8 @@ import {
   HelpCircle,
   DollarSign,
   Calendar,
-  Mail
+  Mail,
+  MessageCircle
 } from "lucide-react";
 
 interface SettingsPageProps {
@@ -188,8 +189,28 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
         </CardContent>
       </Card>
 
-
-      {/* Data & Privacy */}
+      {/* Support */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MessageCircle className="h-5 w-5" />
+            Support
+          </CardTitle>
+          <CardDescription>
+            Besoin d'aide ? Contactez notre équipe support
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button 
+            variant="outline" 
+            className="w-full"
+            onClick={() => window.open('mailto:tom.lifert@gmail.com?subject=Support UniSubHub - Demande d\'aide', '_blank')}
+          >
+            <MessageCircle className="mr-2 h-4 w-4" />
+            Contact support
+          </Button>
+        </CardContent>
+      </Card>
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
