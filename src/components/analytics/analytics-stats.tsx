@@ -120,6 +120,45 @@ export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
     setExpandedRecommendation(expandedRecommendation === recId ? null : recId);
   };
 
+  // Calcul dynamique du score d'optimisation
+  const calculateOptimizationScore = () => {
+    if (subscriptions.length === 0) return { total: 0, diversity: 0, price: 0, usage: 0 };
+
+    // Score de diversité (0-100) : Mieux on répartit entre les catégories, mieux c'est
+    const categories = Object.keys(categoryStats);
+    const diversityScore = Math.min(100, categories.length * 25); // Max 4 catégories = 100pts
+    
+    // Score de prix (0-100) : Pénalise les abonnements chers
+    const expensiveCount = expensiveSubscriptions.length;
+    const expensiveRatio = expensiveCount / subscriptions.length;
+    const priceScore = Math.max(0, 100 - (expensiveRatio * 60)); // -60pts si 100% d'abonnements chers
+    
+    // Score d'utilisation (0-100) : Détecte les doublons potentiels
+    const duplicateCategories = Object.values(categoryStats).filter((count: number) => count > 2).length;
+    const usageScore = Math.max(0, 100 - (duplicateCategories * 30)); // -30pts par catégorie avec >2 services
+    
+    // Score total (moyenne pondérée)
+    const total = Math.round((diversityScore * 0.3 + priceScore * 0.4 + usageScore * 0.3));
+    
+    return { total, diversity: diversityScore, price: priceScore, usage: usageScore };
+  };
+
+  const optimizationScore = calculateOptimizationScore();
+
+  const getScoreLabel = (score: number) => {
+    if (score >= 80) return "Excellent";
+    if (score >= 60) return "Bon";
+    if (score >= 40) return "Moyen";
+    return "À améliorer";
+  };
+
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return "text-green-600";
+    if (score >= 60) return "text-blue-600";
+    if (score >= 40) return "text-orange-600";
+    return "text-red-600";
+  };
+
   return (
     <div className="space-y-6">
       {/* Métriques principales */}
@@ -254,19 +293,27 @@ export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
         </CardHeader>
         <CardContent>
           <div className="text-center space-y-4">
-            <div className="text-4xl font-bold text-green-600">78/100</div>
-            <Progress value={78} className="h-3" />
+            <div className={`text-4xl font-bold ${getScoreColor(optimizationScore.total)}`}>
+              {optimizationScore.total}/100
+            </div>
+            <Progress value={optimizationScore.total} className="h-3" />
             <div className="grid grid-cols-3 gap-4 text-sm">
               <div className="text-center">
-                <div className="font-medium text-green-600">Bon</div>
+                <div className={`font-medium ${getScoreColor(optimizationScore.diversity)}`}>
+                  {getScoreLabel(optimizationScore.diversity)}
+                </div>
                 <div className="text-muted-foreground">Diversité</div>
               </div>
               <div className="text-center">
-                <div className="font-medium text-orange-600">Moyen</div>
+                <div className={`font-medium ${getScoreColor(optimizationScore.price)}`}>
+                  {getScoreLabel(optimizationScore.price)}
+                </div>
                 <div className="text-muted-foreground">Prix</div>
               </div>
               <div className="text-center">
-                <div className="font-medium text-red-600">À améliorer</div>
+                <div className={`font-medium ${getScoreColor(optimizationScore.usage)}`}>
+                  {getScoreLabel(optimizationScore.usage)}
+                </div>
                 <div className="text-muted-foreground">Utilisation</div>
               </div>
             </div>
