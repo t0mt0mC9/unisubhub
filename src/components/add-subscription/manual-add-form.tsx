@@ -45,7 +45,7 @@ export const ManualAddForm = ({ onSuccess }: ManualAddFormProps) => {
     name: "",
     description: "",
     price: "",
-    currency: settings.currency,
+    currency: "EUR", // Fixé à EUR
     billing_cycle: "monthly",
     category: "",
     next_billing_date: new Date(),
@@ -53,10 +53,6 @@ export const ManualAddForm = ({ onSuccess }: ManualAddFormProps) => {
   });
   const { toast } = useToast();
 
-  // Met à jour la devise quand les paramètres changent
-  useEffect(() => {
-    setFormData(prev => ({ ...prev, currency: settings.currency }));
-  }, [settings.currency]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -175,9 +171,9 @@ export const ManualAddForm = ({ onSuccess }: ManualAddFormProps) => {
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="price">Prix *</Label>
+          <Label htmlFor="price">Prix (€) *</Label>
           <Input
             id="price"
             type="number"
@@ -188,24 +184,6 @@ export const ManualAddForm = ({ onSuccess }: ManualAddFormProps) => {
             disabled={loading}
             required
           />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="currency">Devise</Label>
-          <Select
-            value={formData.currency}
-            onValueChange={(value) => updateFormData("currency", value)}
-            disabled={loading}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="EUR">EUR (€)</SelectItem>
-              <SelectItem value="USD">USD ($)</SelectItem>
-              <SelectItem value="GBP">GBP (£)</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
 
         <div className="space-y-2">
