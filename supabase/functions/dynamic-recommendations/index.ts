@@ -86,20 +86,20 @@ Soyez spécifique et actionnable. Incluez seulement des recommandations réalist
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama-3.1-sonar-large-128k-online',
+        model: 'llama-3.1-sonar-small-128k-online',
         messages: [
           {
             role: 'system',
-            content: 'You are a French subscription optimization expert. Return only valid JSON without markdown formatting.'
+            content: 'Tu es un expert français en optimisation d abonnements. Réponds uniquement avec du JSON valide sans formatage markdown.'
           },
           {
             role: 'user',
             content: prompt
           }
         ],
-        temperature: 0.3,
+        temperature: 0.2,
         top_p: 0.9,
-        max_tokens: 2000,
+        max_tokens: 1500,
         return_images: false,
         return_related_questions: false,
         frequency_penalty: 0.5,
@@ -108,7 +108,9 @@ Soyez spécifique et actionnable. Incluez seulement des recommandations réalist
     });
 
     if (!perplexityResponse.ok) {
-      throw new Error(`Perplexity API error: ${perplexityResponse.status}`);
+      const errorText = await perplexityResponse.text();
+      console.error(`Perplexity API error ${perplexityResponse.status}:`, errorText);
+      throw new Error(`Perplexity API error: ${perplexityResponse.status} - ${errorText}`);
     }
 
     const perplexityData = await perplexityResponse.json();
@@ -200,30 +202,80 @@ function getBgColorForType(type: string): string {
 function generateFallbackRecommendations(subscriptions: any[]): any[] {
   if (!subscriptions || subscriptions.length === 0) return [];
 
+  const recommendations = [];
+  
+  // Analyser les doublons
+  const categories = new Map();
+  subscriptions.forEach(sub => {
+    if (!categories.has(sub.category)) {
+      categories.set(sub.category, []);
+    }
+    categories.get(sub.category).push(sub);
+  });
+
+  // Détecter les doublons
+  const duplicates = Array.from(categories.entries()).filter(([_, subs]) => subs.length > 1);
+  if (duplicates.length > 0) {
+    const duplicateCategory = duplicates[0][0];
+    const duplicateSubs = duplicates[0][1];
+    const potentialSavings = Math.min(...duplicateSubs.map(s => s.price));
+    
+    recommendations.push({
+      id: recommendations.length + 1,
+      type: "duplicate",
+      title: `Services en double détectés - ${duplicateCategory}`,
+      description: `${duplicateSubs.length} abonnements ${duplicateCategory} actifs`,
+      impact: "Élevé",
+      details: `Vous avez ${duplicateSubs.map(s => s.name).join(', ')} dans la catégorie ${duplicateCategory}. Considérez n'en garder qu'un seul.`,
+      potential_savings: `${potentialSavings}€`
+    });
+  }
+
+  // Analyser les coûts élevés
   const totalMonthly = subscriptions.reduce((sum, sub) => {
     const monthlyPrice = sub.billing_cycle === 'yearly' ? sub.price / 12 : 
                         sub.billing_cycle === 'weekly' ? sub.price * 4.33 : sub.price;
     return sum + monthlyPrice;
   }, 0);
 
-  return [
-    {
-      id: 1,
+  const expensiveSubs = subscriptions.filter(sub => {
+    const monthlyPrice = sub.billing_cycle === 'yearly' ? sub.price / 12 : 
+                        sub.billing_cycle === 'weekly' ? sub.price * 4.33 : sub.price;
+    return monthlyPrice > 20;
+  });
+
+  if (expensiveSubs.length > 0) {
+    const mostExpensive = expensiveSubs.reduce((a, b) => {
+      const priceA = a.billing_cycle === 'yearly' ? a.price / 12 : a.price;
+      const priceB = b.billing_cycle === 'yearly' ? b.price / 12 : b.price;
+      return priceA > priceB ? a : b;
+    });
+    
+    recommendations.push({
+      id: recommendations.length + 1,
       type: "cost",
-      title: "Optimisation des coûts détectée",
-      description: `Économies potentielles de ~${Math.round(totalMonthly * 0.15)}€/mois identifiées`,
+      title: "Abonnement coûteux identifié",
+      description: `${mostExpensive.name} représente un coût élevé`,
       impact: "Élevé",
-      details: "Analysez vos abonnements les plus coûteux et recherchez des alternatives moins chères.",
-      potential_savings: `${Math.round(totalMonthly * 0.15)}€`
-    },
-    {
-      id: 2,
+      details: `${mostExpensive.name} coûte ${mostExpensive.price}€/${mostExpensive.billing_cycle}. Recherchez des alternatives moins chères ou négociez le tarif.`,
+      potential_savings: `${Math.round(mostExpensive.price * 0.3)}€`
+    });
+  }
+
+  // Optimisation facturation annuelle
+  const monthlyBilling = subscriptions.filter(sub => sub.billing_cycle === 'monthly');
+  if (monthlyBilling.length > 0) {
+    const savingsEstimate = Math.round(totalMonthly * 0.15);
+    recommendations.push({
+      id: recommendations.length + 1,
       type: "billing",
       title: "Optimisation facturation annuelle",
-      description: "Certains abonnements seraient moins chers en forfait annuel",
+      description: `${monthlyBilling.length} abonnements en facturation mensuelle`,
       impact: "Moyen",
-      details: "Passez vos abonnements mensuels en annuel pour obtenir des réductions.",
-      potential_savings: `${Math.round(totalMonthly * 0.1)}€`
-    }
-  ];
+      details: `Passez ${monthlyBilling.map(s => s.name).join(', ')} en forfait annuel pour obtenir jusqu'à 15% de réduction.`,
+      potential_savings: `${savingsEstimate}€`
+    });
+  }
+
+  return recommendations.slice(0, 4); // Maximum 4 recommandations
 }
