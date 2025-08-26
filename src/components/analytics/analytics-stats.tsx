@@ -290,6 +290,9 @@ export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
             <CheckCircle className="h-5 w-5 text-green-600" />
             Score d'optimisation
           </CardTitle>
+          <CardDescription>
+            Score calculé sur la diversité (30%), le prix (40%) et l'utilisation (30%) de vos abonnements
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-center space-y-4">
