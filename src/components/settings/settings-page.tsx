@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { useNotifications } from "@/hooks/use-notifications";
 import { 
   Settings, 
   Bell, 
@@ -17,7 +18,11 @@ import {
   User, 
   LogOut,
   Trash2,
-  HelpCircle
+  HelpCircle,
+  BellRing,
+  Mail,
+  DollarSign,
+  Calendar
 } from "lucide-react";
 
 interface SettingsPageProps {
@@ -26,40 +31,24 @@ interface SettingsPageProps {
 }
 
 export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPageProps) => {
-  const [notifications, setNotifications] = useState(true);
-  const [emailNotifications, setEmailNotifications] = useState(false);
-  const [budgetAlerts, setBudgetAlerts] = useState(true);
-  const [renewalAlerts, setRenewalAlerts] = useState(true);
   const [currency, setCurrency] = useState("EUR");
-  const [budgetLimit, setBudgetLimit] = useState("100");
-  
   const { toast } = useToast();
+  const { settings, updateSettings, loading } = useNotifications();
 
-  // Charger les paramètres sauvegardés au montage du composant
+  // Charger la devise depuis localStorage au montage du composant
   useEffect(() => {
-    const loadSettings = async () => {
+    const loadCurrency = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           const savedCurrency = localStorage.getItem(`preferred_currency_${user.id}`);
-          const savedBudget = localStorage.getItem(`budget_limit_${user.id}`);
-          const savedNotifications = localStorage.getItem(`notifications_${user.id}`);
-          
           if (savedCurrency) setCurrency(savedCurrency);
-          if (savedBudget) setBudgetLimit(savedBudget);
-          if (savedNotifications) {
-            const notifSettings = JSON.parse(savedNotifications);
-            setNotifications(notifSettings.notifications);
-            setEmailNotifications(notifSettings.emailNotifications);
-            setBudgetAlerts(notifSettings.budgetAlerts);
-            setRenewalAlerts(notifSettings.renewalAlerts);
-          }
         }
       } catch (error) {
-        console.error('Error loading settings:', error);
+        console.error('Error loading currency:', error);
       }
     };
-    loadSettings();
+    loadCurrency();
   }, []);
 
   const handleSaveSettings = async () => {
@@ -68,19 +57,19 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
       if (user) {
         // Sauvegarder la devise préférée dans localStorage
         localStorage.setItem(`preferred_currency_${user.id}`, currency);
-        localStorage.setItem(`budget_limit_${user.id}`, budgetLimit);
-        localStorage.setItem(`notifications_${user.id}`, JSON.stringify({
-          notifications,
-          emailNotifications,
-          budgetAlerts,
-          renewalAlerts
-        }));
+        
+        // Sauvegarder les paramètres de notification via le hook
+        const success = await updateSettings({ budgetLimit: settings.budgetLimit });
+        
+        if (success) {
+          toast({
+            title: "Paramètres sauvegardés",
+            description: "Vos préférences ont été mises à jour avec succès",
+          });
+        } else {
+          throw new Error('Failed to update settings');
+        }
       }
-      
-      toast({
-        title: "Paramètres sauvegardés",
-        description: "Vos préférences ont été mises à jour avec succès",
-      });
     } catch (error) {
       toast({
         title: "Erreur",
@@ -165,58 +154,114 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>Notifications push</Label>
-              <div className="text-sm text-muted-foreground">
-                Recevoir des notifications sur votre appareil
+            <div className="space-y-0.5 flex items-center gap-2">
+              <BellRing className="h-4 w-4 text-primary" />
+              <div>
+                <Label>Notifications push</Label>
+                <div className="text-sm text-muted-foreground">
+                  Recevoir des notifications sur votre appareil
+                </div>
               </div>
             </div>
             <Switch
-              checked={notifications}
-              onCheckedChange={setNotifications}
+              checked={settings.pushNotifications}
+              onCheckedChange={(checked) => updateSettings({ pushNotifications: checked })}
+              disabled={loading}
             />
           </div>
           
           <Separator />
           
           <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>Notifications email</Label>
-              <div className="text-sm text-muted-foreground">
-                Recevoir des résumés par email
+            <div className="space-y-0.5 flex items-center gap-2">
+              <Mail className="h-4 w-4 text-primary" />
+              <div>
+                <Label>Notifications email</Label>
+                <div className="text-sm text-muted-foreground">
+                  Recevoir des résumés mensuels par email
+                </div>
               </div>
             </div>
             <Switch
-              checked={emailNotifications}
-              onCheckedChange={setEmailNotifications}
+              checked={settings.emailNotifications}
+              onCheckedChange={(checked) => updateSettings({ emailNotifications: checked })}
+              disabled={loading}
             />
           </div>
           
           <Separator />
           
           <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>Alertes budget</Label>
-              <div className="text-sm text-muted-foreground">
-                Être alerté en cas de dépassement
+            <div className="space-y-0.5 flex items-center gap-2">
+              <DollarSign className="h-4 w-4 text-primary" />
+              <div>
+                <Label>Alertes budget</Label>
+                <div className="text-sm text-muted-foreground">
+                  Être alerté en cas de dépassement
+                </div>
               </div>
             </div>
             <Switch
-              checked={budgetAlerts}
-              onCheckedChange={setBudgetAlerts}
+              checked={settings.budgetAlerts}
+              onCheckedChange={(checked) => updateSettings({ budgetAlerts: checked })}
+              disabled={loading}
             />
           </div>
           
+          <Separator />
+          
           <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>Rappels renouvellement</Label>
-              <div className="text-sm text-muted-foreground">
-                Rappels avant échéance
+            <div className="space-y-0.5 flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-primary" />
+              <div>
+                <Label>Rappels renouvellement</Label>
+                <div className="text-sm text-muted-foreground">
+                  Rappels la veille du renouvellement
+                </div>
               </div>
             </div>
             <Switch
-              checked={renewalAlerts}
-              onCheckedChange={setRenewalAlerts}
+              checked={settings.renewalAlerts}
+              onCheckedChange={(checked) => updateSettings({ renewalAlerts: checked })}
+              disabled={loading}
+            />
+          </div>
+          
+          <Separator />
+          
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5 flex items-center gap-2">
+              <Bell className="h-4 w-4 text-primary" />
+              <div>
+                <Label>Notifications d'offres</Label>
+                <div className="text-sm text-muted-foreground">
+                  Alertes pour nouvelles offres Dealabs correspondantes
+                </div>
+              </div>
+            </div>
+            <Switch
+              checked={settings.offerNotifications}
+              onCheckedChange={(checked) => updateSettings({ offerNotifications: checked })}
+              disabled={loading}
+            />
+          </div>
+          
+          <Separator />
+          
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5 flex items-center gap-2">
+              <Mail className="h-4 w-4 text-primary" />
+              <div>
+                <Label>Résumé mensuel</Label>
+                <div className="text-sm text-muted-foreground">
+                  Recevoir un résumé détaillé chaque mois
+                </div>
+              </div>
+            </div>
+            <Switch
+              checked={settings.monthlySummary}
+              onCheckedChange={(checked) => updateSettings({ monthlySummary: checked })}
+              disabled={loading}
             />
           </div>
         </CardContent>
@@ -254,10 +299,14 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
             <Input
               id="budget"
               type="number"
-              value={budgetLimit}
-              onChange={(e) => setBudgetLimit(e.target.value)}
+              value={settings.budgetLimit}
+              onChange={(e) => updateSettings({ budgetLimit: Number(e.target.value) })}
               placeholder="100"
+              disabled={loading}
             />
+            <div className="text-sm text-muted-foreground">
+              Vous serez alerté si vos dépenses dépassent ce montant
+            </div>
           </div>
         </CardContent>
       </Card>

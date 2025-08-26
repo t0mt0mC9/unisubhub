@@ -74,6 +74,84 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_settings: {
+        Row: {
+          budget_alerts: boolean
+          budget_limit: number
+          created_at: string
+          email_notifications: boolean
+          id: string
+          monthly_summary: boolean
+          offer_notifications: boolean
+          push_notifications: boolean
+          renewal_alerts: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          budget_alerts?: boolean
+          budget_limit?: number
+          created_at?: string
+          email_notifications?: boolean
+          id?: string
+          monthly_summary?: boolean
+          offer_notifications?: boolean
+          push_notifications?: boolean
+          renewal_alerts?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          budget_alerts?: boolean
+          budget_limit?: number
+          created_at?: string
+          email_notifications?: boolean
+          id?: string
+          monthly_summary?: boolean
+          offer_notifications?: boolean
+          push_notifications?: boolean
+          renewal_alerts?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          content: string
+          created_at: string
+          data: Json | null
+          id: string
+          is_read: boolean
+          title: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          data?: Json | null
+          id?: string
+          is_read?: boolean
+          title: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          data?: Json | null
+          id?: string
+          is_read?: boolean
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
