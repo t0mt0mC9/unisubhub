@@ -7,6 +7,7 @@ import { ExternalLink, Tag, TrendingUp, Clock, Gift } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { StreamingComparisonTable } from './streaming-comparison-table';
+import { PressComparisonTable } from './press-comparison-table';
 
 interface DealabsOffer {
   id: string;
@@ -134,9 +135,10 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
       </div>
 
       <Tabs defaultValue="offers" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="offers">Offres en cours</TabsTrigger>
-          <TabsTrigger value="comparison">Comparatif streaming</TabsTrigger>
+          <TabsTrigger value="streaming">Comparatif streaming</TabsTrigger>
+          <TabsTrigger value="press">Comparatif presse</TabsTrigger>
         </TabsList>
 
         <TabsContent value="offers" className="space-y-4">
@@ -332,8 +334,12 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
       )}
         </TabsContent>
 
-        <TabsContent value="comparison">
+        <TabsContent value="streaming">
           <StreamingComparisonTable />
+        </TabsContent>
+
+        <TabsContent value="press">
+          <PressComparisonTable />
         </TabsContent>
       </Tabs>
     </div>
