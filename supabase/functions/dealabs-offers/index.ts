@@ -355,14 +355,17 @@ function generateDemoOffers(): DealabsOffer[] {
 async function fetchPerplexityOffers(userSubscriptions: UserSubscription[]): Promise<DealabsOffer[]> {
   try {
     const perplexityApiKey = Deno.env.get('PERPLEXITY_API_KEY');
-    console.log('=== PERPLEXITY DEBUG ===');
+    console.log('=== PERPLEXITY DEBUG DÉTAILLÉ ===');
     console.log('Perplexity API key available:', !!perplexityApiKey);
+    console.log('Perplexity API key first 10 chars:', perplexityApiKey?.substring(0, 10) || 'NONE');
+    console.log('Environment keys available:', Object.keys(Deno.env.toObject()).filter(key => key.includes('PERPLEXITY')));
     
     if (!perplexityApiKey) {
       console.log('❌ PERPLEXITY: No API key found - using demo offers instead');
       return generateDemoOffers();
     }
 
+    console.log(`✅ PERPLEXITY: API key found, proceeding with API call`);
     console.log(`✅ PERPLEXITY: Fetching offers with working model`);
     
 
@@ -376,6 +379,9 @@ async function fetchPerplexityOffers(userSubscriptions: UserSubscription[]): Pro
     console.log('PERPLEXITY: Calling API with search terms...');
 
     try {
+      console.log('🚀 PERPLEXITY: About to make HTTP request to Perplexity API...');
+      console.log('🚀 PERPLEXITY: Request URL: https://api.perplexity.ai/chat/completions');
+      console.log('🚀 PERPLEXITY: Request model: llama-3.1-sonar-large-128k-online');
       const response = await fetch('https://api.perplexity.ai/chat/completions', {
         method: 'POST',
         headers: {
