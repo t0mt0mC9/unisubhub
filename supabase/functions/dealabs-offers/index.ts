@@ -313,103 +313,42 @@ async function fetchPerplexityOffers(userSubscriptions: UserSubscription[]): Pro
 
     console.log('PERPLEXITY: Searching offers for:', searchTerms);
 
-    const response = await fetch('https://api.perplexity.ai/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${perplexityApiKey}`,
-        'Content-Type': 'application/json',
+    // Test avec des offres statiques d'abord pour confirmer que le problème vient de l'API
+    console.log('PERPLEXITY: Generating demo offers for testing...');
+    
+    const demoOffers = [
+      {
+        title: "Netflix - Essai gratuit 30 jours",
+        description: "Découvrez Netflix gratuitement pendant 30 jours",
+        price: "Gratuit",
+        originalPrice: "15.99€",
+        merchant: "Netflix",
+        category: "streaming",
+        url: "https://netflix.com/fr/"
       },
-      body: JSON.stringify({
-        model: 'llama-3.1-sonar-large-128k-online',
-        messages: [
-          {
-            role: 'user',
-            content: `Trouve des offres promotionnelles actuelles pour les services d'abonnement comme ${searchTerms}. 
-
-Réponds UNIQUEMENT avec un JSON valide :
-{
-  "offers": [
-    {
-      "title": "Netflix - 1 mois gratuit",
-      "description": "Essai gratuit d'un mois pour Netflix",
-      "price": "Gratuit", 
-      "originalPrice": "15.99€",
-      "merchant": "Netflix",
-      "category": "streaming",
-      "url": "https://netflix.com/fr/"
-    }
-  ]
-}`
-          }
-        ],
-        max_tokens: 1000,
-        temperature: 0.3
-      }),
-    });
-
-    console.log(`✅ PERPLEXITY: Response status: ${response.status}`);
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.log(`❌ PERPLEXITY: API error ${response.status}: ${errorText}`);
-      return [];
-    }
-
-    const data = await response.json();
-    console.log('✅ PERPLEXITY: Raw response received');
-    
-    const content = data.choices?.[0]?.message?.content;
-    if (!content) {
-      console.log('❌ PERPLEXITY: No content in response');
-      return [];
-    }
-
-    console.log('PERPLEXITY content preview:', content.substring(0, 300));
-
-    // Parser le JSON avec gestion d'erreur robuste
-    let offers = [];
-    try {
-      // Nettoyer le contenu
-      let cleanContent = content.trim();
-      
-      // Supprimer les balises markdown
-      cleanContent = cleanContent.replace(/```json\n?|\n?```/g, '');
-      
-      // Extraire le JSON
-      const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0]);
-        offers = parsed.offers || [];
-        console.log(`✅ PERPLEXITY: Parsed ${offers.length} offers successfully`);
-      } else {
-        console.log('❌ PERPLEXITY: No valid JSON found');
-        return [];
+      {
+        title: "Spotify Premium - 3 mois offerts",
+        description: "Profitez de 3 mois de Spotify Premium gratuits",
+        price: "Gratuit",
+        originalPrice: "9.99€",
+        merchant: "Spotify", 
+        category: "musique",
+        url: "https://spotify.com/fr/"
+      },
+      {
+        title: "Disney+ - 50% de réduction",
+        description: "Abonnement Disney+ à moitié prix pendant 6 mois",
+        price: "4.99€",
+        originalPrice: "8.99€",
+        merchant: "Disney+",
+        category: "streaming",
+        url: "https://disneyplus.com/fr/"
       }
-    } catch (parseError) {
-      console.log('❌ PERPLEXITY: JSON parse error:', parseError);
-      // Si le parsing échoue, créer des offres de test
-      offers = [
-        {
-          title: "Netflix - Offre découverte",
-          description: "Découvrez Netflix avec une réduction spéciale",
-          price: "9.99€",
-          originalPrice: "15.99€",
-          merchant: "Netflix",
-          category: "streaming",
-          url: "https://netflix.com/fr/"
-        },
-        {
-          title: "Spotify Premium - 3 mois",
-          description: "3 mois de Spotify Premium à prix réduit",
-          price: "Gratuit",
-          originalPrice: "9.99€",
-          merchant: "Spotify",
-          category: "musique",
-          url: "https://spotify.com/fr/"
-        }
-      ];
-      console.log('✅ PERPLEXITY: Using fallback offers');
-    }
+    ];
+
+    // Pour l'instant, utiliser des offres de démonstration
+    console.log('✅ PERPLEXITY: Using demo offers for testing');
+    const offers = demoOffers;
 
     // Formater les offres pour l'interface
     const formattedOffers: DealabsOffer[] = offers.map((offer: any, index: number) => ({
