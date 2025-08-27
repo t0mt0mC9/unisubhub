@@ -8,6 +8,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { StreamingComparisonTable } from './streaming-comparison-table';
 import { PressComparisonTable } from './press-comparison-table';
+import { GamingComparisonTable } from './gaming-comparison-table';
 
 interface DealabsOffer {
   id: string;
@@ -135,10 +136,11 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
       </div>
 
       <Tabs defaultValue="offers" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="offers">Offres en cours</TabsTrigger>
-          <TabsTrigger value="streaming">Comparatif streaming</TabsTrigger>
-          <TabsTrigger value="press">Comparatif presse</TabsTrigger>
+          <TabsTrigger value="streaming">Streaming</TabsTrigger>
+          <TabsTrigger value="press">Presse</TabsTrigger>
+          <TabsTrigger value="gaming">Gaming</TabsTrigger>
         </TabsList>
 
         <TabsContent value="offers" className="space-y-4">
@@ -340,6 +342,10 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
 
         <TabsContent value="press">
           <PressComparisonTable />
+        </TabsContent>
+
+        <TabsContent value="gaming">
+          <GamingComparisonTable />
         </TabsContent>
       </Tabs>
     </div>
