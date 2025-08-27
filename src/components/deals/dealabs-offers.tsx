@@ -28,14 +28,16 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = () => {
       </div>
 
       <Tabs defaultValue="streaming" className="w-full">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="streaming">Streaming</TabsTrigger>
-          <TabsTrigger value="press">Presse</TabsTrigger>
-          <TabsTrigger value="gaming">Gaming</TabsTrigger>
-          <TabsTrigger value="fitness">Fitness</TabsTrigger>
-          <TabsTrigger value="creativity">Créativité</TabsTrigger>
-          <TabsTrigger value="productivity">Productivité</TabsTrigger>
-        </TabsList>
+        <div className="w-full overflow-x-auto">
+          <TabsList className="grid grid-cols-6 min-w-max lg:grid-cols-6 lg:min-w-full">
+            <TabsTrigger value="streaming" className="whitespace-nowrap text-xs sm:text-sm">Streaming</TabsTrigger>
+            <TabsTrigger value="press" className="whitespace-nowrap text-xs sm:text-sm">Presse</TabsTrigger>
+            <TabsTrigger value="gaming" className="whitespace-nowrap text-xs sm:text-sm">Gaming</TabsTrigger>
+            <TabsTrigger value="fitness" className="whitespace-nowrap text-xs sm:text-sm">Fitness</TabsTrigger>
+            <TabsTrigger value="creativity" className="whitespace-nowrap text-xs sm:text-sm">Créativité</TabsTrigger>
+            <TabsTrigger value="productivity" className="whitespace-nowrap text-xs sm:text-sm">Productivité</TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="streaming">
           <StreamingComparisonTable />
