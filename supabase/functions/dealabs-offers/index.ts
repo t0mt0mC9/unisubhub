@@ -64,12 +64,10 @@ serve(async (req) => {
         const perplexityOffersForAll = await fetchPerplexityOffers(userSubscriptions || []);
         console.log(`Fetched ${perplexityOffersForAll.length} real offers from Perplexity`);
         
-        // Si pas d'offres Perplexity, générer des offres fictives pour test
+        // Si pas d'offres Perplexity, ne pas afficher les offres de test
         if (perplexityOffersForAll.length === 0) {
-          console.log('Forcing display of test Perplexity offers');
-          const testOffers = generateTestPerplexityOffers();
-          console.log(`Generated ${testOffers.length} test offers for display`);
-          return new Response(JSON.stringify({ offers: testOffers }), {
+          console.log('No real Perplexity offers found - returning empty list');
+          return new Response(JSON.stringify({ offers: [] }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
         }
@@ -361,50 +359,63 @@ IMPORTANT: Ne proposez QUE des offres RÉELLEMENT DISPONIBLES avec des URLs vali
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama-3.1-sonar-large-128k-online',
+        model: 'llama-3.1-sonar-small-128k-online',
         messages: [
           {
             role: 'system',
-            content: `Tu es un expert en recherche de promotions et offres spéciales actuellement disponibles. 
+            content: `Tu es un expert en recherche de promotions et offres spéciales. 
             
-            Recherche uniquement des offres et promotions RÉELLES et ACTUELLES qui sont disponibles MAINTENANT en 2025. 
+            Trouve des offres et promotions RÉELLES et ACTUELLEMENT DISPONIBLES pour les services mentionnés.
             
-            Pour chaque offre trouvée, assure-toi qu'elle :
-            - Est actuellement active et disponible
-            - A un lien d'inscription direct et fonctionnel  
-            - N'est pas expirée
-            - Est proposée par un site officiel ou marchand reconnu
+            Recherche spécifiquement :
+            - Des codes promo valides
+            - Des offres d'essai gratuit 
+            - Des réductions temporaires
+            - Des promotions d'abonnement
             
-            Réponds uniquement avec du JSON valide dans ce format exact :
+            Pour chaque offre trouvée, vérifie qu'elle :
+            - Est active en janvier 2025
+            - A un lien direct fonctionnel
+            - Vient d'une source fiable
+            
+            Réponds UNIQUEMENT avec du JSON valide dans ce format :
             {
               "offers": [
                 {
-                  "title": "Titre exact de l'offre",
-                  "description": "Description détaillée de l'offre",
-                  "price": "Prix ou 'Gratuit'",
-                  "originalPrice": "Prix original",
-                  "discount": "Pourcentage ou montant de réduction",
-                  "merchant": "Nom du marchand/site",
-                  "category": "Catégorie (Streaming, Musique, etc.)",
-                  "url": "URL directe d'inscription à l'offre",
-                  "expiryDate": "Date d'expiration ISO",
-                  "couponCode": "Code promo si applicable"
+                  "title": "Titre de l'offre",
+                  "description": "Description détaillée",
+                  "price": "Prix ou Gratuit",
+                  "originalPrice": "Prix normal",
+                  "discount": "% ou montant",
+                  "merchant": "Nom du service",
+                  "category": "Catégorie",
+                  "url": "Lien direct d'inscription",
+                  "expiryDate": "2025-02-28T00:00:00Z",
+                  "couponCode": "CODE123 si applicable"
                 }
               ]
             }`
           },
           {
             role: 'user',
-            content: prompt
+            content: `Trouve des offres promotionnelles actuelles pour ces services d'abonnement : ${prompt}. 
+            
+            Recherche sur les sites officiels, les plateformes de deals et les médias spécialisés des offres valides en janvier 2025.
+            
+            Concentre-toi sur :
+            - Netflix, Disney+, Spotify, Apple TV+, Canal+
+            - CapCut Pro et autres outils de productivité
+            - Offres d'essai gratuit étendues
+            - Codes promo exclusifs
+            - Réductions d'abonnement annuel`
           }
         ],
         temperature: 0.1,
         top_p: 0.9,
-        max_tokens: 3000,
+        max_tokens: 4000,
         return_images: false,
         return_related_questions: false,
-        search_domain_filter: ['dealabs.com', 'pepper.com', 'mydealz.de', 'promodescuentos.com'],
-        search_recency_filter: 'day',
+        search_recency_filter: 'week',
         frequency_penalty: 1,
         presence_penalty: 0
       }),
