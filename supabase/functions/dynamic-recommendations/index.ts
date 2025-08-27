@@ -45,7 +45,7 @@ serve(async (req) => {
       `${deal.title} - ${deal.price || 'Prix variable'} (${deal.merchant})`
     ).join(', ') || '';
 
-    const prompt = `Analysez les abonnements suivants et fournissez 3-4 recommandations d'optimisation spécifiques en français.
+    const prompt = `Analysez les abonnements suivants et fournissez exactement 4 recommandations d'optimisation spécifiques en français.
 
 Abonnements utilisateur: ${subscriptionsList}
 
@@ -86,7 +86,7 @@ Soyez spécifique et actionnable. Incluez seulement des recommandations réalist
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama-3.1-sonar-large-128k-online',
+        model: 'llama-3.1-sonar-small-128k-online',
         messages: [
           {
             role: 'system',
