@@ -121,25 +121,6 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
     }
   };
 
-  const getDealabsUrl = (offerTitle: string, merchant: string) => {
-    // Nettoyer le titre pour extraire les mots-clés pertinents
-    const cleanTitle = offerTitle
-      .replace(/\[.*?\]/g, '') // Supprimer les crochets
-      .replace(/\d+\s*mois/g, '') // Supprimer "X mois"
-      .replace(/gratuit|free/gi, 'promo') // Remplacer "gratuit" par "promo"
-      .replace(/reduction|réduction/gi, 'promo')
-      .trim();
-    
-    // Créer une recherche optimisée
-    const searchTerms = `${merchant} ${cleanTitle}`.toLowerCase()
-      .split(' ')
-      .filter(word => word.length > 2) // Garder seulement les mots > 2 caractères
-      .slice(0, 4) // Limiter à 4 mots pour une recherche plus précise
-      .join(' ');
-    
-    const searchQuery = encodeURIComponent(searchTerms);
-    return `https://www.dealabs.com/search?q=${searchQuery}&order=hot`;
-  };
 
   return (
     <div className="space-y-6">
@@ -233,14 +214,14 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {offers.map((offer) => {
-            const isPerplexityOffer = offer.id.startsWith('perplexity_');
+            const isChatGPTOffer = offer.id.startsWith('chatgpt_');
             
             return (
               <Card 
                 key={offer.id} 
                 className={`hover:shadow-lg transition-shadow border-l-4 ${
-                  isPerplexityOffer 
-                    ? 'border-l-purple-500 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20' 
+                  isChatGPTOffer 
+                    ? 'border-l-green-500 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20' 
                     : 'border-l-primary'
                 }`}
               >
@@ -251,8 +232,8 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
                     <Badge variant="secondary" className="text-xs">
                       {offer.category}
                     </Badge>
-                    {isPerplexityOffer && (
-                      <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700 dark:bg-purple-800 dark:text-purple-200">
+                    {isChatGPTOffer && (
+                      <Badge variant="secondary" className="text-xs bg-green-100 text-green-700 dark:bg-green-800 dark:text-green-200">
                         IA
                       </Badge>
                     )}
@@ -324,14 +305,9 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
                   className="w-full" 
                   size="sm"
                   onClick={() => {
-                    if (isPerplexityOffer && offer.url) {
-                      // Pour les offres Perplexity, utiliser l'URL directe si disponible
+                    // Toutes les offres utilisent maintenant l'URL directe (ChatGPT)
+                    if (offer.url) {
                       window.open(offer.url, '_blank', 'noopener,noreferrer');
-                    } else {
-                      // Pour les offres Dealabs, utiliser la recherche Dealabs
-                      const dealabsUrl = getDealabsUrl(offer.title, offer.merchant);
-                      console.log('Opening Dealabs search URL:', dealabsUrl);
-                      window.open(dealabsUrl, '_blank', 'noopener,noreferrer');
                     }
                   }}
                 >
