@@ -182,7 +182,12 @@ export const SmartCategoryChart = ({ subscriptions }: SmartCategoryChartProps) =
                     }
                     return [`${Math.round(value)}€`, name];
                   }}
-                  labelFormatter={(label: string) => `${label}`}
+                  labelFormatter={(label: string, payload: any) => {
+                    if (payload && payload.length > 0 && payload[0].payload.category) {
+                      return payload[0].payload.category;
+                    }
+                    return label;
+                  }}
                   contentStyle={{ 
                     backgroundColor: 'white',
                     border: '2px solid hsl(var(--primary))',
