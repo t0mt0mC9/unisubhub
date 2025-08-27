@@ -463,6 +463,13 @@ Réponds uniquement avec du JSON valide dans ce format exact:
       
     } catch (error) {
       console.log('❌ CHATGPT: Request failed:', error);
+      
+      // Si c'est une erreur de quota, retourner une erreur explicite
+      if (error.message.includes('429') || error.message.includes('quota')) {
+        console.log('❌ CHATGPT: Quota exceeded - returning error instead of demo offers');
+        throw new Error('API ChatGPT indisponible (quota dépassé). Veuillez réessayer plus tard.');
+      }
+      
       console.log('❌ CHATGPT: Falling back to demo offers');
       return generateDemoOffers();
     }
