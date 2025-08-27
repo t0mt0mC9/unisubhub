@@ -144,7 +144,7 @@ export const SmartForecastChart = ({ subscriptions }: SmartForecastChartProps) =
                   <div className="text-2xl font-bold text-green-700 dark:text-green-400 mb-1">
                     {Math.round(data.scenarios.best_case.total)}€
                   </div>
-                   <p className="text-xs text-foreground/80">
+                   <p className="text-xs text-muted-foreground">
                      {data.scenarios.best_case.description}
                    </p>
                 </div>
@@ -157,7 +157,7 @@ export const SmartForecastChart = ({ subscriptions }: SmartForecastChartProps) =
                   <div className="text-2xl font-bold text-orange-700 dark:text-orange-400 mb-1">
                     {Math.round(data.scenarios.worst_case.total)}€
                   </div>
-                   <p className="text-xs text-foreground/80">
+                   <p className="text-xs text-muted-foreground">
                      {data.scenarios.worst_case.description}
                    </p>
                 </div>
@@ -173,13 +173,13 @@ export const SmartForecastChart = ({ subscriptions }: SmartForecastChartProps) =
                 {data.insights.map((insight, index) => (
                   <div 
                     key={index}
-                    className="p-4 rounded-lg bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-950/20 dark:to-violet-950/20 border border-purple-200 dark:border-purple-800"
+                    className="p-4 rounded-lg bg-muted/50 border"
                   >
                     <div className="flex items-start gap-3">
                       <Sparkles className="w-4 h-4 text-purple-600 mt-0.5 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
-                          <h5 className="font-medium text-sm text-foreground">{insight.period}</h5>
+                          <h5 className="font-medium text-sm">{insight.period}</h5>
                           {insight.confidence && (
                             <div className="flex items-center gap-2">
                               <Progress 
@@ -192,7 +192,7 @@ export const SmartForecastChart = ({ subscriptions }: SmartForecastChartProps) =
                             </div>
                           )}
                         </div>
-                         <p className="text-sm text-foreground mb-2">
+                         <p className="text-sm text-muted-foreground mb-2">
                            {insight.prediction}
                          </p>
                         {insight.factors && insight.factors.length > 0 && (
