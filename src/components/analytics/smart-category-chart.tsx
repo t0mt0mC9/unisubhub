@@ -175,14 +175,14 @@ export const SmartCategoryChart = ({ subscriptions }: SmartCategoryChartProps) =
                 />
                 <Tooltip 
                   formatter={(value: any, name: string, props: any) => {
-                    const category = props.payload.category;
                     if (name === 'value') {
-                      return [`${Math.round(value)}€`, `${category} - Votre dépense`];
-                    } else {
-                      return [`${Math.round(value)}€`, `${category} - Moyenne marché`];
+                      return [`${Math.round(value)}€`, 'Votre dépense'];
+                    } else if (name === 'benchmark') {
+                      return [`${Math.round(value)}€`, 'Moyenne marché'];
                     }
+                    return [`${Math.round(value)}€`, name];
                   }}
-                  labelFormatter={(label: string) => `Catégorie: ${label}`}
+                  labelFormatter={(label: string) => `${label}`}
                   contentStyle={{ 
                     backgroundColor: 'white',
                     border: '2px solid hsl(var(--primary))',
