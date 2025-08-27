@@ -60,18 +60,18 @@ serve(async (req) => {
 
     switch (action) {
       case 'get_offers':
-        // Essayer d'abord le cache, puis les offres simulées
+        // Récupérer les offres Dealabs et Perplexity
         const cachedOffers = await getCachedOffers(supabaseClient);
-        if (cachedOffers.length > 0) {
-          const validCachedOffers = filterValidOffers(cachedOffers);
-          console.log(`Using ${validCachedOffers.length} valid cached offers`);
-          return new Response(JSON.stringify({ offers: validCachedOffers }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
+        const dealabsOffersForAll = cachedOffers.length > 0 ? cachedOffers : await fetchDealabsOffers();
+        console.log(`Fetched ${dealabsOffersForAll.length} Dealabs offers for 'all'`);
         
-        const offers = await fetchDealabsOffers();
-        const validOffers = filterValidOffers(offers);
+        const perplexityOffersForAll = await fetchPerplexityOffers(userSubscriptions || []);
+        console.log(`Fetched ${perplexityOffersForAll.length} Perplexity offers for 'all'`);
+        
+        const allCombinedOffers = [...dealabsOffersForAll, ...perplexityOffersForAll];
+        console.log(`Combined ${allCombinedOffers.length} total offers for 'all'`);
+        
+        const validOffers = filterValidOffers(allCombinedOffers);
         return new Response(JSON.stringify({ offers: validOffers }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
