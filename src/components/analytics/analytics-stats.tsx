@@ -192,30 +192,6 @@ export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
         </Card>
       </div>
 
-      {/* Catégorie dominante */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Zap className="h-5 w-5 text-primary" />
-            Analyse par catégorie
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {topCategory && (
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <span className="font-medium">{topCategory[0]}</span>
-                <Badge variant="secondary">{topCategory[1] as number} services</Badge>
-              </div>
-              <Progress value={((topCategory[1] as number) / subscriptions.length) * 100} className="h-2" />
-              <p className="text-sm text-muted-foreground mt-1">
-                Votre catégorie principale représente {Math.round(((topCategory[1] as number) / subscriptions.length) * 100)}% de vos abonnements
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
       {/* Recommandations */}
       <Card>
         <CardHeader>
