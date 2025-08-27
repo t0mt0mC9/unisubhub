@@ -475,12 +475,15 @@ Réponds uniquement avec du JSON valide dans ce format:
       
     } catch (error) {
       console.log('❌ PERPLEXITY: Request failed:', error);
-      return [];
+      console.log('❌ PERPLEXITY: Full error details:', JSON.stringify(error, null, 2));
+      console.log('✅ PERPLEXITY: Falling back to demo offers due to API error');
+      return generateDemoOffers();
     }
 
   } catch (error) {
     console.log('❌ PERPLEXITY: Global error:', error);
-    return [];
+    console.log('✅ PERPLEXITY: Using demo offers as final fallback');
+    return generateDemoOffers();
   }
 }
 
