@@ -156,38 +156,6 @@ const streamingOffers: StreamingOffer[] = [
     uhd: false,
     offline: true
   },
-  {
-    id: 'le-figaro',
-    name: 'Le Figaro',
-    logo: '📰',
-    priceMonthly: '1€ puis 9,90€',
-    description: 'Actualités et analyses du quotidien de référence',
-    features: ['Articles illimités', 'Archives complètes', 'Application mobile', 'Newsletters exclusives'],
-    category: 'news',
-    rating: 4.1,
-    specialOffer: 'Premier mois à 1€',
-    url: 'https://www.lefigaro.fr/abonnement/',
-    simultaneous: 3,
-    hd: false,
-    uhd: false,
-    offline: true
-  },
-  {
-    id: 'le-monde',
-    name: 'Le Monde',
-    logo: '🌍',
-    priceMonthly: '1€ puis 15€',
-    description: 'Information de qualité et analyses approfondies',
-    features: ['Journalisme d\'investigation', 'Suppléments inclus', 'Podcasts Le Monde', 'Version numérique'],
-    category: 'news',
-    rating: 4.3,
-    specialOffer: 'Découverte 1€ le premier mois',
-    url: 'https://www.lemonde.fr/abonnement/',
-    simultaneous: 5,
-    hd: false,
-    uhd: false,
-    offline: true
-  }
 ];
 
 export const StreamingComparisonTable: React.FC = () => {
