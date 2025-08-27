@@ -59,14 +59,34 @@ serve(async (req) => {
     
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    // Check if user already exists in subscribers table
-    const { data: existingSubscriber } = await supabaseClient
+    // Check if user already exists in subscribers table by user_id first, then by email
+    let existingSubscriber = null;
+    
+    // First try to find by user_id (most reliable)
+    const { data: subscriberByUserId } = await supabaseClient
       .from("subscribers")
       .select("*")
-      .eq("email", user.email)
+      .eq("user_id", user.id)
       .single();
+    
+    if (subscriberByUserId) {
+      existingSubscriber = subscriberByUserId;
+    } else {
+      // Fallback to email lookup
+      const { data: subscriberByEmail } = await supabaseClient
+        .from("subscribers")
+        .select("*")
+        .eq("email", user.email)
+        .single();
+      
+      existingSubscriber = subscriberByEmail;
+    }
 
-    logStep("Existing subscriber check", { existingSubscriber });
+    logStep("Existing subscriber check", { 
+      existingSubscriber,
+      searchedByUserId: user.id,
+      searchedByEmail: user.email 
+    });
 
     // If user has a lifetime subscription in the database, preserve it
     if (existingSubscriber?.subscription_type === 'lifetime' && existingSubscriber?.subscribed) {
