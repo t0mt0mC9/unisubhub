@@ -92,7 +92,8 @@ export const SmartForecastChart = ({ subscriptions }: SmartForecastChartProps) =
                   contentStyle={{ 
                     backgroundColor: 'hsl(var(--card))',
                     border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px'
+                    borderRadius: '8px',
+                    color: 'hsl(var(--card-foreground))'
                   }}
                   formatter={(value: any, name: string) => [
                     `${Math.round(value)}€`,
