@@ -179,107 +179,23 @@ export const StreamingComparisonTable: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Crown className="h-6 w-6 text-primary" />
-            Comparatif des offres de streaming français
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="min-w-[200px]">Service</TableHead>
-                  <TableHead>Prix mensuel</TableHead>
-                  <TableHead>Catégorie</TableHead>
-                  <TableHead>Note</TableHead>
-                  <TableHead>Offre spéciale</TableHead>
-                  <TableHead>Essai gratuit</TableHead>
-                  <TableHead>Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {streamingOffers.map((offer) => (
-                  <TableRow key={offer.id} className="hover:bg-muted/50">
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{offer.logo}</span>
-                        <div>
-                          <div className="font-semibold">{offer.name}</div>
-                          <div className="text-sm text-muted-foreground">{offer.description}</div>
-                        </div>
-                      </div>
-                    </TableCell>
-                    
-                    <TableCell>
-                      <div className="font-semibold text-primary">{offer.priceMonthly}</div>
-                      {offer.priceYearly && (
-                        <div className="text-sm text-muted-foreground">{offer.priceYearly}/an</div>
-                      )}
-                    </TableCell>
-                    
-                    <TableCell>
-                      <Badge className={getCategoryColor(offer.category)}>
-                        <div className="flex items-center gap-1">
-                          {getCategoryIcon(offer.category)}
-                          {offer.category}
-                        </div>
-                      </Badge>
-                    </TableCell>
-                    
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span className="font-semibold">{offer.rating}</span>
-                      </div>
-                    </TableCell>
-                    
-                    <TableCell>
-                      {offer.specialOffer && (
-                        <Badge variant="secondary" className="text-xs">
-                          {offer.specialOffer}
-                        </Badge>
-                      )}
-                    </TableCell>
-                    
-                    <TableCell>
-                      {offer.freeTrialDays ? (
-                        <Badge variant="outline" className="text-green-600">
-                          {offer.freeTrialDays} jours
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground text-sm">Aucun</span>
-                      )}
-                    </TableCell>
-                    
-                    <TableCell>
-                      <Button 
-                        size="sm" 
-                        onClick={() => window.open(offer.url, '_blank', 'noopener,noreferrer')}
-                        className="w-full"
-                      >
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        S'abonner
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="text-center space-y-2">
+        <h3 className="text-2xl font-bold flex items-center justify-center gap-2">
+          <Crown className="h-6 w-6 text-primary" />
+          Comparatif des offres de streaming
+        </h3>
+        <p className="text-muted-foreground">
+          Découvrez les meilleures offres streaming, musique et divertissement
+        </p>
+      </div>
 
-      {/* Cards détaillées pour mobile */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:hidden">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {streamingOffers.map((offer) => (
           <Card key={offer.id} className="hover:shadow-lg transition-shadow">
             <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
+              <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-2xl">{offer.logo}</span>
+                  <span className="text-lg">{offer.logo}</span>
                   <Badge className={getCategoryColor(offer.category)}>
                     <div className="flex items-center gap-1">
                       {getCategoryIcon(offer.category)}
@@ -289,7 +205,7 @@ export const StreamingComparisonTable: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-1">
                   <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  <span className="font-semibold text-sm">{offer.rating}</span>
+                  <span className="text-sm font-medium">{offer.rating}</span>
                 </div>
               </div>
               
@@ -300,9 +216,11 @@ export const StreamingComparisonTable: React.FC = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-lg font-bold text-primary">{offer.priceMonthly}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl font-bold text-primary">{offer.priceMonthly}</span>
+                  </div>
                   {offer.freeTrialDays && (
-                    <Badge variant="outline" className="text-green-600">
+                    <Badge variant="outline" className="text-green-600 text-xs">
                       {offer.freeTrialDays} jours gratuits
                     </Badge>
                   )}
@@ -313,18 +231,21 @@ export const StreamingComparisonTable: React.FC = () => {
                 )}
                 
                 {offer.specialOffer && (
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge variant="destructive" className="text-xs">
                     {offer.specialOffer}
                   </Badge>
                 )}
               </div>
 
               <div className="space-y-2">
-                <h4 className="text-sm font-semibold">Fonctionnalités :</h4>
+                <h4 className="text-sm font-semibold flex items-center gap-1">
+                  <Film className="h-4 w-4" />
+                  Fonctionnalités :
+                </h4>
                 <ul className="text-xs text-muted-foreground space-y-1">
                   {offer.features.slice(0, 3).map((feature, index) => (
                     <li key={index} className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                      <span className="h-1 w-1 bg-primary rounded-full flex-shrink-0" />
                       {feature}
                     </li>
                   ))}
@@ -355,6 +276,22 @@ export const StreamingComparisonTable: React.FC = () => {
           </Card>
         ))}
       </div>
+
+      <Card className="bg-muted/50">
+        <CardContent className="p-6 text-center">
+          <div className="space-y-2">
+            <h4 className="font-semibold flex items-center justify-center gap-2">
+              💡 Conseils streaming
+            </h4>
+            <div className="text-sm text-muted-foreground space-y-1">
+              <p>• Profitez des essais gratuits pour tester les catalogues avant de vous abonner</p>
+              <p>• Vérifiez la disponibilité des contenus dans votre région</p>
+              <p>• Pensez aux offres famille si vous partagez avec plusieurs personnes</p>
+              <p>• Surveillez les offres spéciales en fin d'année et périodes promotionnelles</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
