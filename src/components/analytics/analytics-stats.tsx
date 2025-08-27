@@ -80,10 +80,10 @@ export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
 
   const getImpactColor = (impact: string) => {
     switch (impact) {
-      case "Élevé": return "bg-red-500";
-      case "Moyen": return "bg-orange-500";
-      case "Faible": return "bg-green-500";
-      default: return "bg-gray-500";
+      case "Élevé": return "bg-destructive text-destructive-foreground";
+      case "Moyen": return "bg-warning text-warning-foreground";
+      case "Faible": return "bg-success text-success-foreground";
+      default: return "bg-muted text-muted-foreground";
     }
   };
 
@@ -140,10 +140,10 @@ export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-green-600";
-    if (score >= 60) return "text-blue-600";
-    if (score >= 40) return "text-orange-600";
-    return "text-red-600";
+    if (score >= 80) return "text-success";
+    if (score >= 60) return "text-primary";
+    if (score >= 40) return "text-warning";
+    return "text-destructive";
   };
 
   const getIconComponent = (iconName: string) => {
@@ -170,7 +170,7 @@ export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
           </CardHeader>
           <CardContent>
             <div className="flex items-center text-sm text-muted-foreground">
-              <TrendingUp className="h-4 w-4 mr-1 text-green-600" />
+              <TrendingUp className="h-4 w-4 mr-1 text-success" />
               +5% vs mois dernier
             </div>
           </CardContent>
@@ -246,7 +246,7 @@ export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
                       <h4 className="font-medium text-sm">{rec.title}</h4>
                       <Badge 
                         variant="outline" 
-                        className={`text-xs ${getImpactColor(rec.impact)} text-white border-none`}
+                        className={`text-xs ${getImpactColor(rec.impact)} border-none`}
                       >
                         {rec.impact}
                       </Badge>
@@ -266,11 +266,11 @@ export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
                          <p className="text-sm text-foreground">
                            {rec.details || getRecommendationDetails(rec)}
                          </p>
-                         {rec.potential_savings && (
-                           <div className="mt-2 text-xs text-green-600 font-medium">
-                             💰 Économie estimée : {rec.potential_savings}/mois
-                           </div>
-                         )}
+                          {rec.potential_savings && (
+                            <div className="mt-2 text-xs text-success font-medium">
+                              💰 Économie estimée : {rec.potential_savings}/mois
+                            </div>
+                          )}
                        </div>
                      )}
                   </div>
@@ -284,7 +284,7 @@ export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <CheckCircle className="h-5 w-5 text-green-600" />
+            <CheckCircle className="h-5 w-5 text-success" />
             Score d'optimisation
           </CardTitle>
           <CardDescription>

@@ -14,9 +14,9 @@ export const SmartSpendingChart = ({ subscriptions }: SmartSpendingChartProps) =
 
   const getTrendIcon = (trend: string) => {
     switch (trend) {
-      case 'up': return <TrendingUp className="w-4 h-4 text-red-500" />;
-      case 'down': return <TrendingDown className="w-4 h-4 text-green-500" />;
-      default: return <Minus className="w-4 h-4 text-gray-500" />;
+      case 'up': return <TrendingUp className="w-4 h-4 text-destructive" />;
+      case 'down': return <TrendingDown className="w-4 h-4 text-success" />;
+      default: return <Minus className="w-4 h-4 text-muted-foreground" />;
     }
   };
 
@@ -155,9 +155,9 @@ export const SmartSpendingChart = ({ subscriptions }: SmartSpendingChartProps) =
 
         {/* Saisonnalité */}
         {data?.seasonality && (
-          <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+          <div className="mt-4 p-4 bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg border border-primary/20">
             <h4 className="font-medium text-sm mb-2 flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-blue-600" />
+              <Sparkles className="w-4 h-4 text-primary" />
               Analyse saisonnière
             </h4>
             <p className="text-sm text-muted-foreground mb-2">

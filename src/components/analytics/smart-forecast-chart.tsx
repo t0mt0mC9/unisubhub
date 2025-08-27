@@ -35,9 +35,9 @@ export const SmartForecastChart = ({ subscriptions }: SmartForecastChartProps) =
   }
 
   const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 80) return 'text-green-600';
-    if (confidence >= 60) return 'text-yellow-600';
-    return 'text-red-600';
+    if (confidence >= 80) return 'text-success';
+    if (confidence >= 60) return 'text-warning';
+    return 'text-destructive';
   };
 
   const getConfidenceLabel = (confidence: number) => {
@@ -136,12 +136,12 @@ export const SmartForecastChart = ({ subscriptions }: SmartForecastChartProps) =
             {/* Scénarios */}
             {data?.scenarios && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 rounded-lg border border-green-200 dark:border-green-800">
+                <div className="p-4 bg-gradient-to-r from-success/10 to-success/5 rounded-lg border border-success/20">
                   <div className="flex items-center gap-2 mb-2">
-                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    <CheckCircle className="w-4 h-4 text-success" />
                     <h4 className="font-medium text-sm">Scénario optimiste</h4>
                   </div>
-                  <div className="text-2xl font-bold text-green-700 dark:text-green-400 mb-1">
+                  <div className="text-2xl font-bold text-success mb-1">
                     {Math.round(data.scenarios.best_case.total)}€
                   </div>
                    <p className="text-xs text-muted-foreground">
@@ -149,12 +149,12 @@ export const SmartForecastChart = ({ subscriptions }: SmartForecastChartProps) =
                    </p>
                 </div>
 
-                <div className="p-4 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                <div className="p-4 bg-gradient-to-r from-warning/10 to-destructive/10 rounded-lg border border-warning/20">
                   <div className="flex items-center gap-2 mb-2">
-                    <AlertCircle className="w-4 h-4 text-orange-600" />
+                    <AlertCircle className="w-4 h-4 text-warning" />
                     <h4 className="font-medium text-sm">Scénario pessimiste</h4>
                   </div>
-                  <div className="text-2xl font-bold text-orange-700 dark:text-orange-400 mb-1">
+                  <div className="text-2xl font-bold text-destructive mb-1">
                     {Math.round(data.scenarios.worst_case.total)}€
                   </div>
                    <p className="text-xs text-muted-foreground">
@@ -176,7 +176,7 @@ export const SmartForecastChart = ({ subscriptions }: SmartForecastChartProps) =
                     className="p-4 rounded-lg bg-muted/50 border"
                   >
                     <div className="flex items-start gap-3">
-                      <Sparkles className="w-4 h-4 text-purple-600 mt-0.5 flex-shrink-0" />
+                      <Sparkles className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
                           <h5 className="font-medium text-sm">{insight.period}</h5>

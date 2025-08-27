@@ -199,10 +199,10 @@ export const SmartCategoryChart = ({ subscriptions }: SmartCategoryChartProps) =
               {data.insights.slice(0, 2).map((insight, index) => (
                 <div 
                   key={index}
-                  className="p-3 rounded-lg bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20 border border-orange-200 dark:border-orange-800"
+                  className="p-3 rounded-lg bg-gradient-to-r from-warning/10 to-destructive/10 border border-warning/20"
                 >
                   <div className="flex items-start gap-3">
-                    <AlertTriangle className="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" />
+                    <AlertTriangle className="w-4 h-4 text-warning mt-0.5 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <h5 className="font-medium text-sm">{insight.category}</h5>
@@ -215,7 +215,7 @@ export const SmartCategoryChart = ({ subscriptions }: SmartCategoryChartProps) =
                       <p className="text-sm text-muted-foreground mb-1">
                         {insight.analysis}
                       </p>
-                      <p className="text-xs font-medium text-orange-700 dark:text-orange-400">
+                      <p className="text-xs font-medium text-warning">
                         💡 {insight.recommendation}
                       </p>
                     </div>
@@ -227,7 +227,7 @@ export const SmartCategoryChart = ({ subscriptions }: SmartCategoryChartProps) =
 
           {/* Benchmark global */}
           {data?.benchmarks && (
-            <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div className="mt-4 p-3 bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg border border-primary/20">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Comparaison globale</span>
                 <Badge 
