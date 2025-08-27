@@ -3,11 +3,8 @@ project_id = "rhmxohcqyyyglgmtnioc"
 [functions.bank-connect]
 verify_jwt = true
 
-[functions.budget-insight-connect]
-verify_jwt = false
-
 [functions.daily-offers-update]
-verify_jwt = false
+verify_jwt = true
 
 [functions.auth-webhook]
 verify_jwt = false

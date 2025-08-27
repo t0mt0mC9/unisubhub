@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      bank_connections: {
+        Row: {
+          created_at: string
+          encrypted_user_token: string
+          expires_at: string | null
+          id: string
+          provider: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          encrypted_user_token: string
+          expires_at?: string | null
+          id?: string
+          provider: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          encrypted_user_token?: string
+          expires_at?: string | null
+          id?: string
+          provider?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       dealabs_offers_cache: {
         Row: {
           category: string
@@ -154,27 +184,33 @@ export type Database = {
       }
       profiles: {
         Row: {
+          ai_insights_consent: boolean
           avatar_url: string | null
           created_at: string
           email: string | null
           full_name: string | null
           id: string
+          privacy_settings: Json | null
           updated_at: string
         }
         Insert: {
+          ai_insights_consent?: boolean
           avatar_url?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
           id: string
+          privacy_settings?: Json | null
           updated_at?: string
         }
         Update: {
+          ai_insights_consent?: boolean
           avatar_url?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
           id?: string
+          privacy_settings?: Json | null
           updated_at?: string
         }
         Relationships: []

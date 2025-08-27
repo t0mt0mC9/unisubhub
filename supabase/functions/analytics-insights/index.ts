@@ -19,8 +19,32 @@ serve(async (req) => {
   }
 
   try {
+    // Verify authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ error: 'Authentication required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: userData, error: userError } = await supabase.auth.getUser(token);
+    if (userError || !userData.user) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid authentication token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check user's AI insights consent
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('ai_insights_consent')
+      .eq('id', userData.user.id)
+      .single();
+
     const { subscriptions, type = 'spending_trends' } = await req.json();
-    console.log('Generating analytics insights for:', type, subscriptions);
 
     if (!subscriptions || subscriptions.length === 0) {
       return new Response(JSON.stringify({ insights: [], chartData: [] }), {
@@ -165,8 +189,12 @@ Générez:
         break;
     }
 
-    // Appel à Perplexity API
-    const perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
+    // Check if user consented to AI insights
+    let analysisResult = {};
+    
+    if (profile?.ai_insights_consent) {
+      // Appel à Perplexity API only if user consented
+      const perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${perplexityApiKey}`,
@@ -198,18 +226,20 @@ Générez:
       throw new Error(`Perplexity API error: ${perplexityResponse.status}`);
     }
 
-    const perplexityData = await perplexityResponse.json();
-    const aiContent = perplexityData.choices[0].message.content;
-    
-    // Parse la réponse JSON
-    let analysisResult = {};
-    try {
-      analysisResult = JSON.parse(aiContent.replace(/```json\n?|\n?```/g, ''));
-    } catch (parseError) {
-      console.error('Error parsing AI response:', parseError);
-      console.log('Raw AI content:', aiContent);
+      const perplexityData = await perplexityResponse.json();
+      const aiContent = perplexityData.choices[0].message.content;
       
-      // Fallback avec données simulées intelligentes
+      // Parse la réponse JSON
+      try {
+        analysisResult = JSON.parse(aiContent.replace(/```json\n?|\n?```/g, ''));
+      } catch (parseError) {
+        console.error('Error parsing AI response:', parseError);
+        
+        // Fallback avec données simulées intelligentes
+        analysisResult = generateFallbackChartData(type, subscriptionData, totalMonthly, categoryStats);
+      }
+    } else {
+      // User hasn't consented to AI insights, use local fallback only
       analysisResult = generateFallbackChartData(type, subscriptionData, totalMonthly, categoryStats);
     }
 

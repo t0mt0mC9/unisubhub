@@ -19,8 +19,32 @@ serve(async (req) => {
   }
 
   try {
+    // Verify authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ error: 'Authentication required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: userData, error: userError } = await supabase.auth.getUser(token);
+    if (userError || !userData.user) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid authentication token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check user's AI insights consent
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('ai_insights_consent')
+      .eq('id', userData.user.id)
+      .single();
+
     const { subscriptions } = await req.json();
-    console.log('Generating recommendations for subscriptions:', subscriptions);
 
     if (!subscriptions || subscriptions.length === 0) {
       return new Response(JSON.stringify({ recommendations: [] }), {
@@ -77,8 +101,12 @@ Impact disponible: Élevé, Moyen, Faible
 
 Soyez spécifique et actionnable. N'incluez QUE les recommandations qui respectent les critères stricts.`;
 
-    // Appel à Perplexity API
-    const perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
+    // Generate recommendations based on user consent
+    let recommendations = [];
+    
+    if (profile?.ai_insights_consent) {
+      // Appel à Perplexity API only if user consented
+      const perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${perplexityApiKey}`,
@@ -111,21 +139,22 @@ Soyez spécifique et actionnable. N'incluez QUE les recommandations qui respecte
       throw new Error(`Perplexity API error: ${perplexityResponse.status} - ${errorText}`);
     }
 
-    const perplexityData = await perplexityResponse.json();
-    console.log('Perplexity response:', perplexityData);
+      const perplexityData = await perplexityResponse.json();
 
-    const aiContent = perplexityData.choices[0].message.content;
-    
-    // Parse la réponse JSON
-    let recommendations = [];
-    try {
-      const parsed = JSON.parse(aiContent.replace(/```json\n?|\n?```/g, ''));
-      recommendations = parsed.recommendations || [];
-    } catch (parseError) {
-      console.error('Error parsing AI response:', parseError);
-      console.log('Raw AI content:', aiContent);
+      const aiContent = perplexityData.choices[0].message.content;
       
-      // Fallback avec recommandations de base
+      // Parse la réponse JSON
+      try {
+        const parsed = JSON.parse(aiContent.replace(/```json\n?|\n?```/g, ''));
+        recommendations = parsed.recommendations || [];
+      } catch (parseError) {
+        console.error('Error parsing AI response:', parseError);
+        
+        // Fallback avec recommandations de base
+        recommendations = generateFallbackRecommendations(subscriptions);
+      }
+    } else {
+      // User hasn't consented to AI insights, use local fallback only
       recommendations = generateFallbackRecommendations(subscriptions);
     }
 
