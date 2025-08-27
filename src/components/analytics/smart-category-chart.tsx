@@ -89,10 +89,20 @@ export const SmartCategoryChart = ({ subscriptions }: SmartCategoryChartProps) =
                     'Dépense mensuelle'
                   ]}
                   contentStyle={{ 
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px',
-                    color: 'hsl(var(--card-foreground))'
+                    backgroundColor: 'hsl(var(--background))',
+                    border: '2px solid hsl(var(--primary))',
+                    borderRadius: '12px',
+                    color: 'hsl(var(--foreground))',
+                    boxShadow: '0 8px 32px -4px hsl(var(--primary) / 0.3)',
+                    backdropFilter: 'blur(16px)',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    padding: '12px 16px'
+                  }}
+                  labelStyle={{
+                    color: 'hsl(var(--primary))',
+                    fontWeight: '700',
+                    marginBottom: '4px'
                   }}
                 />
               </PieChart>
