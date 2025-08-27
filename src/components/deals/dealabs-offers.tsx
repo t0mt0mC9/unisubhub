@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ExternalLink, Tag, TrendingUp, Clock, Gift } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { StreamingComparisonTable } from './streaming-comparison-table';
 
 interface DealabsOffer {
   id: string;
@@ -124,13 +126,21 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center">
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Gift className="h-6 w-6 text-primary" />
-            Offres du marché
-          </h2>
-        </div>
+      <div className="flex items-center">
+        <h2 className="text-2xl font-bold flex items-center gap-2">
+          <Gift className="h-6 w-6 text-primary" />
+          Offres du marché
+        </h2>
+      </div>
+
+      <Tabs defaultValue="offers" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="offers">Offres en cours</TabsTrigger>
+          <TabsTrigger value="comparison">Comparatif streaming</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="offers" className="space-y-4">
+          <div className="flex flex-col gap-4">
 
         <div className="flex flex-wrap gap-2">
           <Button
@@ -320,6 +330,12 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
           })}
         </div>
       )}
+        </TabsContent>
+
+        <TabsContent value="comparison">
+          <StreamingComparisonTable />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
