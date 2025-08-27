@@ -434,7 +434,7 @@ async function fetchPerplexityOffers(userSubscriptions: UserSubscription[]): Pro
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama-3.1-sonar-small-128k-online',
+        model: 'llama-3.1-sonar-large-128k-online',
         messages: [
           {
             role: 'system',
@@ -553,7 +553,7 @@ async function fetchCafeynOffers(): Promise<DealabsOffer[]> {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama-3.1-sonar-small-128k-online',
+        model: 'llama-3.1-sonar-large-128k-online',
         messages: [
           {
             role: 'system',
@@ -687,7 +687,7 @@ async function fetchChatGPTOffers(userSubscriptions: UserSubscription[]): Promis
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4.1-2025-04-14',
         messages: [
           {
             role: 'system',
