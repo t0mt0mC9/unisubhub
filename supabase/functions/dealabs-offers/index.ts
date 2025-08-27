@@ -235,14 +235,22 @@ async function fetchDealabsOffers(): Promise<DealabsOffer[]> {
 async function fetchPerplexityOffers(userSubscriptions: UserSubscription[]): Promise<DealabsOffer[]> {
   try {
     const perplexityApiKey = Deno.env.get('PERPLEXITY_API_KEY');
+    console.log('=== PERPLEXITY DEBUG ===');
     console.log('Perplexity API key available:', !!perplexityApiKey);
+    console.log('User subscriptions count:', userSubscriptions.length);
+    console.log('User subscriptions:', userSubscriptions.map(s => s.name));
     
-    if (!perplexityApiKey || userSubscriptions.length === 0) {
-      console.log('Skipping Perplexity offers - missing API key or no subscriptions');
+    if (!perplexityApiKey) {
+      console.log('❌ PERPLEXITY: No API key found');
+      return [];
+    }
+    
+    if (userSubscriptions.length === 0) {
+      console.log('❌ PERPLEXITY: No user subscriptions');
       return [];
     }
 
-    console.log(`Fetching Perplexity offers for ${userSubscriptions.length} subscriptions`);
+    console.log(`✅ PERPLEXITY: Fetching offers for ${userSubscriptions.length} subscriptions`);
 
     // Préparer la liste des abonnements utilisateur
     const subscriptionsList = userSubscriptions.map(sub => 
