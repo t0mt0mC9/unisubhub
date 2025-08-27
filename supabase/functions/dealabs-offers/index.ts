@@ -374,6 +374,16 @@ async function fetchOffersFromAllAPIs(userSubscriptions: UserSubscription[]): Pr
     console.log('❌ Dealabs API failed:', error);
   }
   
+  // 4. Cafeyn API (offres presse)
+  try {
+    console.log('🔍 Fetching from Cafeyn via Perplexity...');
+    const cafeynOffers = await fetchCafeynOffers();
+    allOffers.push(...cafeynOffers);
+    console.log(`✅ Cafeyn: ${cafeynOffers.length} press offers`);
+  } catch (error) {
+    console.log('❌ Cafeyn API failed:', error);
+  }
+  
   // Éliminer les doublons par titre
   const uniqueOffers = allOffers.reduce((acc: DealabsOffer[], current) => {
     const exists = acc.find(offer => 
@@ -515,6 +525,135 @@ async function fetchPerplexityOffers(userSubscriptions: UserSubscription[]): Pro
       
   } catch (error) {
     console.log('❌ PERPLEXITY: Request failed:', error);
+    return [];
+  }
+  
+  return [];
+}
+
+// Fetch Cafeyn press offers via Perplexity API
+async function fetchCafeynOffers(): Promise<DealabsOffer[]> {
+  console.log('=== CAFEYN PRESS OFFERS ===');
+  
+  const perplexityApiKey = Deno.env.get('PERPLEXITY_API_KEY');
+  console.log('Perplexity API key available for Cafeyn:', !!perplexityApiKey);
+  
+  if (!perplexityApiKey) {
+    console.log('❌ CAFEYN: No Perplexity API key found');
+    return [];
+  }
+
+  try {
+    console.log('CAFEYN: Searching real press subscription offers...');
+
+    const response = await fetch('https://api.perplexity.ai/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${perplexityApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'llama-3.1-sonar-small-128k-online',
+        messages: [
+          {
+            role: 'system',
+            content: `Tu es un expert en recherche d'offres d'abonnements presse et magazines numériques. Tu dois trouver des offres actuelles et réelles avec des liens directs vers les sites officiels.
+            
+            Réponds UNIQUEMENT avec un JSON valide contenant un array "offers".`
+          },
+          {
+            role: 'user',
+            content: `Trouve des offres promotionnelles ACTUELLES et RÉELLES pour les abonnements presse et magazines numériques français, en particulier:
+            
+            - Cafeyn (plateforme de magazines et journaux numériques)
+            - Le Monde (abonnements numériques)
+            - Le Figaro (offres d'abonnement)
+            - Libération (promotions abonnements)
+            - L'Express, L'Obs, Le Point
+            - Abonnements magazines (Science & Vie, Géo, etc.)
+            - Plateformes de presse numérique
+            
+            Je cherche des offres avec des liens directs vers:
+            - Les sites officiels des journaux/magazines
+            - Cafeyn.com pour les abonnements multi-magazines
+            - Des plateformes légitimes proposant des réductions
+            
+            Format JSON requis:
+            {
+              "offers": [
+                {
+                  "title": "Nom exact de l'offre presse",
+                  "description": "Description détaillée de l'abonnement",
+                  "price": "Prix promo",
+                  "originalPrice": "Prix normal",
+                  "discount": "% de réduction",
+                  "merchant": "Nom du journal/magazine/plateforme",
+                  "category": "Presse",
+                  "url": "URL directe vers l'offre",
+                  "votes": 50,
+                  "temperature": "🔥",
+                  "expires_at": "YYYY-MM-DD ou null"
+                }
+              ]
+            }
+            
+            Trouve maximum 8 offres réelles et actuelles.`
+          }
+        ],
+        max_tokens: 2500,
+        temperature: 0.2
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.log('❌ CAFEYN: API error:', response.status, errorText);
+      return [];
+    }
+
+    const data = await response.json();
+    const content = data.choices[0].message.content;
+    
+    try {
+      // Nettoyage plus robuste du JSON
+      let cleanContent = content.trim();
+      cleanContent = cleanContent.replace(/```json\n?|\n?```/g, '');
+      
+      const jsonStart = cleanContent.indexOf('{');
+      const jsonEnd = cleanContent.lastIndexOf('}') + 1;
+      
+      if (jsonStart >= 0 && jsonEnd > jsonStart) {
+        const jsonStr = cleanContent.substring(jsonStart, jsonEnd);
+        const parsedOffers = JSON.parse(jsonStr);
+        
+        const formattedOffers: DealabsOffer[] = (parsedOffers.offers || []).map((offer: any, index: number) => ({
+          id: `cafeyn_${Date.now()}_${index}`,
+          title: offer.title || 'Offre presse spéciale',
+          description: offer.description || '',
+          price: offer.price || '',
+          originalPrice: offer.originalPrice || '',
+          discount: offer.discount || '',
+          merchant: offer.merchant || 'Presse',
+          category: 'Presse',
+          url: offer.url || '#',
+          votes: offer.votes || Math.floor(Math.random() * 40) + 30,
+          temperature: offer.temperature || Math.floor(Math.random() * 30) + 70,
+          expiryDate: offer.expires_at || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          couponCode: offer.couponCode || '',
+          isExpired: false
+        }));
+        
+        console.log('✅ CAFEYN: Found', formattedOffers.length, 'press offers');
+        return formattedOffers;
+      }
+      
+    } catch (parseError) {
+      console.log('❌ CAFEYN: Failed to parse JSON:', parseError);
+      return [];
+    }
+      
+  } catch (error) {
+    console.log('❌ CAFEYN: Request failed:', error);
     return [];
   }
   
