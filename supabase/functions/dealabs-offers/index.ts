@@ -313,85 +313,114 @@ async function fetchPerplexityOffers(userSubscriptions: UserSubscription[]): Pro
 
     console.log('PERPLEXITY: Searching offers for:', searchTerms);
 
-    // Test avec des offres statiques d'abord pour confirmer que le problème vient de l'API
-    console.log('PERPLEXITY: Generating demo offers for testing...');
-    
-    const demoOffers = [
-      {
-        title: "Netflix - Essai gratuit 30 jours",
-        description: "Découvrez Netflix gratuitement pendant 30 jours",
-        price: "Gratuit",
-        originalPrice: "15.99€",
-        merchant: "Netflix",
-        category: "streaming",
-        url: "https://netflix.com/fr/"
-      },
-      {
-        title: "Spotify Premium - 3 mois offerts",
-        description: "Profitez de 3 mois de Spotify Premium gratuits",
-        price: "Gratuit",
-        originalPrice: "9.99€",
-        merchant: "Spotify", 
-        category: "musique",
-        url: "https://spotify.com/fr/"
-      },
-      {
-        title: "Disney+ - 50% de réduction",
-        description: "Abonnement Disney+ à moitié prix pendant 6 mois",
-        price: "4.99€",
-        originalPrice: "8.99€",
-        merchant: "Disney+",
-        category: "streaming",
-        url: "https://disneyplus.com/fr/"
+    console.log('PERPLEXITY: Calling API with search terms...');
+
+    try {
+      const response = await fetch('https://api.perplexity.ai/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${perplexityApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'llama-3.1-sonar-large-128k-online',
+          messages: [
+            {
+              role: 'user',
+              content: `Trouve des offres promotionnelles récentes pour ces services: ${searchTerms}. 
+              
+Réponds uniquement avec du JSON valide dans ce format:
+{
+  "offers": [
+    {
+      "title": "Nom du service - Description offre",
+      "description": "Description détaillée",
+      "price": "Prix actuel",
+      "originalPrice": "Prix original",
+      "merchant": "Nom du service",
+      "category": "streaming ou musique ou productivité",
+      "url": "https://site-officiel.com"
+    }
+  ]
+}`
+            }
+          ],
+          max_tokens: 1500,
+          temperature: 0.1,
+          top_p: 0.9
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.log(`❌ PERPLEXITY: API error ${response.status}: ${errorText}`);
+        throw new Error(`API error: ${response.status}`);
       }
-    ];
 
-    // Pour l'instant, utiliser des offres de démonstration
-    console.log('✅ PERPLEXITY: Using demo offers for testing');
-    const offers = demoOffers;
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content;
+      
+      if (!content) {
+        console.log('❌ PERPLEXITY: No content in response');
+        throw new Error('No content received');
+      }
 
-    // Formater les offres pour l'interface
-    const formattedOffers: DealabsOffer[] = offers.map((offer: any, index: number) => ({
-      id: `perplexity_${Date.now()}_${index}`,
-      title: offer.title || 'Offre spéciale',
-      description: offer.description || 'Offre promotionnelle limitée',
-      price: offer.price || 'Prix spécial',
-      originalPrice: offer.originalPrice || '',
-      discount: offer.discount || '',
-      merchant: offer.merchant || 'Service partenaire',
-      category: offer.category || 'streaming',
-      url: offer.url || 'https://example.com',
-      votes: Math.floor(Math.random() * 50) + 25,
-      temperature: Math.floor(Math.random() * 50) + 75,
-      expiryDate: offer.expiryDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      couponCode: offer.couponCode || '',
-      isExpired: false
-    }));
+      console.log('PERPLEXITY: Raw content received:', content.substring(0, 200));
 
-    console.log(`✅ PERPLEXITY: Returning ${formattedOffers.length} formatted offers`);
-    return formattedOffers;
+      // Parse JSON plus robuste
+      let offers = [];
+      try {
+        // Nettoyer le contenu et extraire le JSON
+        let cleanContent = content.trim();
+        cleanContent = cleanContent.replace(/```json\n?|\n?```/g, '');
+        
+        // Chercher l'objet JSON principal
+        const jsonStart = cleanContent.indexOf('{');
+        const jsonEnd = cleanContent.lastIndexOf('}') + 1;
+        
+        if (jsonStart >= 0 && jsonEnd > jsonStart) {
+          const jsonStr = cleanContent.substring(jsonStart, jsonEnd);
+          const parsed = JSON.parse(jsonStr);
+          offers = Array.isArray(parsed.offers) ? parsed.offers : [];
+          console.log(`✅ PERPLEXITY: Successfully parsed ${offers.length} offers`);
+        } else {
+          throw new Error('No valid JSON structure found');
+        }
+      } catch (parseError) {
+        console.log('❌ PERPLEXITY: Parse error:', parseError);
+        console.log('Content that failed to parse:', content);
+        offers = [];
+      }
+
+      // Formater les offres pour l'interface
+      const formattedOffers: DealabsOffer[] = offers.map((offer: any, index: number) => ({
+        id: `perplexity_${Date.now()}_${index}`,
+        title: offer.title || 'Offre spéciale',
+        description: offer.description || 'Offre promotionnelle limitée',
+        price: offer.price || 'Prix spécial',
+        originalPrice: offer.originalPrice || '',
+        discount: offer.discount || '',
+        merchant: offer.merchant || 'Service partenaire',
+        category: offer.category || 'streaming',
+        url: offer.url || 'https://example.com',
+        votes: Math.floor(Math.random() * 50) + 25,
+        temperature: Math.floor(Math.random() * 50) + 75,
+        expiryDate: offer.expiryDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        couponCode: offer.couponCode || '',
+        isExpired: false
+      }));
+
+      console.log(`✅ PERPLEXITY: Returning ${formattedOffers.length} formatted offers`);
+      return formattedOffers;
+      
+    } catch (error) {
+      console.log('❌ PERPLEXITY: Request failed:', error);
+      return [];
+    }
 
   } catch (error) {
-    console.log('❌ PERPLEXITY: Request failed:', error);
-    // En cas d'erreur totale, retourner des offres de démonstration
-    return [
-      {
-        id: `perplexity_demo_${Date.now()}`,
-        title: "Netflix - Découverte",
-        description: "Offre découverte Netflix avec réduction",
-        price: "9.99€",
-        originalPrice: "15.99€",
-        discount: "37%",
-        merchant: "Netflix",
-        category: "streaming",
-        url: "https://netflix.com/fr/",
-        votes: 42,
-        temperature: 85,
-        expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        couponCode: "",
-        isExpired: false
-      } as DealabsOffer
-    ];
+    console.log('❌ PERPLEXITY: Global error:', error);
+    return [];
   }
 }
 
