@@ -60,45 +60,31 @@ serve(async (req) => {
 
     switch (action) {
       case 'get_offers':
-        // Récupérer toutes les offres des différentes sources
+        // Récupérer uniquement les offres Perplexity
         const perplexityOffersForAll = await fetchPerplexityOffers(userSubscriptions || []);
-        console.log(`Fetched ${perplexityOffersForAll.length} real offers from Perplexity`);
+        console.log(`Fetched ${perplexityOffersForAll.length} offers from Perplexity`);
         
-        const dealabsOffers = await fetchDealabsOffers();
-        console.log(`Fetched ${dealabsOffers.length} validated Dealabs offers`);
-        
-        const allOffers = [...perplexityOffersForAll, ...dealabsOffers];
-        console.log(`Combined ${allOffers.length} total offers`);
-        
-        const validOffers = filterValidOffers(allOffers);
+        const validOffers = filterValidOffers(perplexityOffersForAll);
         return new Response(JSON.stringify({ offers: validOffers }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
 
       case 'get_matched_offers':
-        // Récupérer des offres correspondant aux abonnements de l'utilisateur
+        // Récupérer uniquement les offres Perplexity correspondant aux abonnements
         const perplexityOffersMatched = await fetchPerplexityOffers(userSubscriptions || []);
-        console.log(`Fetched ${perplexityOffersMatched.length} real Perplexity offers`);
+        console.log(`Fetched ${perplexityOffersMatched.length} Perplexity offers`);
         
-        const dealabsOffersMatched = await fetchDealabsOffers();
-        console.log(`Fetched ${dealabsOffersMatched.length} validated Dealabs offers`);
-        
-        const combinedOffersMatched = [...perplexityOffersMatched, ...dealabsOffersMatched];
-        console.log(`Combined ${combinedOffersMatched.length} total offers`);
-        
-        const matchedOffers = await getMatchedOffers(userSubscriptions || [], combinedOffersMatched);
+        const matchedOffers = await getMatchedOffers(userSubscriptions || [], perplexityOffersMatched);
         const validMatchedOffers = filterValidOffers(matchedOffers);
         return new Response(JSON.stringify({ offers: validMatchedOffers }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
 
       case 'get_category_offers':
-        // Récupérer des offres pour une catégorie spécifique
+        // Récupérer uniquement les offres Perplexity pour une catégorie spécifique
         const perplexityOffersCategory = await fetchPerplexityOffers(userSubscriptions || []);
-        const dealabsOffersCategory = await fetchDealabsOffers();
-        const combinedOffersCategory = [...perplexityOffersCategory, ...dealabsOffersCategory];
         
-        const categoryOffers = await getCategoryOffers(category, combinedOffersCategory);
+        const categoryOffers = await getCategoryOffers(category, perplexityOffersCategory);
         const validCategoryOffers = filterValidOffers(categoryOffers);
         return new Response(JSON.stringify({ offers: validCategoryOffers }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
