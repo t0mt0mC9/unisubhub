@@ -20,12 +20,6 @@ interface DealabsOffersProps {
 export const DealabsOffers: React.FC<DealabsOffersProps> = () => {
   return (
     <div className="space-y-6">
-      <div className="flex items-center">
-        <h2 className="text-2xl font-bold flex items-center gap-2">
-          <Gift className="h-6 w-6 text-primary" />
-          Offres du marché
-        </h2>
-      </div>
 
       <Tabs defaultValue="streaming" className="w-full">
         <div className="w-full overflow-x-auto">

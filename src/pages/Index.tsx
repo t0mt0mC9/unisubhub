@@ -310,10 +310,6 @@ const Index = () => {
   const renderOffers = () => (
     <div className="flex-1 overflow-y-auto pb-20">
       <div className="p-4 space-y-6">
-        <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-foreground mb-2">Offres d'abonnements</h2>
-          <p className="text-muted-foreground">Découvrez les meilleures offres du moment</p>
-        </div>
         
         <DealabsOffers userSubscriptions={allSubscriptions} />
         
