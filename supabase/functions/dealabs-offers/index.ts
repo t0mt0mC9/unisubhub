@@ -361,23 +361,52 @@ IMPORTANT: Ne proposez QUE des offres RÉELLEMENT DISPONIBLES avec des URLs vali
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama-3.1-sonar-small-128k-online',
+        model: 'llama-3.1-sonar-huge-128k-online',
         messages: [
           {
             role: 'system',
-            content: 'Tu es un expert en recherche de promotions et offres spéciales. Réponds uniquement avec du JSON valide, sans formatage markdown.'
+            content: `Tu es un expert en recherche de promotions et offres spéciales actuellement disponibles. 
+            
+            Recherche uniquement des offres et promotions RÉELLES et ACTUELLES qui sont disponibles MAINTENANT en 2025. 
+            
+            Pour chaque offre trouvée, assure-toi qu'elle :
+            - Est actuellement active et disponible
+            - A un lien d'inscription direct et fonctionnel  
+            - N'est pas expirée
+            - Est proposée par un site officiel ou marchand reconnu
+            
+            Réponds uniquement avec du JSON valide dans ce format exact :
+            {
+              "offers": [
+                {
+                  "title": "Titre exact de l'offre",
+                  "description": "Description détaillée de l'offre",
+                  "price": "Prix ou 'Gratuit'",
+                  "originalPrice": "Prix original",
+                  "discount": "Pourcentage ou montant de réduction",
+                  "merchant": "Nom du marchand/site",
+                  "category": "Catégorie (Streaming, Musique, etc.)",
+                  "url": "URL directe d'inscription à l'offre",
+                  "expiryDate": "Date d'expiration ISO",
+                  "couponCode": "Code promo si applicable"
+                }
+              ]
+            }`
           },
           {
             role: 'user',
             content: prompt
           }
         ],
-        temperature: 0.2,
+        temperature: 0.1,
         top_p: 0.9,
-        max_tokens: 2000,
+        max_tokens: 3000,
         return_images: false,
         return_related_questions: false,
-        frequency_penalty: 1
+        search_domain_filter: ['dealabs.com', 'pepper.com', 'mydealz.de', 'promodescuentos.com'],
+        search_recency_filter: 'day',
+        frequency_penalty: 1,
+        presence_penalty: 0
       }),
     });
 
