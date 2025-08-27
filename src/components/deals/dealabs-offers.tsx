@@ -5,6 +5,7 @@ import { StreamingComparisonTable } from './streaming-comparison-table';
 import { PressComparisonTable } from './press-comparison-table';
 import { GamingComparisonTable } from './gaming-comparison-table';
 import { FitnessComparisonTable } from './fitness-comparison-table';
+import { CreativityComparisonTable } from './creativity-comparison-table';
 
 interface DealabsOffersProps {
   userSubscriptions?: Array<{
@@ -26,11 +27,12 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = () => {
       </div>
 
       <Tabs defaultValue="streaming" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="streaming">Streaming</TabsTrigger>
           <TabsTrigger value="press">Presse</TabsTrigger>
           <TabsTrigger value="gaming">Gaming</TabsTrigger>
           <TabsTrigger value="fitness">Fitness</TabsTrigger>
+          <TabsTrigger value="creativity">Créativité</TabsTrigger>
         </TabsList>
 
         <TabsContent value="streaming">
@@ -47,6 +49,10 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = () => {
 
         <TabsContent value="fitness">
           <FitnessComparisonTable />
+        </TabsContent>
+
+        <TabsContent value="creativity">
+          <CreativityComparisonTable />
         </TabsContent>
       </Tabs>
     </div>
