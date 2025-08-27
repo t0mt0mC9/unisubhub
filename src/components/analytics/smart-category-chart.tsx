@@ -157,39 +157,70 @@ export const SmartCategoryChart = ({ subscriptions }: SmartCategoryChartProps) =
         <CardContent>
           {data?.chartData && data.chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={data.chartData} layout="horizontal">
+              <BarChart data={data.chartData} layout="horizontal" margin={{ top: 20, right: 30, left: 60, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                <XAxis type="number" tick={{ fontSize: 12 }} />
+                <XAxis 
+                  type="number" 
+                  tick={{ fontSize: 12, fill: 'hsl(var(--foreground))' }}
+                  axisLine={{ stroke: 'hsl(var(--border))' }}
+                  tickLine={{ stroke: 'hsl(var(--border))' }}
+                />
                 <YAxis 
                   dataKey="category" 
                   type="category" 
                   width={80}
-                  tick={{ fontSize: 12 }}
+                  tick={{ fontSize: 12, fill: 'hsl(var(--foreground))' }}
+                  axisLine={{ stroke: 'hsl(var(--border))' }}
+                  tickLine={{ stroke: 'hsl(var(--border))' }}
                 />
                 <Tooltip 
-                  formatter={(value: any, name: string) => [
-                    `${Math.round(value)}€`,
-                    name === 'value' ? 'Votre dépense' : 'Moyenne marché'
-                  ]}
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px',
-                    color: 'hsl(var(--card-foreground))'
+                  formatter={(value: any, name: string, props: any) => {
+                    const category = props.payload.category;
+                    if (name === 'value') {
+                      return [`${Math.round(value)}€`, `${category} - Votre dépense`];
+                    } else {
+                      return [`${Math.round(value)}€`, `${category} - Moyenne marché`];
+                    }
                   }}
+                  labelFormatter={(label: string) => `Catégorie: ${label}`}
+                  contentStyle={{ 
+                    backgroundColor: 'white',
+                    border: '2px solid hsl(var(--primary))',
+                    borderRadius: '12px',
+                    color: 'black',
+                    boxShadow: '0 8px 32px -4px hsl(var(--primary) / 0.3)',
+                    backdropFilter: 'blur(16px)',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    padding: '16px 20px'
+                  }}
+                  labelStyle={{
+                    color: 'hsl(var(--primary))',
+                    fontWeight: '700',
+                    marginBottom: '8px',
+                    fontSize: '16px'
+                  }}
+                  cursor={{ fill: 'hsl(var(--primary) / 0.1)' }}
                 />
-                <Legend />
+                <Legend 
+                  wrapperStyle={{ paddingTop: '20px', fontSize: '14px' }}
+                  iconType="rect"
+                />
                 <Bar 
                   dataKey="value" 
                   fill="hsl(var(--primary))" 
                   name="Votre dépense"
-                  radius={[0, 4, 4, 0]}
+                  radius={[0, 6, 6, 0]}
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={1}
                 />
                 <Bar 
                   dataKey="benchmark" 
                   fill="hsl(var(--chart-2))" 
                   name="Moyenne marché"
-                  radius={[0, 4, 4, 0]}
+                  radius={[0, 6, 6, 0]}
+                  stroke="hsl(var(--chart-2))"
+                  strokeWidth={1}
                 />
               </BarChart>
             </ResponsiveContainer>
