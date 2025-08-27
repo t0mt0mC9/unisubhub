@@ -86,7 +86,7 @@ Soyez spécifique et actionnable. Incluez seulement des recommandations réalist
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'sonar-pro',
+        model: 'llama-3.1-sonar-large-128k-online',
         messages: [
           {
             role: 'system',
@@ -102,8 +102,7 @@ Soyez spécifique et actionnable. Incluez seulement des recommandations réalist
         max_tokens: 1500,
         return_images: false,
         return_related_questions: false,
-        frequency_penalty: 0.5,
-        presence_penalty: 0.3
+        frequency_penalty: 1
       }),
     });
 
