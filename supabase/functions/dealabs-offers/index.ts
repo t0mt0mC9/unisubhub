@@ -313,9 +313,11 @@ Trouvez des offres ACTUELLES et VÉRIFIABLES avec URLs valides. Soyez précis su
       }),
     });
 
+    console.log(`✅ PERPLEXITY: Response status: ${response.status}`);
+    
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`Perplexity API error ${response.status}:`, errorText);
+      console.error(`❌ PERPLEXITY: API error ${response.status}:`, errorText);
       return [];
     }
 
