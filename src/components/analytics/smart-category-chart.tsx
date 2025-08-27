@@ -89,10 +89,10 @@ export const SmartCategoryChart = ({ subscriptions }: SmartCategoryChartProps) =
                     'Dépense mensuelle'
                   ]}
                   contentStyle={{ 
-                    backgroundColor: 'hsl(var(--background))',
+                    backgroundColor: 'white',
                     border: '2px solid hsl(var(--primary))',
                     borderRadius: '12px',
-                    color: 'hsl(var(--foreground))',
+                    color: 'black',
                     boxShadow: '0 8px 32px -4px hsl(var(--primary) / 0.3)',
                     backdropFilter: 'blur(16px)',
                     fontSize: '14px',
