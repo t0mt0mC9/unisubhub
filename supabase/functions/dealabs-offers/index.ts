@@ -60,40 +60,43 @@ serve(async (req) => {
 
     switch (action) {
       case 'get_offers':
-        // Récupérer les offres Dealabs et Perplexity
-        const cachedOffers = await getCachedOffers(supabaseClient);
-        const dealabsOffersForAll = cachedOffers.length > 0 ? cachedOffers : await fetchDealabsOffers();
-        console.log(`Fetched ${dealabsOffersForAll.length} Dealabs offers for 'all'`);
-        
+        // Récupérer uniquement les offres réelles via Perplexity (plus fiable)
         const perplexityOffersForAll = await fetchPerplexityOffers(userSubscriptions || []);
-        console.log(`Fetched ${perplexityOffersForAll.length} Perplexity offers for 'all'`);
+        console.log(`Fetched ${perplexityOffersForAll.length} real offers from Perplexity`);
         
-        const allCombinedOffers = [...dealabsOffersForAll, ...perplexityOffersForAll];
-        console.log(`Combined ${allCombinedOffers.length} total offers for 'all'`);
+        // Essayer aussi les offres Dealabs mais seulement si elles sont validées
+        const realDealabsOffers = await fetchDealabsOffers();
+        console.log(`Fetched ${realDealabsOffers.length} validated Dealabs offers`);
         
-        const validOffers = filterValidOffers(allCombinedOffers);
+        const allRealOffers = [...perplexityOffersForAll, ...realDealabsOffers];
+        console.log(`Combined ${allRealOffers.length} real offers total`);
+        
+        const validOffers = filterValidOffers(allRealOffers);
         return new Response(JSON.stringify({ offers: validOffers }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
 
       case 'get_matched_offers':
-        const allOffersForMatching = await getCachedOffers(supabaseClient);
-        const dealabsOffers = allOffersForMatching.length > 0 ? allOffersForMatching : await fetchDealabsOffers();
-        console.log(`Fetched ${dealabsOffers.length} Dealabs offers`);
+        // Récupérer des offres réelles pour les abonnements de l'utilisateur
         const perplexityOffers = await fetchPerplexityOffers(userSubscriptions || []);
-        console.log(`Fetched ${perplexityOffers.length} Perplexity offers`);
-        const combinedOffers = [...dealabsOffers, ...perplexityOffers];
-        console.log(`Combined ${combinedOffers.length} total offers (${dealabsOffers.length} Dealabs + ${perplexityOffers.length} Perplexity)`);
-        const matchedOffers = await getMatchedOffers(userSubscriptions || [], combinedOffers);
+        console.log(`Fetched ${perplexityOffers.length} real Perplexity offers`);
+        
+        const realDealabsOffersMatched = await fetchDealabsOffers();
+        console.log(`Fetched ${realDealabsOffersMatched.length} validated Dealabs offers`);
+        
+        const combinedRealOffers = [...perplexityOffers, ...realDealabsOffersMatched];
+        console.log(`Combined ${combinedRealOffers.length} real offers total`);
+        
+        const matchedOffers = await getMatchedOffers(userSubscriptions || [], combinedRealOffers);
         const validMatchedOffers = filterValidOffers(matchedOffers);
         return new Response(JSON.stringify({ offers: validMatchedOffers }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
 
       case 'get_category_offers':
-        const allOffersForCategory = await getCachedOffers(supabaseClient);
-        const categoryFallback = allOffersForCategory.length > 0 ? allOffersForCategory : await fetchDealabsOffers();
-        const categoryOffers = await getCategoryOffers(category, categoryFallback);
+        // Récupérer des offres réelles pour une catégorie spécifique
+        const realOffersForCategory = await fetchDealabsOffers();
+        const categoryOffers = await getCategoryOffers(category, realOffersForCategory);
         const validCategoryOffers = filterValidOffers(categoryOffers);
         return new Response(JSON.stringify({ offers: validCategoryOffers }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -194,26 +197,29 @@ async function fetchDealabsOffers(): Promise<DealabsOffer[]> {
               const offerUrl = deal.deal_link || `https://www.dealabs.com/deals/${deal.deal_id}`;
               const isValidUrl = await validateOfferUrl(offerUrl);
               
-              validatedOffers.push({
-                id: deal.deal_id?.toString() || '',
-                title: deal.title || '',
-                description: deal.description || '',
-                price: extractPrice(deal.title, deal.description),
-                originalPrice: extractOriginalPrice(deal.title, deal.description),
-                discount: extractDiscount(deal.title, deal.description),
-                merchant: extractMerchant(deal.title),
-                category: categorizeSubscription(deal.title, deal.description),
-                url: `https://www.dealabs.com/deals/${deal.deal_id}`, // Forcer URL Dealabs
-                votes: deal.vote_count || 0,
-                temperature: deal.temperature || 0,
-                expiryDate: deal.publish_date,
-                couponCode: extractCouponCode(deal.description),
-                isExpired: !isValidUrl,
-              });
+              // Ne retenir que les offres valides avec URL accessible
+              if (isValidUrl) {
+                validatedOffers.push({
+                  id: deal.deal_id?.toString() || '',
+                  title: deal.title || '',
+                  description: deal.description || '',
+                  price: extractPrice(deal.title, deal.description),
+                  originalPrice: extractOriginalPrice(deal.title, deal.description),
+                  discount: extractDiscount(deal.title, deal.description),
+                  merchant: extractMerchant(deal.title),
+                  category: categorizeSubscription(deal.title, deal.description),
+                  url: offerUrl,
+                  votes: deal.vote_count || 0,
+                  temperature: deal.temperature || 0,
+                  expiryDate: deal.publish_date,
+                  couponCode: extractCouponCode(deal.description),
+                  isExpired: false,
+                });
+              }
             }
             
-            console.log(`Validated ${validatedOffers.filter(o => !o.isExpired).length}/${validatedOffers.length} offers`);
-            return validatedOffers.filter(offer => !offer.isExpired);
+            console.log(`Found ${validatedOffers.length} valid offers with accessible URLs`);
+            return validatedOffers;
           }
         }
       } catch (endpointError) {
@@ -222,13 +228,12 @@ async function fetchDealabsOffers(): Promise<DealabsOffer[]> {
       }
     }
 
-    console.log('All Dealabs API endpoints failed - using curated offers');
-    return await getCuratedDealabsOffers();
+    console.log('All Dealabs API endpoints failed - no real offers available');
+    return [];
 
   } catch (error) {
     console.error('Error fetching from Dealabs API:', error);
-    // Retourner des offres curées si l'API Dealabs n'est pas accessible
-    return await getCuratedDealabsOffers();
+    return [];
   }
 }
 
@@ -237,54 +242,54 @@ async function fetchPerplexityOffers(userSubscriptions: UserSubscription[]): Pro
     const perplexityApiKey = Deno.env.get('PERPLEXITY_API_KEY');
     console.log('=== PERPLEXITY DEBUG ===');
     console.log('Perplexity API key available:', !!perplexityApiKey);
-    console.log('User subscriptions count:', userSubscriptions.length);
-    console.log('User subscriptions:', userSubscriptions.map(s => s.name));
     
     if (!perplexityApiKey) {
       console.log('❌ PERPLEXITY: No API key found');
       return [];
     }
-    
-    if (userSubscriptions.length === 0) {
-      console.log('❌ PERPLEXITY: No user subscriptions');
-      return [];
-    }
 
-    console.log(`✅ PERPLEXITY: Fetching offers for ${userSubscriptions.length} subscriptions`);
+    console.log(`✅ PERPLEXITY: Fetching current offers from the market`);
 
-    // Préparer la liste des abonnements utilisateur
-    const subscriptionsList = userSubscriptions.map(sub => 
-      `${sub.name} (${sub.price}€, catégorie: ${sub.category})`
-    ).join(', ');
-
-    const prompt = `Trouvez 5-8 offres promotionnelles actuelles en français pour ces abonnements: ${subscriptionsList}
+    // Créer un prompt pour chercher des offres actuelles générales ET spécifiques aux abonnements
+    let prompt = `Trouvez 8-12 offres promotionnelles ACTUELLEMENT DISPONIBLES en France pour les services d'abonnement populaires.
 
 Cherchez spécifiquement:
-1. Réductions actuelles sur ces services exacts
-2. Offres spéciales, codes promo, essais gratuits
-3. Offres groupées ou forfaits avantageux
-4. Alternatives moins chères de qualité équivalente
+1. Offres gratuites/d'essai en cours (Netflix, Disney+, Spotify, etc.)
+2. Réductions actuelles sur des services de streaming
+3. Promotions sur des VPN populaires (NordVPN, ExpressVPN, etc.)
+4. Offres sur des services de productivité (Adobe, Office 365, etc.)
+5. Codes promo actifs et vérifiés`;
+
+    // Si l'utilisateur a des abonnements, les inclure dans la recherche
+    if (userSubscriptions && userSubscriptions.length > 0) {
+      const subscriptionsList = userSubscriptions.map(sub => sub.name).join(', ');
+      prompt += `
+
+PRIORITÉ: Recherchez des offres pour ces services que l'utilisateur utilise déjà: ${subscriptionsList}`;
+    }
+
+    prompt += `
 
 Répondez UNIQUEMENT avec un JSON valide dans ce format exact:
 {
   "offers": [
     {
-      "title": "Titre de l'offre",
-      "description": "Description brève",
-      "price": "Prix promotionnel",
-      "originalPrice": "Prix original",
+      "title": "Titre exact de l'offre",
+      "description": "Description détaillée de l'offre",
+      "price": "Prix promotionnel exact",
+      "originalPrice": "Prix normal si applicable",
       "discount": "Pourcentage de réduction",
-      "merchant": "Nom du service",
-      "category": "Catégorie",
-      "url": "URL directe de l'offre",
+      "merchant": "Nom exact du service",
+      "category": "Streaming|Musique|VPN|Gaming|Productivité",
+      "url": "URL directe et VALIDE de l'offre",
       "couponCode": "Code promo si applicable",
-      "expiryDate": "Date d'expiration",
+      "expiryDate": "Date d'expiration au format ISO",
       "source": "perplexity"
     }
   ]
 }
 
-Trouvez des offres ACTUELLES et VÉRIFIABLES avec URLs valides. Soyez précis sur les prix et dates.`;
+IMPORTANT: Ne proposez QUE des offres RÉELLEMENT DISPONIBLES avec des URLs valides et vérifiées. Pas d'exemples fictifs.`;
 
     const response = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
@@ -621,177 +626,7 @@ function extractCouponCode(description: string): string {
   return match ? (match[1] || match[2]) : '';
 }
 
-async function getCuratedDealabsOffers(): Promise<DealabsOffer[]> {
-  // Offres réelles basées sur des promotions fréquemment disponibles sur Dealabs
-  const currentDate = new Date();
-  const futureDate = new Date(currentDate.getTime() + (30 * 24 * 60 * 60 * 1000)); // +30 jours
-  
-  const offers: DealabsOffer[] = [
-    {
-      id: 'dealabs_spotify_1',
-      title: 'Spotify Premium - 3 mois à 0.99€ (Nouveaux abonnés)',
-      description: 'Profitez de Spotify Premium pendant 3 mois à prix réduit. Accès illimité à la musique sans publicité.',
-      price: '0.99€',
-      originalPrice: '9.99€/mois',
-      discount: '90%',
-      merchant: 'Spotify',
-      category: 'Musique',
-      url: createDealabsSearchUrl('spotify premium offre 3 mois'),
-      votes: 189,
-      temperature: 98,
-      expiryDate: futureDate.toISOString(),
-      couponCode: '',
-      isExpired: false,
-    },
-    {
-      id: 'dealabs_netflix_1',
-      title: 'Netflix - 1 mois gratuit pour les nouveaux abonnés',
-      description: 'Découvrez Netflix gratuitement pendant 1 mois complet. Résiliable à tout moment.',
-      price: 'Gratuit',
-      originalPrice: '15.99€/mois',
-      discount: '100%',
-      merchant: 'Netflix',
-      category: 'Streaming',
-      url: createDealabsSearchUrl('netflix gratuit 1 mois'),
-      votes: 234,
-      temperature: 145,
-      expiryDate: futureDate.toISOString(),
-      couponCode: '',
-      isExpired: false,
-    },
-    {
-      id: 'dealabs_nordvpn_1',
-      title: 'NordVPN - 70% de réduction sur l\'abonnement 2 ans',
-      description: 'NordVPN à prix réduit avec 3 mois offerts. Protection complète et serveurs rapides.',
-      price: '3.19€/mois',
-      originalPrice: '10.59€/mois',
-      discount: '70%',
-      merchant: 'NordVPN',
-      category: 'VPN',
-      url: createDealabsSearchUrl('nordvpn promotion 70 pourcent'),
-      votes: 267,
-      temperature: 156,
-      expiryDate: futureDate.toISOString(),
-      couponCode: 'NORD70',
-      isExpired: false,
-    },
-    {
-      id: 'dealabs_disney_1',
-      title: 'Disney+ - 50% de réduction sur l\'abonnement annuel',
-      description: 'Disney+ à moitié prix pour un an. Accès à Disney, Marvel, Star Wars et plus.',
-      price: '44.99€/an',
-      originalPrice: '89.90€/an',
-      discount: '50%',
-      merchant: 'Disney',
-      category: 'Streaming',
-      url: createDealabsSearchUrl('disney plus reduction 50 pourcent'),
-      votes: 156,
-      temperature: 87,
-      expiryDate: futureDate.toISOString(),
-      couponCode: '',
-      isExpired: false,
-    },
-    {
-      id: 'dealabs_gamepass_1',
-      title: 'Xbox Game Pass Ultimate - 3 mois pour 1€',
-      description: 'Accès à plus de 100 jeux pour 1€ pendant 3 mois. Inclut EA Play et Xbox Live Gold.',
-      price: '1€',
-      originalPrice: '12.99€/mois',
-      discount: '92%',
-      merchant: 'Microsoft',
-      category: 'Gaming',
-      url: createDealabsSearchUrl('xbox game pass ultimate 1 euro'),
-      votes: 298,
-      temperature: 134,
-      expiryDate: futureDate.toISOString(),
-      couponCode: '',
-      isExpired: false,
-    },
-    {
-      id: 'dealabs_adobe_1',
-      title: 'Adobe Creative Cloud - 1 mois gratuit',
-      description: 'Essai gratuit d\'Adobe Creative Cloud. Photoshop, Illustrator, Premiere Pro inclus.',
-      price: 'Gratuit',
-      originalPrice: '59.99€/mois',
-      discount: '100%',
-      merchant: 'Adobe',
-      category: 'Productivité',
-      url: createDealabsSearchUrl('adobe creative cloud gratuit essai'),
-      votes: 167,
-      temperature: 94,
-      expiryDate: futureDate.toISOString(),
-      couponCode: '',
-      isExpired: false,
-    },
-    {
-      id: 'dealabs_canal_1',
-      title: 'Canal+ - 2 mois à 9.99€/mois au lieu de 25.99€',
-      description: 'Canal+ avec sport, cinéma et séries à prix réduit pendant 2 mois.',
-      price: '9.99€/mois',
-      originalPrice: '25.99€/mois',
-      discount: '62%',
-      merchant: 'Canal+',
-      category: 'Streaming',
-      url: createDealabsSearchUrl('canal plus promotion 2 mois'),
-      votes: 124,
-      temperature: 78,
-      expiryDate: futureDate.toISOString(),
-      couponCode: '',
-      isExpired: false,
-    },
-    {
-      id: 'dealabs_youtube_1',
-      title: 'YouTube Premium - 2 mois gratuits',
-      description: 'YouTube sans publicité + YouTube Music inclus. Offre limitée dans le temps.',
-      price: 'Gratuit',
-      originalPrice: '11.99€/mois',
-      discount: '100%',
-      merchant: 'YouTube',
-      category: 'Streaming',
-      url: createDealabsSearchUrl('youtube premium gratuit 2 mois'),
-      votes: 201,
-      temperature: 112,
-      expiryDate: futureDate.toISOString(),
-      couponCode: '',
-      isExpired: false,
-    },
-    {
-      id: 'dealabs_psplus_1',
-      title: 'PlayStation Plus - 25% de réduction',
-      description: 'PlayStation Plus Essential avec jeux gratuits mensuels et multijoueur en ligne.',
-      price: '52.49€/an',
-      originalPrice: '69.99€/an',
-      discount: '25%',
-      merchant: 'PlayStation',
-      category: 'Gaming',
-      url: createDealabsSearchUrl('playstation plus reduction 25 pourcent'),
-      votes: 145,
-      temperature: 82,
-      expiryDate: futureDate.toISOString(),
-      couponCode: '',
-      isExpired: false,
-    },
-    {
-      id: 'dealabs_amazon_1',
-      title: 'Amazon Prime - 30 jours gratuits',
-      description: 'Essai gratuit d\'Amazon Prime avec livraison rapide et Prime Video inclus.',
-      price: 'Gratuit',
-      originalPrice: '6.99€/mois',
-      discount: '100%',
-      merchant: 'Amazon',
-      category: 'Streaming',
-      url: createDealabsSearchUrl('amazon prime gratuit 30 jours'),
-      votes: 189,
-      temperature: 95,
-      expiryDate: futureDate.toISOString(),
-      couponCode: '',
-      isExpired: false,
-    }
-  ];
-
-  console.log(`Using ${offers.length} curated Dealabs offers`);
-  return offers;
-}
+// Fonction supprimée - plus d'offres factices/curées
 
 function createDealabsSearchUrl(searchTerms: string): string {
   const query = encodeURIComponent(searchTerms);
