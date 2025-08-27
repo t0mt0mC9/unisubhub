@@ -79,8 +79,11 @@ serve(async (req) => {
       case 'get_matched_offers':
         const allOffersForMatching = await getCachedOffers(supabaseClient);
         const dealabsOffers = allOffersForMatching.length > 0 ? allOffersForMatching : await fetchDealabsOffers();
+        console.log(`Fetched ${dealabsOffers.length} Dealabs offers`);
         const perplexityOffers = await fetchPerplexityOffers(userSubscriptions || []);
+        console.log(`Fetched ${perplexityOffers.length} Perplexity offers`);
         const combinedOffers = [...dealabsOffers, ...perplexityOffers];
+        console.log(`Combined ${combinedOffers.length} total offers (${dealabsOffers.length} Dealabs + ${perplexityOffers.length} Perplexity)`);
         const matchedOffers = await getMatchedOffers(userSubscriptions || [], combinedOffers);
         const validMatchedOffers = filterValidOffers(matchedOffers);
         return new Response(JSON.stringify({ offers: validMatchedOffers }), {
@@ -227,10 +230,15 @@ async function fetchDealabsOffers(): Promise<DealabsOffer[]> {
     // Retourner des offres curées si l'API Dealabs n'est pas accessible
     return await getCuratedDealabsOffers();
   }
+}
+
 async function fetchPerplexityOffers(userSubscriptions: UserSubscription[]): Promise<DealabsOffer[]> {
   try {
     const perplexityApiKey = Deno.env.get('PERPLEXITY_API_KEY');
+    console.log('Perplexity API key available:', !!perplexityApiKey);
+    
     if (!perplexityApiKey || userSubscriptions.length === 0) {
+      console.log('Skipping Perplexity offers - missing API key or no subscriptions');
       return [];
     }
 
