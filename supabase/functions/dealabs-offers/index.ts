@@ -78,8 +78,10 @@ serve(async (req) => {
 
       case 'get_matched_offers':
         const allOffersForMatching = await getCachedOffers(supabaseClient);
-        const fallbackOffers = allOffersForMatching.length > 0 ? allOffersForMatching : await fetchDealabsOffers();
-        const matchedOffers = await getMatchedOffers(userSubscriptions || [], fallbackOffers);
+        const dealabsOffers = allOffersForMatching.length > 0 ? allOffersForMatching : await fetchDealabsOffers();
+        const perplexityOffers = await fetchPerplexityOffers(userSubscriptions || []);
+        const combinedOffers = [...dealabsOffers, ...perplexityOffers];
+        const matchedOffers = await getMatchedOffers(userSubscriptions || [], combinedOffers);
         const validMatchedOffers = filterValidOffers(matchedOffers);
         return new Response(JSON.stringify({ offers: validMatchedOffers }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -224,6 +226,121 @@ async function fetchDealabsOffers(): Promise<DealabsOffer[]> {
     console.error('Error fetching from Dealabs API:', error);
     // Retourner des offres curées si l'API Dealabs n'est pas accessible
     return await getCuratedDealabsOffers();
+  }
+async function fetchPerplexityOffers(userSubscriptions: UserSubscription[]): Promise<DealabsOffer[]> {
+  try {
+    const perplexityApiKey = Deno.env.get('PERPLEXITY_API_KEY');
+    if (!perplexityApiKey || userSubscriptions.length === 0) {
+      return [];
+    }
+
+    console.log(`Fetching Perplexity offers for ${userSubscriptions.length} subscriptions`);
+
+    // Préparer la liste des abonnements utilisateur
+    const subscriptionsList = userSubscriptions.map(sub => 
+      `${sub.name} (${sub.price}€, catégorie: ${sub.category})`
+    ).join(', ');
+
+    const prompt = `Trouvez 5-8 offres promotionnelles actuelles en français pour ces abonnements: ${subscriptionsList}
+
+Cherchez spécifiquement:
+1. Réductions actuelles sur ces services exacts
+2. Offres spéciales, codes promo, essais gratuits
+3. Offres groupées ou forfaits avantageux
+4. Alternatives moins chères de qualité équivalente
+
+Répondez UNIQUEMENT avec un JSON valide dans ce format exact:
+{
+  "offers": [
+    {
+      "title": "Titre de l'offre",
+      "description": "Description brève",
+      "price": "Prix promotionnel",
+      "originalPrice": "Prix original",
+      "discount": "Pourcentage de réduction",
+      "merchant": "Nom du service",
+      "category": "Catégorie",
+      "url": "URL directe de l'offre",
+      "couponCode": "Code promo si applicable",
+      "expiryDate": "Date d'expiration",
+      "source": "perplexity"
+    }
+  ]
+}
+
+Trouvez des offres ACTUELLES et VÉRIFIABLES avec URLs valides. Soyez précis sur les prix et dates.`;
+
+    const response = await fetch('https://api.perplexity.ai/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${perplexityApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'llama-3.1-sonar-large-128k-online',
+        messages: [
+          {
+            role: 'system',
+            content: 'Tu es un expert en recherche de promotions et offres spéciales. Réponds uniquement avec du JSON valide, sans formatage markdown.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.2,
+        top_p: 0.9,
+        max_tokens: 2000,
+        return_images: false,
+        return_related_questions: false,
+        frequency_penalty: 1
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Perplexity API error ${response.status}:`, errorText);
+      return [];
+    }
+
+    const data = await response.json();
+    const aiContent = data.choices[0].message.content;
+    
+    // Parse la réponse JSON
+    let perplexityOffers = [];
+    try {
+      const parsed = JSON.parse(aiContent.replace(/```json\n?|\n?```/g, ''));
+      perplexityOffers = parsed.offers || [];
+    } catch (parseError) {
+      console.error('Error parsing Perplexity response:', parseError);
+      console.log('Raw AI content:', aiContent);
+      return [];
+    }
+
+    // Convertir au format DealabsOffer
+    const formattedOffers: DealabsOffer[] = perplexityOffers.map((offer: any, index: number) => ({
+      id: `perplexity_${Date.now()}_${index}`,
+      title: offer.title || '',
+      description: offer.description || '',
+      price: offer.price || '',
+      originalPrice: offer.originalPrice || '',
+      discount: offer.discount || '',
+      merchant: offer.merchant || '',
+      category: offer.category || 'Divers',
+      url: offer.url || '',
+      votes: 0,
+      temperature: 50, // Score neutre pour les offres Perplexity
+      expiryDate: offer.expiryDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 jours par défaut
+      couponCode: offer.couponCode || '',
+      isExpired: false
+    }));
+
+    console.log(`Found ${formattedOffers.length} Perplexity offers`);
+    return formattedOffers;
+
+  } catch (error) {
+    console.error('Error fetching Perplexity offers:', error);
+    return [];
   }
 }
 

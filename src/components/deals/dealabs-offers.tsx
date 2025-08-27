@@ -232,8 +232,18 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {offers.map((offer) => (
-            <Card key={offer.id} className="hover:shadow-lg transition-shadow border-l-4 border-l-primary">
+          {offers.map((offer) => {
+            const isPerplexityOffer = offer.id.startsWith('perplexity_');
+            
+            return (
+              <Card 
+                key={offer.id} 
+                className={`hover:shadow-lg transition-shadow border-l-4 ${
+                  isPerplexityOffer 
+                    ? 'border-l-purple-500 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20' 
+                    : 'border-l-primary'
+                }`}
+              >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
@@ -241,6 +251,11 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
                     <Badge variant="secondary" className="text-xs">
                       {offer.category}
                     </Badge>
+                    {isPerplexityOffer && (
+                      <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700 dark:bg-purple-800 dark:text-purple-200">
+                        IA
+                      </Badge>
+                    )}
                   </div>
                   <div className="flex items-center gap-1 text-sm">
                     <TrendingUp className="h-4 w-4" />
@@ -309,17 +324,24 @@ export const DealabsOffers: React.FC<DealabsOffersProps> = ({ userSubscriptions 
                   className="w-full" 
                   size="sm"
                   onClick={() => {
-                    const dealabsUrl = getDealabsUrl(offer.title, offer.merchant);
-                    console.log('Opening Dealabs search URL:', dealabsUrl);
-                    window.open(dealabsUrl, '_blank', 'noopener,noreferrer');
+                    if (isPerplexityOffer && offer.url) {
+                      // Pour les offres Perplexity, utiliser l'URL directe si disponible
+                      window.open(offer.url, '_blank', 'noopener,noreferrer');
+                    } else {
+                      // Pour les offres Dealabs, utiliser la recherche Dealabs
+                      const dealabsUrl = getDealabsUrl(offer.title, offer.merchant);
+                      console.log('Opening Dealabs search URL:', dealabsUrl);
+                      window.open(dealabsUrl, '_blank', 'noopener,noreferrer');
+                    }
                   }}
                 >
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Voir l'offre
                 </Button>
               </CardContent>
-            </Card>
-          ))}
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>
