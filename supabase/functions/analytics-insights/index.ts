@@ -85,16 +85,44 @@ Générez des données de tendance pour 12 mois avec:
         break;
 
       case 'category_analysis':
-        prompt = `Analysez la répartition des dépenses par catégorie et générez des insights détaillés:
+        prompt = `Analysez ces abonnements par catégorie et générez des insights sur les dépenses par rapport aux moyennes du marché. Pour chaque catégorie, calculez la dépense totale, le pourcentage du budget et comparez avec les benchmarks du secteur.
 
-Répartition: ${JSON.stringify(categoryStats)}
-Total: ${totalMonthly}€
+Subscription data: ${JSON.stringify(subscriptionData)}
+Total monthly spending: ${totalMonthly}€
+Available market offers: ${JSON.stringify(dealabsOffers?.slice(0, 5) || [])}
 
-Générez:
-1. Analyse comparative des catégories
-2. Benchmarks du marché
-3. Recommandations d'optimisation
-4. Données pour graphiques sectoriels`;
+Utilisez ces benchmarks moyens du marché français pour 2025:
+- Streaming: 25€/mois (Netflix Standard 13€ + une autre plateforme ~12€)
+- Musique: 10€/mois (Spotify Premium ~10€)
+- Productivité: 15€/mois (Microsoft 365 Personnel ~7€ + Adobe ~20€ moyenné)
+- Gaming: 20€/mois
+- Cloud Storage: 5€/mois
+- News: 8€/mois
+
+Retournez uniquement un JSON valide avec cette structure exacte:
+{
+  "chartData": [
+    {
+      "category": "string",
+      "value": number,
+      "percentage": number,
+      "benchmark": number,
+      "color": "string"
+    }
+  ],
+  "insights": [
+    {
+      "category": "string",
+      "analysis": "string",
+      "recommendation": "string",
+      "potential_saving": "string"
+    }
+  ],
+  "benchmarks": {
+    "industry_average": number,
+    "user_vs_average": "below|above|average"
+  }
+}`;
 
         responseStructure = `{
   "chartData": [
