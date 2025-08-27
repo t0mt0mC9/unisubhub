@@ -45,18 +45,17 @@ serve(async (req) => {
       `${deal.title} - ${deal.price || 'Prix variable'} (${deal.merchant})`
     ).join(', ') || '';
 
-    const prompt = `Analysez les abonnements suivants et fournissez exactement 4 recommandations d'optimisation spécifiques en français.
+    const prompt = `Analysez les abonnements suivants et fournissez des recommandations d'optimisation spécifiques en français selon ces critères STRICTS:
 
 Abonnements utilisateur: ${subscriptionsList}
-
 Offres du marché: ${dealsContext}
 
-Concentrez-vous sur:
-1. Identification d'abonnements coûteux vs alternatives du marché
-2. Détection de services en double dans la même catégorie
-3. Optimisation cycle de facturation (mensuel vs annuel)
-4. Services alternatifs avec meilleur rapport qualité-prix
-5. Recommandations basées sur les offres actuelles du marché
+CRITÈRES OBLIGATOIRES pour inclure une recommandation:
+1. Recommandation "duplicate" : SEULEMENT si plus de 2 abonnements dans la même catégorie
+2. Recommandation "cost" : SEULEMENT si le prix mensuel de l'abonnement est supérieur à 30€ 
+3. Recommandation "billing" : SEULEMENT si il existe des abonnements en facturation annuelle ET des abonnements en facturation mensuelle
+
+Ne générez une recommandation QUE si les critères sont respectés. Si aucun critère n'est rempli, retournez un tableau vide.
 
 Répondez uniquement avec un JSON valide dans ce format exact:
 {
@@ -76,7 +75,7 @@ Répondez uniquement avec un JSON valide dans ce format exact:
 Types disponibles: cost, duplicate, billing, usage, alternative
 Impact disponible: Élevé, Moyen, Faible
 
-Soyez spécifique et actionnable. Incluez seulement des recommandations réalistes.`;
+Soyez spécifique et actionnable. N'incluez QUE les recommandations qui respectent les critères stricts.`;
 
     // Appel à Perplexity API
     const perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
@@ -203,7 +202,7 @@ function generateFallbackRecommendations(subscriptions: any[]): any[] {
 
   const recommendations = [];
   
-  // Analyser les doublons
+  // Analyser les doublons (plus de 2 abonnements identiques)
   const categories = new Map();
   subscriptions.forEach(sub => {
     if (!categories.has(sub.category)) {
@@ -212,8 +211,8 @@ function generateFallbackRecommendations(subscriptions: any[]): any[] {
     categories.get(sub.category).push(sub);
   });
 
-  // Détecter les doublons
-  const duplicates = Array.from(categories.entries()).filter(([_, subs]) => subs.length > 1);
+  // Détecter les doublons seulement si plus de 2 abonnements dans la même catégorie
+  const duplicates = Array.from(categories.entries()).filter(([_, subs]) => subs.length > 2);
   if (duplicates.length > 0) {
     const duplicateCategory = duplicates[0][0];
     const duplicateSubs = duplicates[0][1];
@@ -230,17 +229,11 @@ function generateFallbackRecommendations(subscriptions: any[]): any[] {
     });
   }
 
-  // Analyser les coûts élevés
-  const totalMonthly = subscriptions.reduce((sum, sub) => {
-    const monthlyPrice = sub.billing_cycle === 'yearly' ? sub.price / 12 : 
-                        sub.billing_cycle === 'weekly' ? sub.price * 4.33 : sub.price;
-    return sum + monthlyPrice;
-  }, 0);
-
+  // Analyser les coûts élevés (supérieurs à 30€)
   const expensiveSubs = subscriptions.filter(sub => {
     const monthlyPrice = sub.billing_cycle === 'yearly' ? sub.price / 12 : 
                         sub.billing_cycle === 'weekly' ? sub.price * 4.33 : sub.price;
-    return monthlyPrice > 20;
+    return monthlyPrice > 30;
   });
 
   if (expensiveSubs.length > 0) {
@@ -261,9 +254,17 @@ function generateFallbackRecommendations(subscriptions: any[]): any[] {
     });
   }
 
-  // Optimisation facturation annuelle
+  // Optimisation facturation annuelle seulement si il y a des abonnements en facturation mensuelle
   const monthlyBilling = subscriptions.filter(sub => sub.billing_cycle === 'monthly');
-  if (monthlyBilling.length > 0) {
+  const hasYearlyOptions = subscriptions.some(sub => sub.billing_cycle === 'yearly');
+  
+  if (monthlyBilling.length > 0 && hasYearlyOptions) {
+    const totalMonthly = subscriptions.reduce((sum, sub) => {
+      const monthlyPrice = sub.billing_cycle === 'yearly' ? sub.price / 12 : 
+                          sub.billing_cycle === 'weekly' ? sub.price * 4.33 : sub.price;
+      return sum + monthlyPrice;
+    }, 0);
+    
     const savingsEstimate = Math.round(totalMonthly * 0.15);
     recommendations.push({
       id: recommendations.length + 1,
