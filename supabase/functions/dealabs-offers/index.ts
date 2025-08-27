@@ -60,31 +60,31 @@ serve(async (req) => {
 
     switch (action) {
       case 'get_offers':
-        // Récupérer uniquement les offres ChatGPT
-        const perplexityOffersForAll = await fetchPerplexityOffers(userSubscriptions || []);
-        console.log(`Fetched ${perplexityOffersForAll.length} offers from ChatGPT`);
+        // Utiliser toutes les API disponibles pour sourcer des offres réelles
+        const allOffersFromAllAPIs = await fetchOffersFromAllAPIs(userSubscriptions || []);
+        console.log(`Fetched ${allOffersFromAllAPIs.length} offers from all APIs`);
         
-        const validOffers = filterValidOffers(perplexityOffersForAll);
+        const validOffers = filterValidOffers(allOffersFromAllAPIs);
         return new Response(JSON.stringify({ offers: validOffers }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
 
       case 'get_matched_offers':
-        // Récupérer uniquement les offres ChatGPT correspondant aux abonnements
-        const perplexityOffersMatched = await fetchPerplexityOffers(userSubscriptions || []);
-        console.log(`Fetched ${perplexityOffersMatched.length} ChatGPT offers`);
+        // Utiliser toutes les API pour récupérer les offres correspondant aux abonnements
+        const allMatchedOffers = await fetchOffersFromAllAPIs(userSubscriptions || []);
+        console.log(`Fetched ${allMatchedOffers.length} offers from all APIs`);
         
-        const matchedOffers = await getMatchedOffers(userSubscriptions || [], perplexityOffersMatched);
+        const matchedOffers = await getMatchedOffers(userSubscriptions || [], allMatchedOffers);
         const validMatchedOffers = filterValidOffers(matchedOffers);
         return new Response(JSON.stringify({ offers: validMatchedOffers }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
 
       case 'get_category_offers':
-        // Récupérer uniquement les offres ChatGPT pour une catégorie spécifique
-        const perplexityOffersCategory = await fetchPerplexityOffers(userSubscriptions || []);
+        // Utiliser toutes les API pour récupérer les offres d'une catégorie spécifique
+        const allCategoryOffers = await fetchOffersFromAllAPIs(userSubscriptions || []);
         
-        const categoryOffers = await getCategoryOffers(category, perplexityOffersCategory);
+        const categoryOffers = await getCategoryOffers(category, allCategoryOffers);
         const validCategoryOffers = filterValidOffers(categoryOffers);
         return new Response(JSON.stringify({ offers: validCategoryOffers }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -338,139 +338,308 @@ function generateDemoOffers(): DealabsOffer[] {
 }
 
 
-async function fetchPerplexityOffers(userSubscriptions: UserSubscription[]): Promise<DealabsOffer[]> {
+// Fonction principale qui combine toutes les API disponibles
+async function fetchOffersFromAllAPIs(userSubscriptions: UserSubscription[]): Promise<DealabsOffer[]> {
+  console.log('=== FETCHING FROM ALL AVAILABLE APIS ===');
+  
+  const allOffers: DealabsOffer[] = [];
+  
+  // 1. Perplexity API (recherche en temps réel)
   try {
-    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
-    console.log('=== CHATGPT DEBUG ===');
-    console.log('OpenAI API key available:', !!openaiApiKey);
-    
-    if (!openaiApiKey) {
-      console.log('❌ CHATGPT: No API key found - using demo offers instead');
-      return generateDemoOffers();
+    console.log('🔍 Fetching from Perplexity API...');
+    const perplexityOffers = await fetchPerplexityOffers(userSubscriptions);
+    allOffers.push(...perplexityOffers);
+    console.log(`✅ Perplexity: ${perplexityOffers.length} offers`);
+  } catch (error) {
+    console.log('❌ Perplexity API failed:', error);
+  }
+  
+  // 2. ChatGPT API (recherche alternative)
+  try {
+    console.log('🔍 Fetching from ChatGPT API...');
+    const chatGPTOffers = await fetchChatGPTOffers(userSubscriptions);
+    allOffers.push(...chatGPTOffers);
+    console.log(`✅ ChatGPT: ${chatGPTOffers.length} offers`);
+  } catch (error) {
+    console.log('❌ ChatGPT API failed:', error);
+  }
+  
+  // 3. Dealabs API (offres réelles)
+  try {
+    console.log('🔍 Fetching from Dealabs API...');
+    const dealabsOffers = await fetchDealabsOffers();
+    allOffers.push(...dealabsOffers);
+    console.log(`✅ Dealabs: ${dealabsOffers.length} offers`);
+  } catch (error) {
+    console.log('❌ Dealabs API failed:', error);
+  }
+  
+  // Éliminer les doublons par titre
+  const uniqueOffers = allOffers.reduce((acc: DealabsOffer[], current) => {
+    const exists = acc.find(offer => 
+      offer.title.toLowerCase().trim() === current.title.toLowerCase().trim() ||
+      (offer.merchant === current.merchant && offer.price === current.price)
+    );
+    if (!exists) {
+      acc.push(current);
+    }
+    return acc;
+  }, []);
+  
+  console.log(`📊 Total: ${allOffers.length} offers → ${uniqueOffers.length} unique offers`);
+  
+  // Si aucune offre trouvée, retourner les offres démo
+  if (uniqueOffers.length === 0) {
+    console.log('📋 No offers found from APIs, using demo offers');
+    return generateDemoOffers();
+  }
+  
+  return uniqueOffers;
+}
+
+// Utilise Perplexity pour trouver des offres réelles avec recherche en temps réel
+async function fetchPerplexityOffers(userSubscriptions: UserSubscription[]): Promise<DealabsOffer[]> {
+  console.log('=== PERPLEXITY API ===');
+  
+  const perplexityApiKey = Deno.env.get('PERPLEXITY_API_KEY');
+  console.log('Perplexity API key available:', !!perplexityApiKey);
+  
+  if (!perplexityApiKey) {
+    console.log('❌ PERPLEXITY: No API key found');
+    return [];
+  }
+
+  try {
+    const subscriptionNames = userSubscriptions.map(sub => sub.name.toLowerCase().trim());
+    const searchTerms = subscriptionNames.length > 0 
+      ? subscriptionNames.join(', ')
+      : 'Netflix, Spotify, Disney+, Apple TV+, YouTube Premium, Canal+';
+
+    console.log('PERPLEXITY: Searching real offers for:', searchTerms);
+
+    const response = await fetch('https://api.perplexity.ai/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${perplexityApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'llama-3.1-sonar-small-128k-online',
+        messages: [
+          {
+            role: 'system',
+            content: `Tu es un expert en recherche d'offres promotionnelles d'abonnements numériques. Tu dois trouver des offres actuelles et réelles avec des liens directs vers les sites officiels ou plateformes légitimes.
+            
+            Réponds UNIQUEMENT avec un JSON valide contenant un array "offers".`
+          },
+          {
+            role: 'user',
+            content: `Trouve des offres promotionnelles ACTUELLES et RÉELLES pour ces services: ${searchTerms}
+            
+            Je cherche des offres avec des liens directs vers:
+            - Les sites officiels des services (Disney+, Netflix, Spotify, etc.)
+            - Des plateformes légitimes (Amazon, Fnac, Cdiscount, etc.)
+            - Des codes promo ou offres spéciales actuellement disponibles
+            
+            Format JSON requis:
+            {
+              "offers": [
+                {
+                  "title": "Nom exact de l'offre",
+                  "description": "Description détaillée",
+                  "price": "Prix promo",
+                  "originalPrice": "Prix normal",
+                  "discount": "% de réduction",
+                  "merchant": "Site marchand",
+                  "category": "streaming/musique/productivité",
+                  "url": "URL directe vers l'offre",
+                  "votes": 50,
+                  "temperature": "🔥",
+                  "expires_at": "YYYY-MM-DD ou null"
+                }
+              ]
+            }`
+          }
+        ],
+        max_tokens: 2000,
+        temperature: 0.2
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.log('❌ PERPLEXITY: API error:', response.status, errorText);
+      return [];
     }
 
-    console.log(`✅ CHATGPT: API key found, proceeding with API call`);
+    const data = await response.json();
+    const content = data.choices[0].message.content;
     
-    // Créer un prompt simple et efficace
-    const subscriptionNames = userSubscriptions?.map(sub => sub.name?.toLowerCase().trim()).filter(Boolean) || [];
+    try {
+      // Nettoyage plus robuste du JSON
+      let cleanContent = content.trim();
+      cleanContent = cleanContent.replace(/```json\n?|\n?```/g, '');
+      
+      const jsonStart = cleanContent.indexOf('{');
+      const jsonEnd = cleanContent.lastIndexOf('}') + 1;
+      
+      if (jsonStart >= 0 && jsonEnd > jsonStart) {
+        const jsonStr = cleanContent.substring(jsonStart, jsonEnd);
+        const parsedOffers = JSON.parse(jsonStr);
+        
+        const formattedOffers: DealabsOffer[] = (parsedOffers.offers || []).map((offer: any, index: number) => ({
+          id: `perplexity_${Date.now()}_${index}`,
+          title: offer.title || 'Offre spéciale',
+          description: offer.description || '',
+          price: offer.price || '',
+          originalPrice: offer.originalPrice || '',
+          discount: offer.discount || '',
+          merchant: offer.merchant || '',
+          category: offer.category || 'autres',
+          url: offer.url || '#',
+          votes: offer.votes || Math.floor(Math.random() * 50) + 25,
+          temperature: offer.temperature || Math.floor(Math.random() * 50) + 75,
+          expiryDate: offer.expires_at || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          couponCode: offer.couponCode || '',
+          isExpired: false
+        }));
+        
+        console.log('✅ PERPLEXITY: Found', formattedOffers.length, 'real offers');
+        return formattedOffers;
+      }
+      
+    } catch (parseError) {
+      console.log('❌ PERPLEXITY: Failed to parse JSON:', parseError);
+      return [];
+    }
+      
+  } catch (error) {
+    console.log('❌ PERPLEXITY: Request failed:', error);
+    return [];
+  }
+  
+  return [];
+}
+
+// Utilise ChatGPT comme source secondaire
+async function fetchChatGPTOffers(userSubscriptions: UserSubscription[]): Promise<DealabsOffer[]> {
+  console.log('=== CHATGPT API ===');
+  
+  const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+  console.log('OpenAI API key available:', !!openaiApiKey);
+  
+  if (!openaiApiKey) {
+    console.log('❌ CHATGPT: No API key found');
+    return [];
+  }
+
+  try {
+    const subscriptionNames = userSubscriptions.map(sub => sub.name.toLowerCase().trim());
     const searchTerms = subscriptionNames.length > 0 
       ? subscriptionNames.join(', ')
       : 'Netflix, Spotify, Disney+, Apple TV+, YouTube Premium';
 
     console.log('CHATGPT: Searching offers for:', searchTerms);
 
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openaiApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: `Tu es un expert en promotions d'abonnements numériques français. Trouve des offres spéciales actuelles avec des liens directs vers les sites officiels.
+            
+            Réponds UNIQUEMENT avec un JSON valide contenant un array "offers".`
+          },
+          {
+            role: 'user',
+            content: `Trouve des offres promotionnelles RÉELLES pour: ${searchTerms}
+            
+            Cherche des offres avec liens directs vers les sites officiels (Disney+, Netflix, Spotify, Apple, etc.).
+            
+            JSON requis:
+            {
+              "offers": [
+                {
+                  "title": "Titre de l'offre",
+                  "description": "Description détaillée",
+                  "price": "Prix",
+                  "originalPrice": "Prix normal",
+                  "discount": "Réduction",
+                  "merchant": "Site",
+                  "category": "catégorie",
+                  "url": "URL directe",
+                  "votes": 30,
+                  "temperature": "🔥",
+                  "expires_at": "2024-03-31"
+                }
+              ]
+            }`
+          }
+        ],
+        max_tokens: 1500,
+        temperature: 0.3
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.log('❌ CHATGPT: API error:', response.status, errorText);
+      return [];
+    }
+
+    const data = await response.json();
+    const content = data.choices[0].message.content;
+    
     try {
-      console.log('🚀 CHATGPT: About to make HTTP request to OpenAI API...');
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${openaiApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            {
-              role: 'system',
-              content: 'Tu es un assistant spécialisé dans la recherche d\'offres promotionnelles pour des services d\'abonnement. Réponds uniquement avec du JSON valide.'
-            },
-            {
-              role: 'user',
-              content: `Trouve 3-5 offres promotionnelles récentes et attractives pour ces services: ${searchTerms}. 
-              
-Réponds uniquement avec du JSON valide dans ce format exact:
-{
-  "offers": [
-    {
-      "title": "Nom du service - Description offre courte",
-      "description": "Description détaillée de l'offre",
-      "price": "Prix actuel (ex: 'Gratuit', '4.99€', etc.)",
-      "originalPrice": "Prix original (ex: '15.99€')",
-      "merchant": "Nom exact du service",
-      "category": "streaming ou musique ou productivité",
-      "url": "https://site-officiel.com"
-    }
-  ]
-}`
-            }
-          ],
-          max_tokens: 1500,
-          temperature: 0.1
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.log(`❌ CHATGPT: API error ${response.status}: ${errorText}`);
-        throw new Error(`API error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      const content = data.choices?.[0]?.message?.content;
+      // Nettoyage plus robuste du JSON
+      let cleanContent = content.trim();
+      cleanContent = cleanContent.replace(/```json\n?|\n?```/g, '');
       
-      if (!content) {
-        console.log('❌ CHATGPT: No content in response');
-        throw new Error('No content received');
-      }
-
-      console.log('CHATGPT: Raw content received:', content.substring(0, 200));
-
-      // Parse JSON plus robuste
-      let offers = [];
-      try {
-        // Nettoyer le contenu et extraire le JSON
-        let cleanContent = content.trim();
-        cleanContent = cleanContent.replace(/```json\n?|\n?```/g, '');
-        
-        // Chercher l'objet JSON principal
-        const jsonStart = cleanContent.indexOf('{');
-        const jsonEnd = cleanContent.lastIndexOf('}') + 1;
-        
-        if (jsonStart >= 0 && jsonEnd > jsonStart) {
-          const jsonStr = cleanContent.substring(jsonStart, jsonEnd);
-          const parsed = JSON.parse(jsonStr);
-          offers = Array.isArray(parsed.offers) ? parsed.offers : [];
-          console.log(`✅ CHATGPT: Successfully parsed ${offers.length} offers`);
-        } else {
-          throw new Error('No valid JSON structure found');
-        }
-      } catch (parseError) {
-        console.log('❌ CHATGPT: Parse error:', parseError);
-        console.log('Content that failed to parse:', content);
-        offers = [];
-      }
-
-      // Formater les offres pour l'interface
-      const formattedOffers: DealabsOffer[] = offers.map((offer: any, index: number) => ({
-        id: `chatgpt_${Date.now()}_${index}`,
-        title: offer.title || 'Offre spéciale',
-        description: offer.description || 'Offre promotionnelle limitée',
-        price: offer.price || 'Prix spécial',
-        originalPrice: offer.originalPrice || '',
-        discount: offer.discount || '',
-        merchant: offer.merchant || 'Service partenaire',
-        category: offer.category || 'streaming',
-        url: offer.url || 'https://example.com',
-        votes: Math.floor(Math.random() * 50) + 25,
-        temperature: Math.floor(Math.random() * 50) + 75,
-        expiryDate: offer.expiryDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        couponCode: offer.couponCode || '',
-        isExpired: false
-      }));
-
-      console.log(`✅ CHATGPT: Returning ${formattedOffers.length} formatted offers`);
-      return formattedOffers;
+      const jsonStart = cleanContent.indexOf('{');
+      const jsonEnd = cleanContent.lastIndexOf('}') + 1;
       
-    } catch (error) {
-      console.log('❌ CHATGPT: Request failed:', error);
-      console.log('❌ CHATGPT: Falling back to demo offers');
-      return generateDemoOffers();
+      if (jsonStart >= 0 && jsonEnd > jsonStart) {
+        const jsonStr = cleanContent.substring(jsonStart, jsonEnd);
+        const parsedOffers = JSON.parse(jsonStr);
+        
+        const formattedOffers: DealabsOffer[] = (parsedOffers.offers || []).map((offer: any, index: number) => ({
+          id: `chatgpt_${Date.now()}_${index}`,
+          title: offer.title || 'Offre spéciale',
+          description: offer.description || '',
+          price: offer.price || '',
+          originalPrice: offer.originalPrice || '',
+          discount: offer.discount || '',
+          merchant: offer.merchant || '',
+          category: offer.category || 'autres',
+          url: offer.url || '#',
+          votes: offer.votes || Math.floor(Math.random() * 30) + 20,
+          temperature: offer.temperature || Math.floor(Math.random() * 40) + 60,
+          expiryDate: offer.expires_at || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          couponCode: offer.couponCode || '',
+          isExpired: false
+        }));
+        
+        console.log('✅ CHATGPT: Found', formattedOffers.length, 'offers');
+        return formattedOffers;
+      }
+      
+    } catch (parseError) {
+      console.log('❌ CHATGPT: Failed to parse JSON:', parseError);
+      return [];
     }
-
+      
   } catch (error) {
-    console.error('❌ CHATGPT: Critical error in fetchPerplexityOffers:', error);
-    return generateDemoOffers();
+    console.log('❌ CHATGPT: Request failed:', error);
+    return [];
   }
+  
+  return [];
 }
 
 async function getCachedOffers(supabaseClient: any): Promise<DealabsOffer[]> {
