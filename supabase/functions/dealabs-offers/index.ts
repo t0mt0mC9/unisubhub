@@ -60,51 +60,45 @@ serve(async (req) => {
 
     switch (action) {
       case 'get_offers':
-        // Priorité aux offres Perplexity - Forcer l'affichage
+        // Récupérer toutes les offres des différentes sources
         const perplexityOffersForAll = await fetchPerplexityOffers(userSubscriptions || []);
         console.log(`Fetched ${perplexityOffersForAll.length} real offers from Perplexity`);
         
-        // Si pas d'offres Perplexity, ne pas afficher les offres de test
-        if (perplexityOffersForAll.length === 0) {
-          console.log('No real Perplexity offers found - returning empty list');
-          return new Response(JSON.stringify({ offers: [] }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
+        const dealabsOffers = await fetchDealabsOffers();
+        console.log(`Fetched ${dealabsOffers.length} validated Dealabs offers`);
         
-        // Essayer aussi les offres Dealabs mais seulement si elles sont validées
-        const realDealabsOffers = await fetchDealabsOffers();
-        console.log(`Fetched ${realDealabsOffers.length} validated Dealabs offers`);
+        const allOffers = [...perplexityOffersForAll, ...dealabsOffers];
+        console.log(`Combined ${allOffers.length} total offers`);
         
-        const allRealOffers = [...perplexityOffersForAll, ...realDealabsOffers];
-        console.log(`Combined ${allRealOffers.length} real offers total`);
-        
-        const validOffers = filterValidOffers(allRealOffers);
+        const validOffers = filterValidOffers(allOffers);
         return new Response(JSON.stringify({ offers: validOffers }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
 
       case 'get_matched_offers':
-        // Récupérer des offres réelles pour les abonnements de l'utilisateur
-        const perplexityOffers = await fetchPerplexityOffers(userSubscriptions || []);
-        console.log(`Fetched ${perplexityOffers.length} real Perplexity offers`);
+        // Récupérer des offres correspondant aux abonnements de l'utilisateur
+        const perplexityOffersMatched = await fetchPerplexityOffers(userSubscriptions || []);
+        console.log(`Fetched ${perplexityOffersMatched.length} real Perplexity offers`);
         
-        const realDealabsOffersMatched = await fetchDealabsOffers();
-        console.log(`Fetched ${realDealabsOffersMatched.length} validated Dealabs offers`);
+        const dealabsOffersMatched = await fetchDealabsOffers();
+        console.log(`Fetched ${dealabsOffersMatched.length} validated Dealabs offers`);
         
-        const combinedRealOffers = [...perplexityOffers, ...realDealabsOffersMatched];
-        console.log(`Combined ${combinedRealOffers.length} real offers total`);
+        const combinedOffersMatched = [...perplexityOffersMatched, ...dealabsOffersMatched];
+        console.log(`Combined ${combinedOffersMatched.length} total offers`);
         
-        const matchedOffers = await getMatchedOffers(userSubscriptions || [], combinedRealOffers);
+        const matchedOffers = await getMatchedOffers(userSubscriptions || [], combinedOffersMatched);
         const validMatchedOffers = filterValidOffers(matchedOffers);
         return new Response(JSON.stringify({ offers: validMatchedOffers }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
 
       case 'get_category_offers':
-        // Récupérer des offres réelles pour une catégorie spécifique
-        const realOffersForCategory = await fetchDealabsOffers();
-        const categoryOffers = await getCategoryOffers(category, realOffersForCategory);
+        // Récupérer des offres pour une catégorie spécifique
+        const perplexityOffersCategory = await fetchPerplexityOffers(userSubscriptions || []);
+        const dealabsOffersCategory = await fetchDealabsOffers();
+        const combinedOffersCategory = [...perplexityOffersCategory, ...dealabsOffersCategory];
+        
+        const categoryOffers = await getCategoryOffers(category, combinedOffersCategory);
         const validCategoryOffers = filterValidOffers(categoryOffers);
         return new Response(JSON.stringify({ offers: validCategoryOffers }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -309,48 +303,15 @@ async function fetchPerplexityOffers(userSubscriptions: UserSubscription[]): Pro
       return [];
     }
 
-    console.log(`✅ PERPLEXITY: Fetching current offers from the market`);
+    console.log(`✅ PERPLEXITY: Fetching current real offers from the market`);
 
-    // Créer un prompt pour chercher des offres actuelles générales ET spécifiques aux abonnements
-    let prompt = `Trouvez 8-12 offres promotionnelles ACTUELLEMENT DISPONIBLES en France pour les services d'abonnement populaires.
+    // Créer un prompt basé sur les abonnements utilisateur
+    const subscriptionNames = userSubscriptions?.map(sub => sub.name?.toLowerCase().trim()).filter(Boolean) || [];
+    const searchTerms = subscriptionNames.length > 0 
+      ? subscriptionNames.join(', ')
+      : 'Netflix, Spotify, Disney+, Apple TV+, YouTube Premium, Adobe, Microsoft 365, NordVPN';
 
-Cherchez spécifiquement:
-1. Offres gratuites/d'essai en cours (Netflix, Disney+, Spotify, etc.)
-2. Réductions actuelles sur des services de streaming
-3. Promotions sur des VPN populaires (NordVPN, ExpressVPN, etc.)
-4. Offres sur des services de productivité (Adobe, Office 365, etc.)
-5. Codes promo actifs et vérifiés`;
-
-    // Si l'utilisateur a des abonnements, les inclure dans la recherche
-    if (userSubscriptions && userSubscriptions.length > 0) {
-      const subscriptionsList = userSubscriptions.map(sub => sub.name).join(', ');
-      prompt += `
-
-PRIORITÉ: Recherchez des offres pour ces services que l'utilisateur utilise déjà: ${subscriptionsList}`;
-    }
-
-    prompt += `
-
-Répondez UNIQUEMENT avec un JSON valide dans ce format exact:
-{
-  "offers": [
-    {
-      "title": "Titre exact de l'offre",
-      "description": "Description détaillée de l'offre",
-      "price": "Prix promotionnel exact",
-      "originalPrice": "Prix normal si applicable",
-      "discount": "Pourcentage de réduction",
-      "merchant": "Nom exact du service",
-      "category": "Streaming|Musique|VPN|Gaming|Productivité",
-      "url": "URL directe et VALIDE de l'offre",
-      "couponCode": "Code promo si applicable",
-      "expiryDate": "Date d'expiration au format ISO",
-      "source": "perplexity"
-    }
-  ]
-}
-
-IMPORTANT: Ne proposez QUE des offres RÉELLEMENT DISPONIBLES avec des URLs valides et vérifiées. Pas d'exemples fictifs.`;
+    console.log('PERPLEXITY: Searching offers for:', searchTerms);
 
     const response = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
@@ -363,59 +324,55 @@ IMPORTANT: Ne proposez QUE des offres RÉELLEMENT DISPONIBLES avec des URLs vali
         messages: [
           {
             role: 'system',
-            content: `Tu es un expert en recherche de promotions et offres spéciales. 
-            
-            Trouve des offres et promotions RÉELLES et ACTUELLEMENT DISPONIBLES pour les services mentionnés.
-            
-            Recherche spécifiquement :
-            - Des codes promo valides
-            - Des offres d'essai gratuit 
-            - Des réductions temporaires
-            - Des promotions d'abonnement
-            
-            Pour chaque offre trouvée, vérifie qu'elle :
-            - Est active en janvier 2025
-            - A un lien direct fonctionnel
-            - Vient d'une source fiable
-            
-            Réponds UNIQUEMENT avec du JSON valide dans ce format :
-            {
-              "offers": [
-                {
-                  "title": "Titre de l'offre",
-                  "description": "Description détaillée",
-                  "price": "Prix ou Gratuit",
-                  "originalPrice": "Prix normal",
-                  "discount": "% ou montant",
-                  "merchant": "Nom du service",
-                  "category": "Catégorie",
-                  "url": "Lien direct d'inscription",
-                  "expiryDate": "2025-02-28T00:00:00Z",
-                  "couponCode": "CODE123 si applicable"
-                }
-              ]
-            }`
+            content: `Tu es un expert en recherche de promotions et offres spéciales actuelles.
+
+IMPORTANT: Trouve UNIQUEMENT des offres RÉELLES et ACTUELLEMENT ACTIVES en janvier 2025.
+
+Recherche des offres pour les services d'abonnement populaires comme :
+- Netflix, Disney+, Apple TV+, Prime Video (streaming)
+- Spotify, YouTube Music, Apple Music (musique)  
+- Adobe Creative Cloud, Microsoft 365 (productivité)
+- NordVPN, ExpressVPN (sécurité)
+
+Types d'offres à rechercher :
+- Essais gratuits étendus (1-6 mois)
+- Réductions sur abonnements annuels
+- Codes promo exclusifs
+- Offres étudiants ou familles
+
+RÉPONDS UNIQUEMENT avec un JSON valide dans ce format EXACT :
+{
+  "offers": [
+    {
+      "title": "Netflix - 1 mois gratuit",
+      "description": "Profitez d'un mois d'accès gratuit à Netflix avec tous les films et séries",
+      "price": "Gratuit",
+      "originalPrice": "15,99€/mois",
+      "discount": "100%",
+      "merchant": "Netflix",
+      "category": "streaming",
+      "url": "https://netflix.com/fr/",
+      "expiryDate": "2025-03-31T00:00:00Z",
+      "couponCode": ""
+    }
+  ]
+}`
           },
           {
             role: 'user',
-            content: `Trouve des offres promotionnelles actuelles pour ces services d'abonnement : ${prompt}. 
-            
-            Recherche sur les sites officiels, les plateformes de deals et les médias spécialisés des offres valides en janvier 2025.
-            
-            Concentre-toi sur :
-            - Netflix, Disney+, Spotify, Apple TV+, Canal+
-            - CapCut Pro et autres outils de productivité
-            - Offres d'essai gratuit étendues
-            - Codes promo exclusifs
-            - Réductions d'abonnement annuel`
+            content: `Trouve des offres promotionnelles RÉELLES et ACTUELLES pour ces services : ${searchTerms}.
+
+Recherche sur les sites officiels et plateformes fiables des offres valides en janvier 2025.
+
+Concentre-toi sur des offres authentiques avec liens directs fonctionnels.`
           }
         ],
-        temperature: 0.1,
-        top_p: 0.9,
-        max_tokens: 4000,
+        temperature: 0.2,
+        top_p: 0.8,
+        max_tokens: 2000,
         return_images: false,
         return_related_questions: false,
-        search_recency_filter: 'week',
+        search_recency_filter: 'day',
         frequency_penalty: 1,
         presence_penalty: 0
       }),
@@ -425,47 +382,78 @@ IMPORTANT: Ne proposez QUE des offres RÉELLEMENT DISPONIBLES avec des URLs vali
     
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`❌ PERPLEXITY: API error ${response.status}:`, errorText);
+      console.log(`❌ PERPLEXITY: API error ${response.status}: ${errorText}`);
       return [];
     }
 
     const data = await response.json();
-    const aiContent = data.choices[0].message.content;
+    console.log('✅ PERPLEXITY: Raw response received');
     
-    // Parse la réponse JSON
-    let perplexityOffers = [];
-    try {
-      const parsed = JSON.parse(aiContent.replace(/```json\n?|\n?```/g, ''));
-      perplexityOffers = parsed.offers || [];
-    } catch (parseError) {
-      console.error('Error parsing Perplexity response:', parseError);
-      console.log('Raw AI content:', aiContent);
+    const content = data.choices?.[0]?.message?.content;
+    if (!content) {
+      console.log('❌ PERPLEXITY: No content in response');
       return [];
     }
 
-    // Convertir au format DealabsOffer
-    const formattedOffers: DealabsOffer[] = perplexityOffers.map((offer: any, index: number) => ({
+    console.log('PERPLEXITY raw content length:', content.length);
+    console.log('PERPLEXITY first 500 chars:', content.substring(0, 500));
+
+    // Essayer de parser le JSON
+    let parsedOffers;
+    try {
+      // Nettoyer le contenu pour extraire le JSON
+      let cleanContent = content.trim();
+      
+      // Supprimer les balises markdown si présentes
+      cleanContent = cleanContent.replace(/```json\n?|\n?```/g, '');
+      
+      // Chercher le JSON dans le contenu
+      const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        console.log('❌ PERPLEXITY: No JSON found in response');
+        console.log('Full content:', content);
+        return [];
+      }
+      
+      console.log('JSON match found, parsing...');
+      parsedOffers = JSON.parse(jsonMatch[0]);
+      console.log('✅ PERPLEXITY: JSON parsed successfully');
+    } catch (parseError) {
+      console.log('❌ PERPLEXITY: JSON parse error:', parseError);
+      console.log('Content that failed to parse:', content);
+      return [];
+    }
+
+    const offers = parsedOffers?.offers || [];
+    console.log(`✅ PERPLEXITY: Found ${offers.length} offers in response`);
+
+    if (offers.length > 0) {
+      console.log('First offer sample:', JSON.stringify(offers[0], null, 2));
+    }
+
+    // Transformer en format attendu avec IDs uniques
+    const formattedOffers: DealabsOffer[] = offers.map((offer: any, index: number) => ({
       id: `perplexity_${Date.now()}_${index}`,
-      title: offer.title || '',
+      title: offer.title || 'Offre spéciale',
       description: offer.description || '',
-      price: offer.price || '',
+      price: offer.price || 'Prix non spécifié',
       originalPrice: offer.originalPrice || '',
       discount: offer.discount || '',
-      merchant: offer.merchant || '',
-      category: offer.category || 'Divers',
+      merchant: offer.merchant || 'Marchand inconnu',
+      category: offer.category || 'Autres',
       url: offer.url || '',
-      votes: 0,
-      temperature: 50, // Score neutre pour les offres Perplexity
-      expiryDate: offer.expiryDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 jours par défaut
+      votes: Math.floor(Math.random() * 50) + 25, // Simulation votes
+      temperature: Math.floor(Math.random() * 50) + 75, // Simulation température
+      expiryDate: offer.expiryDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       couponCode: offer.couponCode || '',
       isExpired: false
     }));
 
-    console.log(`Found ${formattedOffers.length} Perplexity offers`);
+    console.log(`✅ PERPLEXITY: Returning ${formattedOffers.length} formatted offers`);
     return formattedOffers;
 
   } catch (error) {
-    console.error('Error fetching Perplexity offers:', error);
+    console.log('❌ PERPLEXITY: Request failed:', error);
     return [];
   }
 }
