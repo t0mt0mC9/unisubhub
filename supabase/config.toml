@@ -21,6 +21,9 @@ verify_jwt = false
 [functions.notifications-dashboard]
 verify_jwt = false
 
+[functions.test-notification]
+verify_jwt = false
+
 [api]
 enabled = true
 port = 54321
