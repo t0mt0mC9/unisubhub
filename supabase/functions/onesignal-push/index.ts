@@ -90,17 +90,20 @@ serve(async (req) => {
     console.log('App ID présent:', !!oneSignalAppId)
     console.log('API Key longueur:', oneSignalApiKey ? oneSignalApiKey.length : 0)
     console.log('App ID longueur:', oneSignalAppId ? oneSignalAppId.length : 0)
+    console.log('App ID value:', oneSignalAppId || 'UNDEFINED')
 
-    if (!oneSignalApiKey || !oneSignalAppId) {
-      console.error('❌ OneSignal API key ou App ID manquant')
-      console.error('API Key:', oneSignalApiKey ? 'présente' : 'manquante')
-      console.error('App ID:', oneSignalAppId ? 'présent' : 'manquant')
+    // Fallback avec l'App ID hardcodé si le secret n'est pas disponible
+    const finalAppId = oneSignalAppId || 'e1e3a34f-c681-49ec-9c03-51c04792d448'
+    
+    if (!oneSignalApiKey) {
+      console.error('❌ OneSignal API key manquant')
       return new Response(
         JSON.stringify({ 
-          error: 'Configuration OneSignal manquante',
+          error: 'Configuration OneSignal manquante - API Key',
           details: {
             hasApiKey: !!oneSignalApiKey,
-            hasAppId: !!oneSignalAppId
+            hasAppId: !!oneSignalAppId,
+            usingFallbackAppId: !oneSignalAppId
           }
         }),
         { 
@@ -112,7 +115,7 @@ serve(async (req) => {
 
     // Préparer le payload OneSignal
     const oneSignalPayload: any = {
-      app_id: oneSignalAppId,
+      app_id: finalAppId,
       headings: { en: title },
       contents: { en: message },
       data: data || {},
