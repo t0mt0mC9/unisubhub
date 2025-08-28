@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Check, Crown, Star, AlertCircle, Smartphone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { revenueCatService, SubscriptionInfo } from "@/services/revenuecat";
+import { useSubscription } from "@/hooks/use-subscription";
 
 // Types locaux pour éviter les imports conditionnels
 interface PurchasesOffering {
@@ -34,6 +35,9 @@ export const MobileSubscriptionPlans = () => {
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState<string | null>(null);
   const { toast } = useToast();
+  
+  // Vérifier l'abonnement Supabase/Stripe
+  const { subscriptionData, hasAccess } = useSubscription();
 
   useEffect(() => {
     initializeRevenueCat().catch(error => {
@@ -214,8 +218,8 @@ export const MobileSubscriptionPlans = () => {
         </CardHeader>
       </Card>
 
-      {/* Statut de l'abonnement actuel */}
-      {subscriptionInfo?.isActive && (
+      {/* Statut de l'abonnement actuel - vérifier d'abord Supabase/Stripe puis RevenueCat */}
+      {(hasAccess || subscriptionInfo?.isActive) && (
         <Card className="border-green-200 bg-green-50 dark:bg-green-950/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-green-800 dark:text-green-400">
@@ -223,10 +227,23 @@ export const MobileSubscriptionPlans = () => {
               Abonnement actif
             </CardTitle>
             <CardDescription>
-              Plan {subscriptionInfo.tier} - 
-              {subscriptionInfo.expirationDate && 
-                ` Expire le ${new Date(subscriptionInfo.expirationDate).toLocaleDateString('fr-FR')}`
-              }
+              {subscriptionData.subscribed ? (
+                <>
+                  Plan {subscriptionData.subscription_tier} ({subscriptionData.subscription_type})
+                  {subscriptionData.subscription_end && 
+                    ` - Expire le ${new Date(subscriptionData.subscription_end).toLocaleDateString('fr-FR')}`
+                  }
+                </>
+              ) : subscriptionData.trial_active ? (
+                `Période d'essai - ${subscriptionData.trial_days_remaining} jours restants`
+              ) : subscriptionInfo ? (
+                <>
+                  Plan {subscriptionInfo.tier} - 
+                  {subscriptionInfo.expirationDate && 
+                    ` Expire le ${new Date(subscriptionInfo.expirationDate).toLocaleDateString('fr-FR')}`
+                  }
+                </>
+              ) : null}
             </CardDescription>
           </CardHeader>
         </Card>
