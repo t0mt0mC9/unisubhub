@@ -27,7 +27,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    const { userId, title, message, data, url } = await req.json() as PushNotificationRequest
+    const { userId, title, message, data, url, included_segments } = await req.json() as PushNotificationRequest
 
     if (!userId || !title || !message) {
       return new Response(
