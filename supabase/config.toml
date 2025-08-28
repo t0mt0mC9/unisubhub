@@ -12,6 +12,15 @@ verify_jwt = false
 [functions.check-tomorrow-billings]
 verify_jwt = false
 
+[functions.automated-budget-alerts]
+verify_jwt = false
+
+[functions.automated-billing-reminders]
+verify_jwt = false
+
+[functions.notifications-dashboard]
+verify_jwt = false
+
 [api]
 enabled = true
 port = 54321
