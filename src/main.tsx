@@ -3,6 +3,7 @@ import App from './App.tsx'
 import './index.css'
 import { initializeOneSignal } from './lib/onesignal'
 import './lib/test-onesignal'
+import './lib/send-test-notification'
 
 // Initialize OneSignal
 initializeOneSignal();
