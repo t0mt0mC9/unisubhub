@@ -109,7 +109,7 @@ class RevenueCatService {
         } else if (platform === 'android') {
           console.log('Configuring RevenueCat for Android...');
           await Purchases.configure({
-            apiKey: 'goog_LuYBBYxfEbapYRFKJHvBgKDPvBl'
+            apiKey: 'goog_NXDlajMOxEzuDzzFDBVhJBQXfJq'
           });
           console.log('✅ RevenueCat configured for Android');
           
