@@ -13,6 +13,7 @@ interface PushNotificationRequest {
   data?: Record<string, any>
   url?: string
   included_segments?: string[]
+  filters?: Array<{field: string, relation: string, value: string}>
 }
 
 serve(async (req) => {
@@ -28,7 +29,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    const { userId, title, message, data, url, included_segments } = await req.json() as PushNotificationRequest
+    const { userId, title, message, data, url, included_segments, filters } = await req.json() as PushNotificationRequest
 
     // Vérifier les paramètres requis
     if (!title || !message) {
@@ -108,9 +109,11 @@ serve(async (req) => {
       ios_badgeCount: 1
     }
 
-    // Utiliser included_segments ou filters selon le cas
+    // Utiliser included_segments, filters ou user_id selon le cas
     if (included_segments) {
       oneSignalPayload.included_segments = included_segments
+    } else if (filters) {
+      oneSignalPayload.filters = filters
     } else if (userId) {
       oneSignalPayload.filters = [
         { field: "tag", key: "user_id", relation: "=", value: userId }

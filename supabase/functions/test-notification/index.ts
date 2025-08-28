@@ -23,17 +23,21 @@ serve(async (req) => {
 
     const userId = '750929e9-09e0-4c24-8e21-a34a324acf6e' // tom.lifert@gmail.com
 
-    // Envoyer notification push via OneSignal
+    // Envoyer notification push ciblée pour tom.lifert@gmail.com
     const { data: pushResult, error: pushError } = await supabaseClient.functions.invoke('onesignal-push', {
       body: {
-        title: '🧪 Test notification UniSubHub',
-        message: 'Bonjour ! Ceci est un test de notification push depuis votre système automatisé. Si vous recevez ce message, tout fonctionne parfaitement ! 🎉',
+        title: '🧪 Test notification UniSubHub - Mobile',
+        message: 'Bonjour Tom ! Cette notification est envoyée spécifiquement sur votre mobile. Si vous la recevez, la configuration mobile fonctionne parfaitement ! 📱🎉',
         data: {
-          type: 'test_notification',
+          type: 'mobile_test_notification',
           test_time: new Date().toISOString(),
-          from: 'notification_system'
+          from: 'mobile_notification_system',
+          target_user: 'tom.lifert@gmail.com'
         },
-        included_segments: ['All']  // Envoyer à tous les utilisateurs abonnés
+        // Cibler spécifiquement par email
+        filters: [
+          { field: "email", relation: "=", value: "tom.lifert@gmail.com" }
+        ]
       }
     })
 

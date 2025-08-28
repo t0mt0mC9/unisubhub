@@ -16,6 +16,10 @@ const config: CapacitorConfig = {
     },
     PurchasesCapacitor: {
       // Configuration pour RevenueCat
+    },
+    // Configuration OneSignal pour mobile
+    OneSignal: {
+      appId: "e1e3a34f-c681-49ec-9c03-51c04792d448"
     }
   }
 };
