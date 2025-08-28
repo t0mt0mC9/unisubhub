@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Home, Gift, BarChart3, Settings, Crown, Users } from "lucide-react";
+import { Home, Gift, BarChart3, Settings, Crown, Users, Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface BottomNavProps {
@@ -11,7 +11,7 @@ const navItems = [
   { id: 'dashboard', label: 'Accueil', icon: Home, path: '/' },
   { id: 'offers', label: 'Offres', icon: Gift, path: null },
   { id: 'analytics', label: 'Analyses', icon: BarChart3, path: null },
-  { id: 'subscription', label: 'Premium', icon: Crown, path: null },
+  { id: 'notifications', label: 'Notifications', icon: Bell, path: null },
   { id: 'settings', label: 'Réglages', icon: Settings, path: null },
 ];
 

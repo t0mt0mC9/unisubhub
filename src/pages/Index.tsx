@@ -21,6 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { updateExpiredBillingDates } from "@/lib/subscription-updater";
 import { Search, Filter, Plus, BarChart3, Settings, LogOut, X, Bell } from "lucide-react";
+import { NotificationsDashboard } from "@/components/notifications/notifications-dashboard";
 
 
 const Index = () => {
@@ -365,6 +366,7 @@ const Index = () => {
       case 'dashboard': return 'UniSubHub';
       case 'offers': return 'Offres';
       case 'analytics': return 'Analyses';
+      case 'notifications': return 'Notifications';
       case 'settings': return 'Paramètres';
       case 'subscription': return 'Premium';
       case 'profile': return 'Profil';
@@ -381,12 +383,19 @@ const Index = () => {
       case 'dashboard': return renderDashboard();
       case 'offers': return renderOffers();
       case 'analytics': return renderAnalytics();
+      case 'notifications': return renderNotifications();
       case 'settings': return renderSettings();
       case 'subscription': return renderSubscription();
       case 'profile': return renderProfile();
       default: return renderDashboard();
     }
   };
+
+  const renderNotifications = () => (
+    <div className="flex-1 overflow-y-auto pb-20">
+      <NotificationsDashboard />
+    </div>
+  );
 
   const renderSubscription = () => <PremiumPage />;
 

@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      automated_tasks_log: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          execution_date: string
+          execution_details: Json | null
+          id: string
+          notifications_sent: number | null
+          status: string
+          task_name: string
+          updated_at: string
+          users_processed: number | null
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          execution_date: string
+          execution_details?: Json | null
+          id?: string
+          notifications_sent?: number | null
+          status: string
+          task_name: string
+          updated_at?: string
+          users_processed?: number | null
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          execution_date?: string
+          execution_details?: Json | null
+          id?: string
+          notifications_sent?: number | null
+          status?: string
+          task_name?: string
+          updated_at?: string
+          users_processed?: number | null
+        }
+        Relationships: []
+      }
       bank_connections: {
         Row: {
           created_at: string
