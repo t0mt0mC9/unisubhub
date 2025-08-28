@@ -45,25 +45,6 @@ const App = () => {
       setLoading(false);
     });
 
-    // Execute the tomorrow billings check function
-    const executeTomorrowBillingsCheck = async () => {
-      try {
-        console.log("🔍 Exécution de la vérification des facturations de demain...");
-        const { data, error } = await supabase.functions.invoke('check-tomorrow-billings');
-        
-        if (error) {
-          console.error("❌ Erreur lors de l'exécution:", error);
-        } else {
-          console.log("✅ Fonction exécutée avec succès:", data);
-        }
-      } catch (error) {
-        console.error("❌ Erreur d'invocation:", error);
-      }
-    };
-
-    // Execute the function
-    executeTomorrowBillingsCheck();
-
     return () => subscription.unsubscribe();
   }, []);
 
