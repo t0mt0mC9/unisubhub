@@ -85,10 +85,24 @@ serve(async (req) => {
     const oneSignalApiKey = Deno.env.get('ONESIGNAL_API_KEY')
     const oneSignalAppId = Deno.env.get('ONESIGNAL_APP_ID')
 
+    console.log('🔍 Vérification des secrets OneSignal:')
+    console.log('API Key présente:', !!oneSignalApiKey)
+    console.log('App ID présent:', !!oneSignalAppId)
+    console.log('API Key longueur:', oneSignalApiKey ? oneSignalApiKey.length : 0)
+    console.log('App ID longueur:', oneSignalAppId ? oneSignalAppId.length : 0)
+
     if (!oneSignalApiKey || !oneSignalAppId) {
-      console.error('OneSignal API key ou App ID manquant')
+      console.error('❌ OneSignal API key ou App ID manquant')
+      console.error('API Key:', oneSignalApiKey ? 'présente' : 'manquante')
+      console.error('App ID:', oneSignalAppId ? 'présent' : 'manquant')
       return new Response(
-        JSON.stringify({ error: 'Configuration OneSignal manquante' }),
+        JSON.stringify({ 
+          error: 'Configuration OneSignal manquante',
+          details: {
+            hasApiKey: !!oneSignalApiKey,
+            hasAppId: !!oneSignalAppId
+          }
+        }),
         { 
           status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
