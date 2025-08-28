@@ -92,18 +92,19 @@ serve(async (req) => {
     console.log('App ID longueur:', oneSignalAppId ? oneSignalAppId.length : 0)
     console.log('App ID value:', oneSignalAppId || 'UNDEFINED')
 
-    // Fallback avec l'App ID hardcodé si le secret n'est pas disponible
+    // Fallbacks temporaires pour tester
     const finalAppId = oneSignalAppId || 'e1e3a34f-c681-49ec-9c03-51c04792d448'
     
     if (!oneSignalApiKey) {
-      console.error('❌ OneSignal API key manquant')
+      console.error('❌ OneSignal API key manquant - impossible de continuer')
+      console.error('⚠️  Veuillez configurer ONESIGNAL_API_KEY dans les secrets Supabase')
       return new Response(
         JSON.stringify({ 
-          error: 'Configuration OneSignal manquante - API Key',
+          error: 'Configuration OneSignal manquante - API Key requis',
           details: {
             hasApiKey: !!oneSignalApiKey,
             hasAppId: !!oneSignalAppId,
-            usingFallbackAppId: !oneSignalAppId
+            message: 'Veuillez configurer ONESIGNAL_API_KEY dans les secrets Supabase'
           }
         }),
         { 
@@ -112,6 +113,8 @@ serve(async (req) => {
         }
       )
     }
+
+    console.log('✅ Configuration OneSignal OK, envoi de la notification...')
 
     // Préparer le payload OneSignal
     const oneSignalPayload: any = {
