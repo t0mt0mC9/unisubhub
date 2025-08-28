@@ -116,7 +116,7 @@ serve(async (req) => {
       oneSignalPayload.filters = filters
     } else if (userId) {
       oneSignalPayload.filters = [
-        { field: "tag", key: "user_id", relation: "=", value: userId }
+        { field: "tag", relation: "=", key: "user_id", value: userId }
       ]
     }
 
