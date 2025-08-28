@@ -4,6 +4,7 @@ import './index.css'
 import { initializeOneSignal } from './lib/onesignal'
 import './lib/test-onesignal'
 import './lib/send-test-notification'
+import './lib/test-notification-direct'
 
 // Initialize OneSignal
 initializeOneSignal();
