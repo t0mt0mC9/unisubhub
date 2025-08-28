@@ -30,6 +30,9 @@ verify_jwt = false
 [functions.onesignal-push]
 verify_jwt = false
 
+[functions.test-onesignal-direct]
+verify_jwt = false
+
 [api]
 enabled = true
 port = 54321
