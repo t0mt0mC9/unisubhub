@@ -23,39 +23,26 @@ serve(async (req) => {
 
     const userId = '750929e9-09e0-4c24-8e21-a34a324acf6e' // tom.lifert@gmail.com
 
-    // Envoyer notification push via OneSignal directement
-    const oneSignalApiKey = Deno.env.get('ONESIGNAL_API_KEY')
-    const oneSignalAppId = Deno.env.get('ONESIGNAL_APP_ID')
-
-    const oneSignalPayload = {
-      app_id: oneSignalAppId,
-      included_segments: ['All'], // Envoyer à tous les utilisateurs abonnés
-      headings: { en: '🧪 Test notification UniSubHub' },
-      contents: { en: 'Bonjour ! Ceci est un test de notification push depuis votre système automatisé. Si vous recevez ce message, tout fonctionne parfaitement ! 🎉' },
-      data: {
-        type: 'test_notification',
-        test_time: new Date().toISOString(),
-        from: 'notification_system'
+    // Envoyer notification push via OneSignal
+    const { data: pushResult, error: pushError } = await supabaseClient.functions.invoke('onesignal-push', {
+      body: {
+        title: '🧪 Test notification UniSubHub',
+        message: 'Bonjour ! Ceci est un test de notification push depuis votre système automatisé. Si vous recevez ce message, tout fonctionne parfaitement ! 🎉',
+        data: {
+          type: 'test_notification',
+          test_time: new Date().toISOString(),
+          from: 'notification_system'
+        },
+        included_segments: ['All']  // Envoyer à tous les utilisateurs abonnés
       }
-    }
-
-    const pushResponse = await fetch('https://onesignal.com/api/v1/notifications', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Basic ${oneSignalApiKey}`
-      },
-      body: JSON.stringify(oneSignalPayload)
     })
 
-    const pushResult = await pushResponse.json()
-
-    if (!pushResponse.ok) {
-      console.error('❌ Erreur push notification:', pushResult)
+    if (pushError) {
+      console.error('❌ Erreur push notification:', pushError)
       return new Response(JSON.stringify({
         success: false,
         error: 'Erreur envoi notification',
-        details: pushResult
+        details: pushError
       }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }

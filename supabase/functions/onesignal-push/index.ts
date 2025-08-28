@@ -7,11 +7,12 @@ const corsHeaders = {
 }
 
 interface PushNotificationRequest {
-  userId: string
+  userId?: string
   title: string
   message: string
   data?: Record<string, any>
   url?: string
+  included_segments?: string[]
 }
 
 serve(async (req) => {
@@ -29,9 +30,10 @@ serve(async (req) => {
 
     const { userId, title, message, data, url, included_segments } = await req.json() as PushNotificationRequest
 
-    if (!userId || !title || !message) {
+    // Vérifier les paramètres requis
+    if (!title || !message) {
       return new Response(
-        JSON.stringify({ error: 'userId, title et message sont requis' }),
+        JSON.stringify({ error: 'title et message sont requis' }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -39,40 +41,43 @@ serve(async (req) => {
       )
     }
 
-    // Vérifier que l'utilisateur existe et récupérer ses préférences de notification
-    const { data: profile, error: profileError } = await supabaseClient
-      .from('profiles')
-      .select('id, email')
-      .eq('id', userId)
-      .single()
+    // Si on utilise included_segments, pas besoin de vérifier un utilisateur spécifique
+    if (!included_segments && userId) {
+      // Vérifier que l'utilisateur existe et récupérer ses préférences de notification
+      const { data: profile, error: profileError } = await supabaseClient
+        .from('profiles')
+        .select('id, email')
+        .eq('id', userId)
+        .single()
 
-    if (profileError || !profile) {
-      console.error('Utilisateur non trouvé:', profileError)
-      return new Response(
-        JSON.stringify({ error: 'Utilisateur non trouvé' }),
-        { 
-          status: 404, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      )
-    }
+      if (profileError || !profile) {
+        console.error('Utilisateur non trouvé:', profileError)
+        return new Response(
+          JSON.stringify({ error: 'Utilisateur non trouvé' }),
+          { 
+            status: 404, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        )
+      }
 
-    // Vérifier les paramètres de notification
-    const { data: notificationSettings } = await supabaseClient
-      .from('notification_settings')
-      .select('push_notifications')
-      .eq('user_id', userId)
-      .single()
+      // Vérifier les paramètres de notification
+      const { data: notificationSettings } = await supabaseClient
+        .from('notification_settings')
+        .select('push_notifications')
+        .eq('user_id', userId)
+        .single()
 
-    if (notificationSettings && !notificationSettings.push_notifications) {
-      console.log('Notifications push désactivées pour l\'utilisateur:', userId)
-      return new Response(
-        JSON.stringify({ message: 'Notifications push désactivées pour cet utilisateur' }),
-        { 
-          status: 200, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      )
+      if (notificationSettings && !notificationSettings.push_notifications) {
+        console.log('Notifications push désactivées pour l\'utilisateur:', userId)
+        return new Response(
+          JSON.stringify({ message: 'Notifications push désactivées pour cet utilisateur' }),
+          { 
+            status: 200, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        )
+      }
     }
 
     // Créer la notification OneSignal
@@ -91,11 +96,8 @@ serve(async (req) => {
     }
 
     // Préparer le payload OneSignal
-    const oneSignalPayload = {
+    const oneSignalPayload: any = {
       app_id: oneSignalAppId,
-      filters: [
-        { field: "tag", key: "user_id", relation: "=", value: userId }
-      ],
       headings: { en: title },
       contents: { en: message },
       data: data || {},
@@ -104,6 +106,15 @@ serve(async (req) => {
       android_channel_id: "unisubhub-notifications",
       ios_badgeType: "Increase",
       ios_badgeCount: 1
+    }
+
+    // Utiliser included_segments ou filters selon le cas
+    if (included_segments) {
+      oneSignalPayload.included_segments = included_segments
+    } else if (userId) {
+      oneSignalPayload.filters = [
+        { field: "tag", key: "user_id", relation: "=", value: userId }
+      ]
     }
 
     // Envoyer la notification via OneSignal
