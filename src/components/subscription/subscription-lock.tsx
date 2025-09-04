@@ -1,11 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Lock, Crown, Clock, Gift, RefreshCw, LogOut } from "lucide-react";
+import { Lock, Crown, Clock, Gift, RefreshCw, LogOut, ArrowLeft } from "lucide-react";
 import { UnifiedSubscriptionManager } from "./unified-subscription-manager";
 import { useSubscription } from "@/hooks/use-subscription";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 import { cleanupAuthState } from "@/lib/auth-cleanup";
 
 interface SubscriptionLockProps {
@@ -16,6 +17,7 @@ interface SubscriptionLockProps {
 export const SubscriptionLock = ({ onUpgrade, trialDaysRemaining = 0 }: SubscriptionLockProps) => {
   const { refresh, loading } = useSubscription();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleRefresh = async () => {
     const data = await refresh();
@@ -72,23 +74,34 @@ export const SubscriptionLock = ({ onUpgrade, trialDaysRemaining = 0 }: Subscrip
             Votre période d'essai de 14 jours est maintenant terminée. 
             Passez à Premium pour continuer à utiliser UniSubHub.
           </p>
-          <div className="flex gap-2 justify-center">
-            <Button 
-              onClick={handleRefresh} 
-              variant="outline" 
-              disabled={loading}
-            >
-              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              Vérifier mon abonnement
-            </Button>
+          <div className="flex flex-col gap-3">
+            <div className="flex gap-2 justify-center">
+              <Button 
+                onClick={handleRefresh} 
+                variant="outline" 
+                disabled={loading}
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                Vérifier mon abonnement
+              </Button>
+              
+              <Button 
+                onClick={handleForceReauth} 
+                variant="destructive"
+                size="sm"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Nettoyer et reconnecter
+              </Button>
+            </div>
             
             <Button 
-              onClick={handleForceReauth} 
-              variant="destructive"
-              size="sm"
+              onClick={() => navigate('/')} 
+              variant="ghost"
+              className="text-muted-foreground hover:text-foreground"
             >
-              <LogOut className="h-4 w-4 mr-2" />
-              Nettoyer et reconnecter
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Retourner à l'application
             </Button>
           </div>
         </div>
