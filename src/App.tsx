@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
+import PaymentSuccess from "./pages/PaymentSuccess";
 
 import ExpenseAnalysis from "./pages/ExpenseAnalysis";
 import { useSubscription } from "@/hooks/use-subscription";
@@ -124,6 +125,10 @@ const App = () => {
             <Route 
               path="/analytics" 
               element={user ? (userHasAccess() ? <ExpenseAnalysis /> : <SubscriptionLock />) : <Navigate to="/auth" replace />} 
+            />
+            <Route 
+              path="/payment-success" 
+              element={<PaymentSuccess />} 
             />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
