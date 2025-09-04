@@ -26,8 +26,18 @@ const App = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
-  const { hasAccess, isLocked, loading: subscriptionLoading } = useSubscription();
+  const { hasAccess, isLocked, loading: subscriptionLoading, refresh: refreshSubscription } = useSubscription();
   const { showOnboarding, loading: onboardingLoading, completeOnboarding } = useOnboarding();
+
+  // Force refresh subscription status when user loads the app
+  useEffect(() => {
+    if (user && !subscriptionLoading) {
+      const timer = setTimeout(() => {
+        refreshSubscription();
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [user, refreshSubscription, subscriptionLoading]);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -52,21 +62,31 @@ const App = () => {
   // Fonction pour déterminer si l'utilisateur a accès
   const userHasAccess = () => {
     if (!user) {
+      console.log('🔍 userHasAccess: Pas d\'utilisateur connecté');
       return false;
     }
     
-    // Si l'utilisateur a un abonnement actif selon le hook
+    // PRIORITÉ 1: Si l'utilisateur a un abonnement actif selon le hook
     if (hasAccess) {
+      console.log('✅ userHasAccess: Accès accordé via abonnement/trial actif');
       return true;
     }
     
-    // Sinon, vérifier l'essai gratuit basé sur la date de création
+    // PRIORITÉ 2: Vérifier l'essai gratuit basé sur la date de création (fallback uniquement)
     const userCreatedAt = new Date(user.created_at);
     const now = new Date();
     const daysSinceCreation = Math.floor((now.getTime() - userCreatedAt.getTime()) / (1000 * 60 * 60 * 24));
     
-    // Donner accès pendant 14 jours après création
+    // Donner accès pendant 14 jours après création (seulement si pas d'abonnement)
     const trialAccess = daysSinceCreation < 14;
+    
+    console.log('🔍 userHasAccess: État détaillé', {
+      hasAccess,
+      daysSinceCreation,
+      trialAccess,
+      subscriptionLoading,
+      finalAccess: trialAccess
+    });
     
     return trialAccess;
   };
@@ -75,6 +95,7 @@ const App = () => {
     return <SplashScreen onFinish={() => setShowSplash(false)} />;
   }
 
+  // Pendant le chargement de l'abonnement, ne pas afficher l'écran de verrouillage
   if (loading || subscriptionLoading || onboardingLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
