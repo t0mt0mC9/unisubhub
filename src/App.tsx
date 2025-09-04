@@ -29,15 +29,24 @@ const App = () => {
   const { hasAccess, isLocked, loading: subscriptionLoading, refresh: refreshSubscription } = useSubscription();
   const { showOnboarding, loading: onboardingLoading, completeOnboarding } = useOnboarding();
 
-  // Force refresh subscription status when user loads the app
+  // Force refresh subscription status when user loads the app - ONLY ONCE
   useEffect(() => {
-    if (user && !subscriptionLoading) {
+    let isActive = true;
+    
+    if (user && !subscriptionLoading && isActive) {
       const timer = setTimeout(() => {
-        refreshSubscription();
+        if (isActive) {
+          console.log('🔄 Rafraîchissement unique de l\'abonnement...');
+          refreshSubscription();
+        }
       }, 2000);
-      return () => clearTimeout(timer);
+      
+      return () => {
+        clearTimeout(timer);
+        isActive = false;
+      };
     }
-  }, [user, refreshSubscription, subscriptionLoading]);
+  }, [user?.id]); // Seulement quand l'ID utilisateur change
 
   useEffect(() => {
     // Set up auth state listener FIRST

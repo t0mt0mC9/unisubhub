@@ -34,7 +34,7 @@ export const useSubscription = () => {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError || !user) {
         console.log('❌ Utilisateur non connecté:', userError?.message);
-        setSubscriptionData({
+        const emptyState = {
           subscribed: false,
           subscription_tier: null,
           subscription_type: null,
@@ -42,7 +42,8 @@ export const useSubscription = () => {
           trial_active: false,
           trial_days_remaining: 0,
           trial_end_date: null
-        });
+        };
+        setSubscriptionData(emptyState);
         return null;
       }
       
@@ -62,7 +63,15 @@ export const useSubscription = () => {
       }
       
       console.log('✅ Données d\'abonnement reçues:', data);
-      setSubscriptionData(data);
+      
+      // Vérifier si les données ont vraiment changé avant de les mettre à jour
+      const currentDataString = JSON.stringify(subscriptionData);
+      const newDataString = JSON.stringify(data);
+      
+      if (currentDataString !== newDataString) {
+        setSubscriptionData(data);
+      }
+      
       return data;
     } catch (error: any) {
       console.error('Erreur lors de la vérification de l\'abonnement:', error);
@@ -82,13 +91,20 @@ export const useSubscription = () => {
   };
 
   useEffect(() => {
+    let isActive = true;
+    
     // Attendre un peu pour que la session soit stable
-    const timer = setTimeout(() => {
-      checkSubscription();
+    const timer = setTimeout(async () => {
+      if (isActive) {
+        await checkSubscription();
+      }
     }, 1000);
     
-    return () => clearTimeout(timer);
-  }, []);
+    return () => {
+      clearTimeout(timer);
+      isActive = false;
+    };
+  }, []); // Vide pour éviter les re-exécutions
 
   // Determine if user has access (either subscribed or trial active)
   const hasAccess = subscriptionData.subscribed || subscriptionData.trial_active;
@@ -96,14 +112,18 @@ export const useSubscription = () => {
   // Check if trial has expired and user hasn't subscribed
   const isLocked = !subscriptionData.subscribed && !subscriptionData.trial_active;
   
-  console.log('📊 État de l\'abonnement:', {
-    subscribed: subscriptionData.subscribed,
-    trial_active: subscriptionData.trial_active,
-    subscription_tier: subscriptionData.subscription_tier,
-    subscription_type: subscriptionData.subscription_type,
-    hasAccess,
-    isLocked
-  });
+  // Log seulement quand les valeurs changent vraiment
+  const stateKey = `${subscriptionData.subscribed}-${subscriptionData.trial_active}-${subscriptionData.subscription_tier}`;
+  useEffect(() => {
+    console.log('📊 État de l\'abonnement:', {
+      subscribed: subscriptionData.subscribed,
+      trial_active: subscriptionData.trial_active,
+      subscription_tier: subscriptionData.subscription_tier,
+      subscription_type: subscriptionData.subscription_type,
+      hasAccess,
+      isLocked
+    });
+  }, [stateKey]); // Seulement quand l'état change vraiment
 
   return {
     subscriptionData,
