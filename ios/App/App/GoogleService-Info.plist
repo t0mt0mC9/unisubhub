@@ -9,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.unisubhub.app</string>
+	<string>com.unisubhub.mobile</string>
 	<key>PROJECT_ID</key>
 	<string>unisubhub-939ec</string>
 	<key>STORAGE_BUCKET</key>
@@ -26,11 +26,5 @@
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
 	<string>1:649180776800:ios:2036e88e0afc9813df7605</string>
-	<key>DATABASE_URL</key>
-	<string>https://unisubhub-939ec-default-rtdb.firebaseio.com</string>
-	<key>CLIENT_ID</key>
-	<string>649180776800-example.apps.googleusercontent.com</string>
-	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.649180776800-example</string>
 </dict>
 </plist>
