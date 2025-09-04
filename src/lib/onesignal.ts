@@ -8,12 +8,17 @@ declare global {
 }
 
 export const initializeOneSignal = () => {
-  if (Capacitor.isNativePlatform()) {
-    // Configuration mobile native
-    initMobileOneSignal();
-  } else {
-    // Configuration web
-    initWebOneSignal();
+  try {
+    if (Capacitor.isNativePlatform()) {
+      // Configuration mobile native
+      initMobileOneSignal();
+    } else {
+      // Configuration web
+      initWebOneSignal();
+    }
+  } catch (error) {
+    console.warn('⚠️ OneSignal initialization failed:', error);
+    // Don't crash the app if OneSignal fails
   }
 };
 

@@ -12,6 +12,7 @@ import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import { initializeOneSignal } from "./lib/onesignal";
 
 import ExpenseAnalysis from "./pages/ExpenseAnalysis";
 import { useSubscription } from "@/hooks/use-subscription";
@@ -49,6 +50,11 @@ const App = () => {
   }, [user?.id]); // Seulement quand l'ID utilisateur change
 
   useEffect(() => {
+    // Initialize OneSignal safely after auth is ready
+    setTimeout(() => {
+      initializeOneSignal();
+    }, 1000);
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {

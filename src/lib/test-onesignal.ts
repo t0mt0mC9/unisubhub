@@ -54,14 +54,14 @@ export const checkOneSignalConfig = async () => {
   }
 };
 
-// Auto-lancer les tests
+// Auto-lancer les tests - DÉSACTIVÉ pour éviter les crashes
 if (typeof window !== 'undefined') {
   window.testOneSignalNotification = sendTestNotification;
   window.checkOneSignalConfiguration = checkOneSignalConfig;
   
-  // Démarrer les tests automatiquement
-  setTimeout(() => {
-    console.log('🚀 Démarrage automatique des tests OneSignal');
-    checkOneSignalConfig().then(() => sendTestNotification());
-  }, 2000);
+  // Tests automatiques désactivés pour éviter les erreurs de démarrage
+  // setTimeout(() => {
+  //   console.log('🚀 Démarrage automatique des tests OneSignal');
+  //   checkOneSignalConfig().then(() => sendTestNotification());
+  // }, 2000);
 }
