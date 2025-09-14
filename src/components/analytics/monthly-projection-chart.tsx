@@ -31,8 +31,10 @@ export const MonthlyProjectionChart = ({ subscriptions }: MonthlyProjectionChart
         let willBeBilled = false;
         
         if (billingCycle === 'monthly') {
-          // Pour les abonnements mensuels, ils sont facturés chaque mois
-          willBeBilled = true;
+          // Facturé chaque mois à partir de la première date de facturation
+          const startOfTarget = new Date(targetMonth.getFullYear(), targetMonth.getMonth(), 1);
+          const startOfStart = new Date(nextBillingDate.getFullYear(), nextBillingDate.getMonth(), 1);
+          willBeBilled = startOfTarget >= startOfStart;
         } else if (billingCycle === 'yearly') {
           // Pour les abonnements annuels, vérifier si c'est le bon mois
           const billingMonth = nextBillingDate.getMonth();
@@ -44,8 +46,12 @@ export const MonthlyProjectionChart = ({ subscriptions }: MonthlyProjectionChart
           
           willBeBilled = monthsDiff % 12 === 0 && monthsDiff >= 0;
         } else if (billingCycle === 'weekly') {
-          // Pour les abonnements hebdomadaires, approximation : ~4.33 fois par mois
-          monthlyTotal += price * 4.33;
+          // Pour les abonnements hebdomadaires, compter à partir de la date de début (~4.33 fois par mois)
+          const startOfTarget = new Date(targetMonth.getFullYear(), targetMonth.getMonth(), 1);
+          const startOfStart = new Date(nextBillingDate.getFullYear(), nextBillingDate.getMonth(), 1);
+          if (startOfTarget >= startOfStart) {
+            monthlyTotal += price * 4.33;
+          }
           return; // Skip le reste de la logique
         }
         
