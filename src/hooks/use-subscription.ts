@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -112,8 +112,7 @@ export const useSubscription = () => {
   // Check if trial has expired and user hasn't subscribed
   const isLocked = !subscriptionData.subscribed && !subscriptionData.trial_active;
   
-  // Log seulement quand les valeurs changent vraiment
-  const stateKey = `${subscriptionData.subscribed}-${subscriptionData.trial_active}-${subscriptionData.subscription_tier}`;
+  // Log seulement au premier rendu et quand les valeurs changent vraiment
   useEffect(() => {
     console.log('📊 État de l\'abonnement:', {
       subscribed: subscriptionData.subscribed,
@@ -123,14 +122,21 @@ export const useSubscription = () => {
       hasAccess,
       isLocked
     });
-  }, [stateKey]); // Seulement quand l'état change vraiment
+  }, [subscriptionData.subscribed, subscriptionData.trial_active, subscriptionData.subscription_tier, hasAccess, isLocked]);
+
+  // Fonction refresh stable avec useCallback qui retourne les données
+  const refresh = useCallback(async () => {
+    console.log('🔄 Rafraîchissement manuel de l\'abonnement...');
+    const result = await checkSubscription();
+    return result;
+  }, []);
 
   return {
-    subscriptionData,
+    ...subscriptionData,
     loading,
     hasAccess,
     isLocked,
     checkSubscription,
-    refresh: checkSubscription
+    refresh
   };
 };

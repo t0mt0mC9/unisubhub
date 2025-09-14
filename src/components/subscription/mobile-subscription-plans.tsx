@@ -37,7 +37,15 @@ export const MobileSubscriptionPlans = () => {
   const { toast } = useToast();
   
   // Vérifier l'abonnement Supabase/Stripe
-  const { subscriptionData, hasAccess } = useSubscription();
+  const { 
+    subscribed, 
+    hasAccess, 
+    subscription_tier, 
+    subscription_type, 
+    subscription_end,
+    trial_active,
+    trial_days_remaining
+  } = useSubscription();
 
   useEffect(() => {
     initializeRevenueCat().catch(error => {
@@ -227,15 +235,15 @@ export const MobileSubscriptionPlans = () => {
               Abonnement actif
             </CardTitle>
             <CardDescription>
-              {subscriptionData.subscribed ? (
+              {subscribed ? (
                 <>
-                  Plan {subscriptionData.subscription_tier} ({subscriptionData.subscription_type})
-                  {subscriptionData.subscription_end && 
-                    ` - Expire le ${new Date(subscriptionData.subscription_end).toLocaleDateString('fr-FR')}`
+                  Plan {subscription_tier} ({subscription_type})
+                  {subscription_end && 
+                    ` - Expire le ${new Date(subscription_end).toLocaleDateString('fr-FR')}`
                   }
                 </>
-              ) : subscriptionData.trial_active ? (
-                `Période d'essai - ${subscriptionData.trial_days_remaining} jours restants`
+              ) : trial_active ? (
+                `Période d'essai - ${trial_days_remaining} jours restants`
               ) : subscriptionInfo ? (
                 <>
                   Plan {subscriptionInfo.tier} - 

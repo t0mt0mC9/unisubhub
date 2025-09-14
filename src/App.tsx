@@ -31,22 +31,21 @@ const App = () => {
 
   // Force refresh subscription status when user loads the app - ONLY ONCE
   useEffect(() => {
-    let isActive = true;
+    if (!user?.id || subscriptionLoading) return;
     
-    if (user && !subscriptionLoading && isActive) {
-      const timer = setTimeout(() => {
-        if (isActive) {
-          console.log('🔄 Rafraîchissement unique de l\'abonnement...');
-          refreshSubscription();
-        }
-      }, 2000);
-      
-      return () => {
-        clearTimeout(timer);
-        isActive = false;
-      };
-    }
-  }, [user?.id]); // Seulement quand l'ID utilisateur change
+    let isActive = true;
+    const timer = setTimeout(() => {
+      if (isActive) {
+        console.log('🔄 Rafraîchissement unique de l\'abonnement...');
+        refreshSubscription();
+      }
+    }, 2000);
+    
+    return () => {
+      clearTimeout(timer);
+      isActive = false;
+    };
+  }, [user?.id, subscriptionLoading, refreshSubscription]);
 
   useEffect(() => {
     // Initialize OneSignal safely after auth is ready
@@ -105,10 +104,6 @@ const App = () => {
     return trialAccess;
   };
 
-  if (showSplash) {
-    return <SplashScreen onFinish={() => setShowSplash(false)} />;
-  }
-
   // Check if user needs initial setup
   useEffect(() => {
     if (user && !loading && !subscriptionLoading) {
@@ -118,6 +113,10 @@ const App = () => {
       }
     }
   }, [user, loading, subscriptionLoading]);
+
+  if (showSplash) {
+    return <SplashScreen onFinish={() => setShowSplash(false)} />;
+  }
 
   // Pendant le chargement de l'abonnement, ne pas afficher l'écran de verrouillage
   if (loading || subscriptionLoading) {
