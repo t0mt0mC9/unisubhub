@@ -278,7 +278,21 @@ function generateFallbackRecommendations(subscriptions: any[]): any[] {
   if (duplicates.length > 0) {
     const duplicateCategory = duplicates[0][0];
     const duplicateSubs = duplicates[0][1];
-    const potentialSavings = Math.min(...duplicateSubs.map(s => s.price));
+    
+    // Normaliser les prix au mensuel pour comparaison
+    const normalizedSubs = duplicateSubs.map(sub => ({
+      ...sub,
+      monthlyPrice: sub.billing_cycle === 'yearly' ? sub.price / 12 : 
+                   sub.billing_cycle === 'weekly' ? sub.price * 4.33 : sub.price
+    }));
+    
+    // Trier par prix croissant et garder le moins cher
+    normalizedSubs.sort((a, b) => a.monthlyPrice - b.monthlyPrice);
+    const cheapest = normalizedSubs[0];
+    const toRemove = normalizedSubs.slice(1);
+    
+    // Calculer l'économie en supprimant les plus chers
+    const potentialSavings = toRemove.reduce((sum, sub) => sum + sub.monthlyPrice, 0);
     
     recommendations.push({
       id: recommendations.length + 1,
@@ -286,8 +300,8 @@ function generateFallbackRecommendations(subscriptions: any[]): any[] {
       title: `Services en double détectés - ${duplicateCategory}`,
       description: `${duplicateSubs.length} abonnements ${duplicateCategory} actifs`,
       impact: "Élevé",
-      details: `Vous avez ${duplicateSubs.map(s => s.name).join(', ')} dans la catégorie ${duplicateCategory}. Considérez n'en garder qu'un seul.`,
-      potential_savings: `${potentialSavings}€`
+      details: `Vous avez ${duplicateSubs.map(s => s.name).join(', ')} dans la catégorie ${duplicateCategory}. Gardez ${cheapest.name} (le moins cher) et supprimez les autres.`,
+      potential_savings: `${Math.round(potentialSavings)}€`
     });
   }
 
