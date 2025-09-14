@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Calendar, TrendingUp } from "lucide-react";
@@ -63,12 +64,16 @@ export const MonthlyProjectionChart = ({ subscriptions }: MonthlyProjectionChart
     return projections;
   };
 
-  const projectionData = calculateMonthlyProjections();
+  // Utiliser useMemo pour optimiser les calculs et forcer la mise à jour
+  const projectionData = useMemo(() => calculateMonthlyProjections(), [subscriptions]);
   
-  // Calculer les statistiques
-  const avgMonthly = projectionData.reduce((sum, month) => sum + month.amount, 0) / projectionData.length;
-  const maxMonth = Math.max(...projectionData.map(m => m.amount));
-  const minMonth = Math.min(...projectionData.map(m => m.amount));
+  // Calculer les statistiques avec useMemo pour performance
+  const stats = useMemo(() => {
+    const avgMonthly = projectionData.reduce((sum, month) => sum + month.amount, 0) / projectionData.length;
+    const maxMonth = Math.max(...projectionData.map(m => m.amount));
+    const minMonth = Math.min(...projectionData.map(m => m.amount));
+    return { avgMonthly, maxMonth, minMonth };
+  }, [projectionData]);
 
   const formatTooltip = (value: any, name: string) => {
     if (name === 'amount') {
@@ -94,15 +99,15 @@ export const MonthlyProjectionChart = ({ subscriptions }: MonthlyProjectionChart
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="text-center p-3 bg-muted/50 rounded-lg">
             <div className="text-sm text-muted-foreground">Moyenne mensuelle</div>
-            <div className="text-lg font-semibold text-primary">{avgMonthly.toFixed(2)}€</div>
+            <div className="text-lg font-semibold text-primary">{stats.avgMonthly.toFixed(2)}€</div>
           </div>
           <div className="text-center p-3 bg-muted/50 rounded-lg">
             <div className="text-sm text-muted-foreground">Mois le plus élevé</div>
-            <div className="text-lg font-semibold text-destructive">{maxMonth.toFixed(2)}€</div>
+            <div className="text-lg font-semibold text-destructive">{stats.maxMonth.toFixed(2)}€</div>
           </div>
           <div className="text-center p-3 bg-muted/50 rounded-lg">
             <div className="text-sm text-muted-foreground">Mois le plus bas</div>
-            <div className="text-lg font-semibold text-success">{minMonth.toFixed(2)}€</div>
+            <div className="text-lg font-semibold text-success">{stats.minMonth.toFixed(2)}€</div>
           </div>
         </div>
 
