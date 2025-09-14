@@ -1,7 +1,6 @@
 import { SmartCategoryChart } from "./smart-category-chart";
 import { SmartForecastChart } from "./smart-forecast-chart";
 import { MonthlyProjectionChart } from "./monthly-projection-chart";
-import { BenchmarkComparisonChart } from "./benchmark-comparison-chart";
 
 interface AnalyticsChartsProps {
   subscriptions: any[];
@@ -12,9 +11,6 @@ export const AnalyticsCharts = ({ subscriptions }: AnalyticsChartsProps) => {
     <div className="space-y-8">
       {/* Projection des dépenses mensuelles */}
       <MonthlyProjectionChart subscriptions={subscriptions} />
-      
-      {/* Comparaison avec les benchmarks du marché */}
-      <BenchmarkComparisonChart subscriptions={subscriptions} />
       
       {/* Analyse par catégorie avec benchmarks */}
       <SmartCategoryChart subscriptions={subscriptions} />
