@@ -46,9 +46,9 @@ export const SubscriptionLock = ({ onUpgrade, trialDaysRemaining = 0 }: Subscrip
         console.log('⚠️ Erreur lors de la déconnexion globale (ignorée):', err);
       }
       
-      // 3. Forcer un rafraîchissement complet de la page
+      // 3. Rediriger vers la page de connexion sans rechargement
       console.log('🔄 Redirection vers la page de connexion...');
-      window.location.href = '/auth';
+      navigate('/auth');
       
     } catch (error) {
       console.error('❌ Erreur lors du nettoyage:', error);

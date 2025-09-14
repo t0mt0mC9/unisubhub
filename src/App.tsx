@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -28,24 +28,20 @@ const App = () => {
   const [showSplash, setShowSplash] = useState(true);
   const { hasAccess, isLocked, loading: subscriptionLoading, refresh: refreshSubscription } = useSubscription();
   const [showInitialSetup, setShowInitialSetup] = useState(false);
+  const refreshedOnceRef = useRef(false);
 
-  // Force refresh subscription status when user loads the app - ONLY ONCE
+  // Force refresh subscription status after login - ONLY ONCE
   useEffect(() => {
-    if (!user?.id || subscriptionLoading) return;
-    
-    let isActive = true;
+    if (!user?.id || refreshedOnceRef.current) return;
+    refreshedOnceRef.current = true;
+
     const timer = setTimeout(() => {
-      if (isActive) {
-        console.log('🔄 Rafraîchissement unique de l\'abonnement...');
-        refreshSubscription();
-      }
-    }, 2000);
-    
-    return () => {
-      clearTimeout(timer);
-      isActive = false;
-    };
-  }, [user?.id, subscriptionLoading, refreshSubscription]);
+      console.log("🔄 Rafraîchissement unique de l'abonnement...");
+      refreshSubscription();
+    }, 1200);
+
+    return () => clearTimeout(timer);
+  }, [user?.id, refreshSubscription]);
 
   useEffect(() => {
     // Initialize OneSignal safely after auth is ready
