@@ -240,7 +240,6 @@ const Index = () => {
           totalMonthly={spendingData.totalMonthly}
           totalYearly={spendingData.totalYearly}
           currency={getCurrencySymbol()}
-          monthlyChange={spendingData.monthlyChange}
           activeSubscriptions={spendingData.activeCount}
         />
 

@@ -1,12 +1,11 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown, DollarSign, CreditCard } from "lucide-react";
+import { DollarSign, CreditCard } from "lucide-react";
 
 interface SpendingOverviewProps {
   totalMonthly: number;
   totalYearly: number;
   currency: string;
-  monthlyChange: number;
   activeSubscriptions: number;
 }
 
@@ -14,11 +13,8 @@ export function SpendingOverview({
   totalMonthly,
   totalYearly,
   currency,
-  monthlyChange,
   activeSubscriptions
 }: SpendingOverviewProps) {
-  const isPositiveChange = monthlyChange >= 0;
-
   return (
     <div className="grid grid-cols-2 gap-4 mb-6">
       <Card className="p-4 bg-gradient-primary">
@@ -28,18 +24,6 @@ export function SpendingOverview({
             <p className="text-2xl font-bold text-primary-foreground">
               {totalMonthly.toFixed(2)} {currency}
             </p>
-            
-            {/* Évolution par rapport au mois précédent */}
-            <div className="mt-2 flex items-center space-x-1">
-              {isPositiveChange ? (
-                <TrendingUp className="h-4 w-4 text-primary-foreground/80" />
-              ) : (
-                <TrendingDown className="h-4 w-4 text-primary-foreground/80" />
-              )}
-              <span className="text-sm text-primary-foreground/80">
-                {isPositiveChange ? '+' : ''}{monthlyChange.toFixed(1)}% vs mois précédent
-              </span>
-            </div>
           </div>
           <DollarSign className="h-8 w-8 text-primary-foreground/80" />
         </div>
