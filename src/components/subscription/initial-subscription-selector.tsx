@@ -58,9 +58,9 @@ export const InitialSubscriptionSelector = ({ onComplete }: InitialSubscriptionS
       price: sub.avgPrice,
       currency: sub.currency || 'EUR',
       billing_cycle: sub.billingCycle || 'monthly',
-      category: sub.category || 'Autres',
-      next_billing_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // Dans 30 jours
-      is_active: true
+      category: sub.category || 'Autre',
+      next_billing_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Date dans 30 jours (YYYY-MM-DD)
+      status: 'active'
     }));
 
     // Insérer les abonnements
