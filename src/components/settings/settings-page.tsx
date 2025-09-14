@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,7 @@ interface SettingsPageProps {
 
 export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPageProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const { settings, updateSettings, loading } = useNotifications();
 
 
@@ -54,8 +56,8 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
         // Clear all auth state and redirect
         await supabase.auth.signOut({ scope: 'global' });
         
-        // Force a complete page reload to clear all state
-        window.location.href = '/auth';
+        // Navigate without page reload
+        navigate('/auth');
       } else {
         throw new Error(data.error || 'Unknown error occurred');
       }

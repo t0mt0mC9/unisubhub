@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { MobileHeader } from "@/components/ui/mobile-header";
 import { BottomNav } from "@/components/navigation/bottom-nav";
 import { SpendingOverview } from "@/components/dashboard/spending-overview";
@@ -25,6 +26,7 @@ import { NotificationsDashboard } from "@/components/notifications/notifications
 
 
 const Index = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -173,7 +175,7 @@ const Index = () => {
         title: "Déconnexion réussie",
         description: "À bientôt sur UniSubHub",
       });
-      window.location.href = '/auth';
+      navigate('/auth');
     } catch (error: any) {
       toast({
         title: "Erreur",

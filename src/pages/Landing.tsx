@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +31,7 @@ import screenshotReferral from "@/assets/screenshot-referral.png";
 
 const Landing = () => {
   const [hoveredFeature, setHoveredFeature] = useState<number | null>(null);
+  const navigate = useNavigate();
 
   const features = [
     {
@@ -104,7 +106,7 @@ const Landing = () => {
             </div>
             <Button 
               className="bg-gradient-primary hover:opacity-90 text-primary-foreground"
-              onClick={() => window.location.href = '/auth'}
+              onClick={() => navigate('/auth')}
             >
               Se connecter
             </Button>
@@ -142,7 +144,7 @@ const Landing = () => {
               <Button 
                 size="lg" 
                 className="bg-gradient-primary hover:opacity-90 text-primary-foreground px-8 py-6 text-lg"
-                onClick={() => window.location.href = '/auth'}
+                onClick={() => navigate('/auth')}
               >
                 <Play className="mr-2 h-5 w-5" />
                 Commencer gratuitement
@@ -240,7 +242,7 @@ const Landing = () => {
                   <Button 
                     variant="outline"
                     className="border-primary/30 hover:bg-primary/5"
-                    onClick={() => window.location.href = '/auth'}
+                    onClick={() => navigate('/auth')}
                   >
                     Voir les offres du moment
                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -373,7 +375,7 @@ const Landing = () => {
               <div className="text-center mt-8">
                 <Button 
                   className="bg-gradient-primary hover:opacity-90 text-primary-foreground px-8 py-3 text-lg"
-                  onClick={() => window.location.href = '/auth'}
+                  onClick={() => navigate('/auth')}
                 >
                   Essayer maintenant
                 </Button>
@@ -443,7 +445,7 @@ const Landing = () => {
               <Button 
                 size="lg"
                 className="bg-gradient-primary hover:opacity-90 text-primary-foreground px-8 py-6 text-lg"
-                onClick={() => window.location.href = '/auth'}
+                onClick={() => navigate('/auth')}
               >
                 Commencer gratuitement
                 <ArrowRight className="ml-2 h-5 w-5" />
