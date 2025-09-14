@@ -159,28 +159,6 @@ export const SmartCategoryChart = ({ subscriptions }: SmartCategoryChartProps) =
             ))}
           </div>
         )}
-
-        {/* Benchmark global */}
-        {data?.benchmarks && (
-          <div className="mt-4 p-3 bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg border border-primary/20">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Comparaison globale</span>
-              <Badge 
-                variant={
-                  data.benchmarks.user_vs_average === 'below' ? 'default' :
-                  data.benchmarks.user_vs_average === 'above' ? 'destructive' : 'secondary'
-                }
-                className="text-xs"
-              >
-                {data.benchmarks.user_vs_average === 'below' ? '✅ Sous la moyenne' :
-                 data.benchmarks.user_vs_average === 'above' ? '⚠️ Au-dessus' : '➡️ Dans la moyenne'}
-              </Badge>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Moyenne marché: {data.benchmarks.industry_average}€/mois
-            </p>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
