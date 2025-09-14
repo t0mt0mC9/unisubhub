@@ -247,7 +247,7 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="budget">Budget mensuel moyen (€)</Label>
+            <Label htmlFor="budget">Budget mensuel moyen à ne pas dépasser (€)</Label>
             <Input
               id="budget"
               type="number"
