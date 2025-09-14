@@ -56,7 +56,6 @@ export const EditSubscriptionDialog = ({ open, onOpenChange, subscription, onSuc
     name: subscription?.name || "",
     description: subscription?.description || "",
     price: subscription?.price?.toString() || "",
-    currency: subscription?.currency || "EUR",
     billing_cycle: subscription?.billing_cycle || "monthly",
     category: subscription?.category || "",
     next_billing_date: subscription?.next_billing_date ? new Date(subscription.next_billing_date) : new Date(),
@@ -86,7 +85,6 @@ export const EditSubscriptionDialog = ({ open, onOpenChange, subscription, onSuc
           name: formData.name,
           description: formData.description,
           price: parseFloat(formData.price),
-          currency: formData.currency,
           billing_cycle: formData.billing_cycle,
           category: formData.category,
           next_billing_date: format(formData.next_billing_date, 'yyyy-MM-dd'),
@@ -231,9 +229,9 @@ export const EditSubscriptionDialog = ({ open, onOpenChange, subscription, onSuc
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="price">Prix *</Label>
+                <Label htmlFor="price">Prix (€) *</Label>
                 <Input
                   id="price"
                   type="number"
@@ -244,24 +242,6 @@ export const EditSubscriptionDialog = ({ open, onOpenChange, subscription, onSuc
                   disabled={loading}
                   required
                 />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="currency">Devise</Label>
-                <Select
-                  value={formData.currency}
-                  onValueChange={(value) => updateFormData("currency", value)}
-                  disabled={loading}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="EUR">EUR (€)</SelectItem>
-                    <SelectItem value="USD">USD ($)</SelectItem>
-                    <SelectItem value="GBP">GBP (£)</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
 
               <div className="space-y-2">
