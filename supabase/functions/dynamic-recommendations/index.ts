@@ -106,8 +106,24 @@ Soyez spécifique et actionnable. N'incluez QUE les recommandations qui respecte
     let recommendations = [];
     
     if (profile?.ai_insights_consent) {
-      // Appel à Perplexity API only if user consented
-      const perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
+      // Vérifier le cache en base pour éviter les appels répétés
+      const subscriptionsHash = activeSubscriptions.map(sub => 
+        `${sub.name}-${sub.price}-${sub.category}-${sub.billing_cycle}`
+      ).sort().join('|');
+      
+      const { data: cachedRecommendations } = await supabase
+        .from('recommendations_cache')
+        .select('*')
+        .eq('user_id', userData.user.id)
+        .eq('subscriptions_hash', subscriptionsHash)
+        .gte('created_at', new Date(Date.now() - 15 * 60 * 1000).toISOString()) // Cache valide 15 minutes
+        .single();
+
+      if (cachedRecommendations) {
+        recommendations = JSON.parse(cachedRecommendations.recommendations_data);
+      } else {
+        // Appel à Perplexity API seulement si pas de cache
+        const perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${perplexityApiKey}`,
@@ -140,19 +156,31 @@ Soyez spécifique et actionnable. N'incluez QUE les recommandations qui respecte
       throw new Error(`Perplexity API error: ${perplexityResponse.status} - ${errorText}`);
     }
 
-      const perplexityData = await perplexityResponse.json();
+        const perplexityData = await perplexityResponse.json();
 
-      const aiContent = perplexityData.choices[0].message.content;
-      
-      // Parse la réponse JSON
-      try {
-        const parsed = JSON.parse(aiContent.replace(/```json\n?|\n?```/g, ''));
-        recommendations = parsed.recommendations || [];
-      } catch (parseError) {
-        console.error('Error parsing AI response:', parseError);
+        const aiContent = perplexityData.choices[0].message.content;
         
-        // Fallback avec recommandations de base
-        recommendations = generateFallbackRecommendations(subscriptions);
+        // Parse la réponse JSON
+        try {
+          const parsed = JSON.parse(aiContent.replace(/```json\n?|\n?```/g, ''));
+          recommendations = parsed.recommendations || [];
+          
+          // Sauvegarder en cache
+          await supabase
+            .from('recommendations_cache')
+            .upsert({
+              user_id: userData.user.id,
+              subscriptions_hash: subscriptionsHash,
+              recommendations_data: JSON.stringify(recommendations),
+              created_at: new Date().toISOString()
+            });
+            
+        } catch (parseError) {
+          console.error('Error parsing AI response:', parseError);
+          
+          // Fallback avec recommandations de base
+          recommendations = generateFallbackRecommendations(subscriptions);
+        }
       }
     } else {
       // User hasn't consented to AI insights, use local fallback only
