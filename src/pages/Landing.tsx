@@ -153,7 +153,7 @@ const Landing = () => {
             <div className="max-w-4xl mx-auto mb-12">
               <div className="relative aspect-video rounded-2xl overflow-hidden border border-border/50 shadow-2xl bg-card">
                 <iframe
-                  src="https://www.youtube.com/embed/inTD--zedHc"
+                  src="https://www.youtube.com/embed/jtOXxW5I2WA"
                   title="Démo UniSubHub"
                   className="w-full h-full"
                   frameBorder="0"
