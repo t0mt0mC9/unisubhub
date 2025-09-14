@@ -168,12 +168,6 @@ export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
               {totalMonthly.toFixed(2)}€
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="flex items-center text-sm text-muted-foreground">
-              <TrendingUp className="h-4 w-4 mr-1 text-success" />
-              +5% vs mois dernier
-            </div>
-          </CardContent>
         </Card>
 
         <Card>
