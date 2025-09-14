@@ -171,14 +171,20 @@ export const BenchmarkComparisonChart = ({ subscriptions }: BenchmarkComparisonC
                   />
                   <Tooltip 
                     formatter={formatTooltip}
-                    labelClassName="text-foreground font-semibold"
-                    contentStyle={{
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
-                      color: 'hsl(var(--card-foreground))',
+                    labelStyle={{ 
+                      color: 'hsl(var(--foreground))', 
+                      fontWeight: '600',
                       fontSize: '14px'
                     }}
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--popover))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                      color: 'hsl(var(--popover-foreground))',
+                      fontSize: '14px',
+                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'
+                    }}
+                    cursor={false}
                   />
                   <Legend 
                     wrapperStyle={{ paddingTop: '20px', fontSize: '14px' }}
