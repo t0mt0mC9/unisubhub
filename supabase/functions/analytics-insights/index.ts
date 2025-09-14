@@ -291,7 +291,7 @@ function generateFallbackChartData(type: string, subscriptions: any[], total: nu
       };
     
     case 'category_analysis':
-      const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00ff00', '#ff00ff', '#00ffff', '#ffff00', '#ff0000', '#0000ff', '#808080'];
+      const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00ff00', '#ff00ff', '#00ffff', '#ffff00', '#ff0000', '#0000ff'];
       
       // Benchmarks du marché français 2025
       const marketBenchmarks = {
@@ -308,24 +308,23 @@ function generateFallbackChartData(type: string, subscriptions: any[], total: nu
         'Autre': 10
       };
 
-      // Créer des données pour TOUTES les catégories, même celles sans abonnements
-      const chartData = Object.keys(marketBenchmarks).map((category, i) => {
+      // Créer des données pour toutes les catégories avec des abonnements
+      const chartData = Object.keys(categoryStats).map((category, i) => {
         const userValue = categoryStats[category] || 0;
-        const benchmark = marketBenchmarks[category as keyof typeof marketBenchmarks];
+        const benchmark = marketBenchmarks[category as keyof typeof marketBenchmarks] || 10;
         
         return {
           category,
           value: Math.round(userValue),
-          percentage: total > 0 ? Math.round((userValue / total) * 100) : 0,
+          percentage: Math.round((userValue / total) * 100),
           benchmark: benchmark,
-          color: colors[i % colors.length],
-          hasSubscriptions: userValue > 0
+          color: colors[i % colors.length]
         };
       });
 
-      // Générer des insights basés sur les comparaisons pour les catégories avec abonnements
+      // Générer des insights basés sur les comparaisons
       const insights = chartData
-        .filter(item => item.hasSubscriptions && item.value > item.benchmark * 1.2) // Plus de 20% au-dessus du benchmark
+        .filter(item => item.value > item.benchmark * 1.2) // Plus de 20% au-dessus du benchmark
         .slice(0, 3)
         .map(item => ({
           category: item.category,
@@ -336,19 +335,16 @@ function generateFallbackChartData(type: string, subscriptions: any[], total: nu
           potential_saving: `${Math.round((item.value - item.benchmark) * 0.3)}€`
         }));
 
-      // Si aucune catégorie ne dépasse les benchmarks, ajouter un insight général
-      if (insights.length === 0 && chartData.some(item => item.hasSubscriptions)) {
-        insights.push({
-          category: "Général",
-          analysis: "Dépenses globalement équilibrées par rapport au marché",
-          recommendation: "Continuer le suivi régulier des abonnements",
-          potential_saving: "0€"
-        });
-      }
-
       return {
         chartData,
-        insights,
+        insights: insights.length > 0 ? insights : [
+          {
+            category: "Général",
+            analysis: "Dépenses globalement équilibrées",
+            recommendation: "Continuer le suivi régulier",
+            potential_saving: "0€"
+          }
+        ],
         benchmarks: {
           industry_average: Object.values(marketBenchmarks).reduce((a, b) => a + b, 0) / Object.keys(marketBenchmarks).length,
           user_vs_average: total > 50 ? "above" : total < 30 ? "below" : "average"
