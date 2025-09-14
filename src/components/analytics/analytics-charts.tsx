@@ -1,4 +1,3 @@
-import { SmartSpendingChart } from "./smart-spending-chart";
 import { SmartCategoryChart } from "./smart-category-chart";
 import { SmartForecastChart } from "./smart-forecast-chart";
 import { MonthlyProjectionChart } from "./monthly-projection-chart";
@@ -12,9 +11,6 @@ export const AnalyticsCharts = ({ subscriptions }: AnalyticsChartsProps) => {
     <div className="space-y-8">
       {/* Projection des dépenses mensuelles */}
       <MonthlyProjectionChart subscriptions={subscriptions} />
-      
-      {/* Analyse intelligente des tendances */}
-      <SmartSpendingChart subscriptions={subscriptions} />
       
       {/* Analyse par catégorie avec benchmarks */}
       <SmartCategoryChart subscriptions={subscriptions} />
