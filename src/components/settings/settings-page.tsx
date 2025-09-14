@@ -278,7 +278,7 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
           <Button 
             variant="outline" 
             className="w-full"
-            onClick={() => window.open('mailto:tom.lifert@gmail.com?subject=Support UniSubHub - Demande d\'aide', '_blank')}
+            onClick={() => window.open('mailto:thomas.lifert@city-fix.fr?subject=Support UniSubHub - Demande d\'aide', '_blank')}
           >
             <MessageCircle className="mr-2 h-4 w-4" />
             Contact support
