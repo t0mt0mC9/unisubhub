@@ -75,33 +75,13 @@ export const SubscriptionLock = ({ onUpgrade, trialDaysRemaining = 0 }: Subscrip
             Passez à Premium pour continuer à utiliser UniSubHub.
           </p>
           <div className="flex flex-col gap-3">
-            <div className="flex gap-2 justify-center">
-              <Button 
-                onClick={handleRefresh} 
-                variant="outline" 
-                disabled={loading}
-              >
-                <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                Vérifier mon abonnement
-              </Button>
-              
-              <Button 
-                onClick={handleForceReauth} 
-                variant="destructive"
-                size="sm"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Nettoyer et reconnecter
-              </Button>
-            </div>
-            
             <Button 
-              onClick={() => navigate('/')} 
-              variant="ghost"
-              className="text-muted-foreground hover:text-foreground"
+              onClick={() => navigate('/auth')} 
+              variant="outline"
+              className="w-full"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Retourner à l'application
+              Retourner à la connexion
             </Button>
           </div>
         </div>
