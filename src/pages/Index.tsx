@@ -12,7 +12,7 @@ import { AddSubscriptionDialog } from "@/components/add-subscription/add-subscri
 import { ProfilePage } from "@/components/profile/profile-page";
 import { PrivacyPolicyPage } from "@/components/privacy/privacy-policy-page";
 import PremiumPage from "@/components/subscription/premium-page";
-import { OnboardingOverlay } from "@/components/onboarding/onboarding-overlay";
+// import { OnboardingOverlay } from "@/components/onboarding/onboarding-overlay"; // Removed
 import { mockSubscriptions, calculateTotalSpending } from "@/data/mock-subscriptions";
 import { useUserSettings } from "@/hooks/use-user-settings";
 import { Button } from "@/components/ui/button";
@@ -422,9 +422,7 @@ const Index = () => {
         onOpenChange={setShowAddDialog}
         onSubscriptionAdded={loadSubscriptions}
       />
-      {showOnboarding && (
-        <OnboardingOverlay onComplete={handleCompleteOnboarding} />
-      )}
+      {/* Onboarding removed - handled in App.tsx */}
     </div>
   );
 };

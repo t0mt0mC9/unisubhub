@@ -16,9 +16,8 @@ import { initializeOneSignal } from "./lib/onesignal";
 
 import ExpenseAnalysis from "./pages/ExpenseAnalysis";
 import { useSubscription } from "@/hooks/use-subscription";
-import { useOnboarding } from "@/hooks/use-onboarding";
 import { SubscriptionLock } from "@/components/subscription/subscription-lock";
-import { OnboardingOverlay } from "@/components/onboarding/onboarding-overlay";
+import { InitialSubscriptionSelector } from "@/components/subscription/initial-subscription-selector";
 
 const queryClient = new QueryClient();
 
@@ -28,7 +27,7 @@ const App = () => {
   const [loading, setLoading] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
   const { hasAccess, isLocked, loading: subscriptionLoading, refresh: refreshSubscription } = useSubscription();
-  const { showOnboarding, loading: onboardingLoading, completeOnboarding } = useOnboarding();
+  const [showInitialSetup, setShowInitialSetup] = useState(false);
 
   // Force refresh subscription status when user loads the app - ONLY ONCE
   useEffect(() => {
@@ -110,8 +109,18 @@ const App = () => {
     return <SplashScreen onFinish={() => setShowSplash(false)} />;
   }
 
+  // Check if user needs initial setup
+  useEffect(() => {
+    if (user && !loading && !subscriptionLoading) {
+      const setupCompleted = localStorage.getItem(`initial-setup-completed-${user.id}`);
+      if (!setupCompleted) {
+        setShowInitialSetup(true);
+      }
+    }
+  }, [user, loading, subscriptionLoading]);
+
   // Pendant le chargement de l'abonnement, ne pas afficher l'écran de verrouillage
-  if (loading || subscriptionLoading || onboardingLoading) {
+  if (loading || subscriptionLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -122,14 +131,14 @@ const App = () => {
     );
   }
 
-  // Afficher l'onboarding pour les nouveaux utilisateurs connectés
-  if (user && showOnboarding) {
+  // Afficher la sélection d'abonnements pour les nouveaux utilisateurs connectés
+  if (user && showInitialSetup) {
     return (
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <OnboardingOverlay onComplete={completeOnboarding} />
+          <InitialSubscriptionSelector onComplete={() => setShowInitialSetup(false)} />
         </TooltipProvider>
       </QueryClientProvider>
     );
