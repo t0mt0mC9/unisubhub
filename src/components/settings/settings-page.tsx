@@ -244,13 +244,10 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
             <DollarSign className="h-5 w-5" />
             Budget mensuel
           </CardTitle>
-          <CardDescription>
-            Configurez votre budget mensuel à ne pas dépasser
-          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="budget">Budget mensuel à ne pas dépasser (€)</Label>
+            <Label htmlFor="budget">Budget mensuel moyen (€)</Label>
             <Input
               id="budget"
               type="number"
