@@ -23,7 +23,8 @@ import {
   DollarSign,
   Calendar,
   Mail,
-  MessageCircle
+  MessageCircle,
+  Sparkles
 } from "lucide-react";
 
 interface SettingsPageProps {
@@ -36,7 +37,53 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
   const navigate = useNavigate();
   const { settings, updateSettings, loading } = useNotifications();
 
+  const [aiConsent, setAiConsent] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
 
+  useEffect(() => {
+    const loadConsent = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('ai_insights_consent')
+          .eq('id', user.id)
+          .single();
+        if (!error && profile) {
+          setAiConsent(!!profile.ai_insights_consent);
+        }
+      } catch (e) {
+        console.error('Load AI consent error:', e);
+      }
+    };
+    loadConsent();
+  }, []);
+
+  const handleToggleAIConsent = async (checked: boolean) => {
+    setAiLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({ title: "Connexion requise", description: "Veuillez vous connecter pour activer l'IA.", variant: "destructive" });
+        return;
+      }
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({ id: user.id, ai_insights_consent: checked }, { onConflict: 'id' });
+      if (error) throw error;
+      setAiConsent(checked);
+      toast({
+        title: checked ? "Prédictions IA activées" : "Prédictions IA désactivées",
+        description: checked ? "Les graphiques utiliseront Perplexity quand c'est possible." : "Nous utiliserons des données locales.",
+      });
+    } catch (e: any) {
+      console.error('Toggle AI consent error:', e);
+      toast({ title: "Erreur", description: e.message || "Impossible de mettre à jour le consentement", variant: "destructive" });
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const handleDeleteAccount = async () => {
     try {
@@ -159,6 +206,34 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
             />
           </div>
           
+        </CardContent>
+      </Card>
+
+      {/* IA - Prédictions intelligentes */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" />
+            Prédictions intelligentes (IA)
+          </CardTitle>
+          <CardDescription>
+            Activez les prédictions Perplexity pour des projections personnalisées
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>Activer les prédictions IA</Label>
+              <div className="text-sm text-muted-foreground">
+                Utilise l'IA Perplexity avec votre consentement explicite.
+              </div>
+            </div>
+            <Switch
+              checked={aiConsent}
+              onCheckedChange={handleToggleAIConsent}
+              disabled={aiLoading}
+            />
+          </div>
         </CardContent>
       </Card>
 
