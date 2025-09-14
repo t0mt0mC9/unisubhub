@@ -30,8 +30,11 @@ export const useDynamicRecommendations = (subscriptions: any[]) => {
       setError(null);
 
       try {
+        // Filtrer uniquement les abonnements actifs
+        const activeSubscriptions = subscriptions.filter(sub => sub.status === 'active');
+        
         const { data, error: functionError } = await supabase.functions.invoke('dynamic-recommendations', {
-          body: { subscriptions }
+          body: { subscriptions: activeSubscriptions }
         });
 
         if (functionError) {

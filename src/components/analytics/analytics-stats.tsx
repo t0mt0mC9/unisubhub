@@ -27,10 +27,11 @@ export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
   const { toast } = useToast();
   const [expandedRecommendation, setExpandedRecommendation] = useState<number | null>(null);
   
-  // Utiliser les recommandations dynamiques
-  const { recommendations: dynamicRecommendations, loading: recommendationsLoading } = useDynamicRecommendations(subscriptions);
-  // Calculs des statistiques basés sur les vraies données utilisateur
-  const totalMonthly = subscriptions.reduce((sum, sub) => {
+  // Filtrer uniquement les abonnements actifs pour les recommandations
+  const activeSubscriptions = subscriptions.filter(sub => sub.status === 'active');
+  const { recommendations: dynamicRecommendations, loading: recommendationsLoading } = useDynamicRecommendations(activeSubscriptions);
+  // Calculs des statistiques basés sur les abonnements actifs uniquement
+  const totalMonthly = activeSubscriptions.reduce((sum, sub) => {
     const monthlyPrice = sub.billing_cycle === 'yearly' ? sub.price / 12 : 
                         sub.billing_cycle === 'weekly' ? sub.price * 4.33 : sub.price;
     return sum + monthlyPrice;
@@ -38,15 +39,15 @@ export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
 
   const totalYearly = totalMonthly * 12;
   
-  const categoryStats = subscriptions.reduce((acc, sub) => {
+  const categoryStats = activeSubscriptions.reduce((acc, sub) => {
     acc[sub.category] = (acc[sub.category] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
   const topCategory = Object.entries(categoryStats).sort(([,a], [,b]) => (b as number) - (a as number))[0];
   
-  // Analyse des abonnements à risque (prix élevés)
-  const expensiveSubscriptions = subscriptions.filter(sub => {
+  // Analyse des abonnements actifs à risque (prix élevés)
+  const expensiveSubscriptions = activeSubscriptions.filter(sub => {
     const monthlyPrice = sub.billing_cycle === 'yearly' ? sub.price / 12 : 
                         sub.billing_cycle === 'weekly' ? sub.price * 4.33 : sub.price;
     return monthlyPrice > 20;
@@ -74,7 +75,7 @@ export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
       icon: "Users",
       color: "text-orange-600",
       bgColor: "bg-orange-100",
-      details: `Services de streaming détectés : ${subscriptions.filter(sub => sub.category === "Streaming").map(sub => sub.name).join(", ")}. Vous pourriez garder seulement 1-2 services principaux.`
+      details: `Services de streaming détectés : ${activeSubscriptions.filter(sub => sub.category === "Streaming").map(sub => sub.name).join(", ")}. Vous pourriez garder seulement 1-2 services principaux.`
     }
   ];
 
@@ -92,10 +93,10 @@ export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
       case "cost":
         return `Analysez vos abonnements les plus coûteux : ${expensiveSubscriptions.map(sub => sub.name).join(", ")}. Considérez des alternatives moins chères ou négociez des tarifs.`;
       case "duplicate":
-        const streamingServices = subscriptions.filter(sub => sub.category === "Streaming");
+        const streamingServices = activeSubscriptions.filter(sub => sub.category === "Streaming");
         return `Services de streaming détectés : ${streamingServices.map(sub => sub.name).join(", ")}. Vous pourriez garder seulement 1-2 services principaux.`;
       case "billing":
-        return `Abonnements mensuels qui seraient moins chers en annuel : ${subscriptions.filter(sub => sub.billing_cycle === 'monthly').slice(0, 3).map(sub => sub.name).join(", ")}.`;
+        return `Abonnements mensuels qui seraient moins chers en annuel : ${activeSubscriptions.filter(sub => sub.billing_cycle === 'monthly').slice(0, 3).map(sub => sub.name).join(", ")}.`;
       case "usage":
         return `Services coûteux à analyser : ${expensiveSubscriptions.slice(0, 3).map(sub => `${sub.name} (${sub.price}€)`).join(", ")}. Vérifiez votre usage réel.`;
       default:
@@ -109,7 +110,7 @@ export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
 
   // Calcul dynamique du score d'optimisation
   const calculateOptimizationScore = () => {
-    if (subscriptions.length === 0) return { total: 0, diversity: 0, price: 0, usage: 0 };
+    if (activeSubscriptions.length === 0) return { total: 0, diversity: 0, price: 0, usage: 0 };
 
     // Score de diversité (0-100) : Mieux on répartit entre les catégories, mieux c'est
     const categories = Object.keys(categoryStats);
@@ -117,7 +118,7 @@ export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
     
     // Score de prix (0-100) : Pénalise les abonnements chers
     const expensiveCount = expensiveSubscriptions.length;
-    const expensiveRatio = expensiveCount / subscriptions.length;
+    const expensiveRatio = expensiveCount / activeSubscriptions.length;
     const priceScore = Math.max(0, 100 - (expensiveRatio * 60)); // -60pts si 100% d'abonnements chers
     
     // Score d'utilisation (0-100) : Détecte les doublons potentiels
@@ -180,7 +181,7 @@ export const AnalyticsStats = ({ subscriptions }: AnalyticsStatsProps) => {
           <CardContent>
             <div className="flex items-center text-sm text-muted-foreground">
               <Target className="h-4 w-4 mr-1" />
-              {subscriptions.length} services actifs
+              {activeSubscriptions.length} services actifs
             </div>
           </CardContent>
         </Card>

@@ -60,8 +60,9 @@ serve(async (req) => {
       .order('temperature', { ascending: false })
       .limit(20);
 
-    // Préparer les données pour Perplexity
-    const subscriptionsList = subscriptions.map((sub: any) => 
+    // Préparer les données pour Perplexity - uniquement abonnements actifs
+    const activeSubscriptions = subscriptions.filter((sub: any) => sub.status === 'active');
+    const subscriptionsList = activeSubscriptions.map((sub: any) => 
       `${sub.name} (${sub.price}€/${sub.billing_cycle}, catégorie: ${sub.category})`
     ).join(', ');
 
@@ -229,11 +230,15 @@ function getBgColorForType(type: string): string {
 function generateFallbackRecommendations(subscriptions: any[]): any[] {
   if (!subscriptions || subscriptions.length === 0) return [];
 
+  // Filtrer uniquement les abonnements actifs
+  const activeSubscriptions = subscriptions.filter(sub => sub.status === 'active');
+  if (activeSubscriptions.length === 0) return [];
+
   const recommendations = [];
   
-  // Analyser les doublons (plus de 2 abonnements identiques)
+  // Analyser les doublons (plus de 2 abonnements identiques) - uniquement actifs
   const categories = new Map();
-  subscriptions.forEach(sub => {
+  activeSubscriptions.forEach(sub => {
     if (!categories.has(sub.category)) {
       categories.set(sub.category, []);
     }
@@ -258,8 +263,8 @@ function generateFallbackRecommendations(subscriptions: any[]): any[] {
     });
   }
 
-  // Analyser les coûts élevés (supérieurs à 30€)
-  const expensiveSubs = subscriptions.filter(sub => {
+  // Analyser les coûts élevés (supérieurs à 30€) - uniquement actifs
+  const expensiveSubs = activeSubscriptions.filter(sub => {
     const monthlyPrice = sub.billing_cycle === 'yearly' ? sub.price / 12 : 
                         sub.billing_cycle === 'weekly' ? sub.price * 4.33 : sub.price;
     return monthlyPrice > 30;
@@ -283,12 +288,12 @@ function generateFallbackRecommendations(subscriptions: any[]): any[] {
     });
   }
 
-  // Optimisation facturation annuelle seulement si il y a des abonnements en facturation mensuelle
-  const monthlyBilling = subscriptions.filter(sub => sub.billing_cycle === 'monthly');
-  const hasYearlyOptions = subscriptions.some(sub => sub.billing_cycle === 'yearly');
+  // Optimisation facturation annuelle seulement si il y a des abonnements actifs en facturation mensuelle
+  const monthlyBilling = activeSubscriptions.filter(sub => sub.billing_cycle === 'monthly');
+  const hasYearlyOptions = activeSubscriptions.some(sub => sub.billing_cycle === 'yearly');
   
   if (monthlyBilling.length > 0 && hasYearlyOptions) {
-    const totalMonthly = subscriptions.reduce((sum, sub) => {
+    const totalMonthly = activeSubscriptions.reduce((sum, sub) => {
       const monthlyPrice = sub.billing_cycle === 'yearly' ? sub.price / 12 : 
                           sub.billing_cycle === 'weekly' ? sub.price * 4.33 : sub.price;
       return sum + monthlyPrice;
