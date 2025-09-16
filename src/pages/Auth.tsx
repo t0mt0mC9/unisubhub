@@ -25,11 +25,12 @@ const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // Vérifier les paramètres URL pour le reset de mot de passe
+  // Vérifier les paramètres URL pour le reset de mot de passe (hash et query)
   useEffect(() => {
-    const accessToken = searchParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token');
-    const type = searchParams.get('type');
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const accessToken = searchParams.get('access_token') || hashParams.get('access_token');
+    const refreshToken = searchParams.get('refresh_token') || hashParams.get('refresh_token');
+    const type = searchParams.get('type') || hashParams.get('type');
 
     if (type === 'recovery' && accessToken && refreshToken) {
       // L'utilisateur a cliqué sur le lien de reset
@@ -49,6 +50,9 @@ const Auth = () => {
             variant: "destructive",
           });
           setIsResettingPassword(false);
+        } else {
+          // Nettoyer l'URL pour retirer les tokens
+          window.history.replaceState({}, document.title, window.location.pathname);
         }
       });
     }
