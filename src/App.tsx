@@ -12,6 +12,7 @@ import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import ResetPassword from "./pages/ResetPassword";
 import { initializeOneSignal } from "./lib/onesignal";
 
 import ExpenseAnalysis from "./pages/ExpenseAnalysis";
@@ -157,6 +158,10 @@ const App = () => {
             <Route 
               path="/auth" 
               element={!user ? <Auth /> : <Navigate to="/" replace />} 
+            />
+            <Route 
+              path="/reset-password" 
+              element={<ResetPassword />} 
             />
             <Route 
               path="/expense-analysis" 
