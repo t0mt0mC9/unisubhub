@@ -159,13 +159,20 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
 
   const confirmBudgetChange = () => {
     if (pendingBudgetValue) {
-      updateSettings({ budgetLimit: parseFloat(pendingBudgetValue) });
+      const newBudget = parseFloat(pendingBudgetValue);
+      console.log('💰 Confirmation budget change vers:', newBudget);
+      
+      // Mettre à jour les deux hooks en parallèle
+      updateSettings({ budgetLimit: newBudget });
+      
       setCurrentBudgetInput(pendingBudgetValue); // Synchroniser l'input
       
       // Déclencher un événement personnalisé pour forcer la mise à jour de la barre
-      window.dispatchEvent(new CustomEvent('budgetUpdated', { 
-        detail: { newBudget: parseFloat(pendingBudgetValue) }
-      }));
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('budgetUpdated', { 
+          detail: { newBudget }
+        }));
+      }, 200); // Petit délai pour laisser le temps à la sauvegarde
       
       toast({
         title: "Budget mis à jour",

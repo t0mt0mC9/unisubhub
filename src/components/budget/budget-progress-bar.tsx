@@ -53,6 +53,7 @@ export const BudgetProgressBar = () => {
 
       const budgetLimit = notificationSettings.budgetLimit || parseFloat(userSettings.budgetLimit) || 100;
       console.log('🔄 Recalcul budget - Total:', monthlyTotal.toFixed(2), 'Limite:', budgetLimit);
+      console.log('📊 Sources budget - NotificationSettings:', notificationSettings.budgetLimit, 'UserSettings:', userSettings.budgetLimit);
       
       const percentage = (monthlyTotal / budgetLimit) * 100;
       const displayPercentage = Math.min(percentage, 100); // Limiter l'affichage à 100% pour la barre
@@ -96,9 +97,12 @@ export const BudgetProgressBar = () => {
 
   // Écouter les événements de mise à jour du budget
   useEffect(() => {
-    const handleBudgetUpdate = () => {
-      console.log('📢 Événement budgetUpdated reçu, recalcul immédiat...');
-      calculateBudgetData();
+    const handleBudgetUpdate = (event: any) => {
+      console.log('📢 Événement budgetUpdated reçu, nouveau budget:', event.detail?.newBudget);
+      // Forcer le recalcul après un petit délai pour s'assurer que les hooks sont synchronisés
+      setTimeout(() => {
+        calculateBudgetData();
+      }, 100);
     };
 
     window.addEventListener('budgetUpdated', handleBudgetUpdate);
