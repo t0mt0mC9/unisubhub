@@ -19,15 +19,16 @@ import {
 } from 'lucide-react';
 
 export const DeviceUsageAnalytics = () => {
-  const { 
-    usageData, 
-    loading, 
-    hasPermission, 
-    error, 
+  const {
+    usageData,
+    loading,
+    hasPermission,
+    error,
     platform,
-    requestPermissions, 
-    fetchUsageStats, 
-    clearData 
+    requestPermissions,
+    fetchUsageStats,
+    clearData,
+    useSimulatedData
   } = useDeviceUsageStats();
 
   const [selectedDays, setSelectedDays] = useState(7);
@@ -60,6 +61,10 @@ export const DeviceUsageAnalytics = () => {
 
   const handleFetchStats = () => {
     fetchUsageStats(selectedDays);
+  };
+
+  const handleSimulateData = () => {
+    useSimulatedData();
   };
 
   // Interface de demande de consentement
@@ -105,13 +110,30 @@ export const DeviceUsageAnalytics = () => {
           </div>
         )}
 
-        <div className="flex gap-2">
-          <Button onClick={handleRequestPermissions} disabled={loading}>
-            {loading ? 'Vérification...' : 'Autoriser l\'accès'}
-          </Button>
-          <Button variant="outline" onClick={clearData}>
-            Plus tard
-          </Button>
+        <div className="space-y-3">
+          <div className="flex gap-2">
+            <Button onClick={handleRequestPermissions} disabled={loading}>
+              {loading ? 'Vérification...' : 'Autoriser l\'accès'}
+            </Button>
+            <Button variant="outline" onClick={clearData}>
+              Plus tard
+            </Button>
+          </div>
+          
+          <div className="text-center border-t pt-3">
+            <p className="text-sm text-muted-foreground mb-2">ou</p>
+            <Button 
+              onClick={handleSimulateData}
+              variant="outline"
+              className="w-full"
+              size="sm"
+            >
+              📱 Voir une démonstration (iPhone)
+            </Button>
+            <p className="text-xs text-muted-foreground mt-2">
+              Découvrez l'analyse avec des données simulées (Netflix, Prime Video, L'Equipe)
+            </p>
+          </div>
         </div>
       </CardContent>
     </Card>

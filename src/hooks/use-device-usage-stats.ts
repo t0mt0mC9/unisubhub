@@ -228,6 +228,119 @@ export const useDeviceUsageStats = () => {
     return insights;
   };
 
+  // Données simulées pour démonstration (iPhone)
+  const generateSimulatedData = (): DeviceUsageData => {
+    const simulatedApps: AppUsageStats[] = [
+      {
+        packageName: 'com.netflix.Netflix',
+        appName: 'Netflix',
+        totalTimeInForeground: 7200000, // 2 heures
+        lastTimeUsed: Date.now() - 3600000, // Il y a 1 heure
+        firstTimeStamp: Date.now() - 86400000 * 7, // Il y a 7 jours
+        lastTimeStamp: Date.now() - 3600000,
+        totalTimeVisible: 7200000
+      },
+      {
+        packageName: 'com.amazon.aiv.dvr',
+        appName: 'Prime Video',
+        totalTimeInForeground: 5400000, // 1h30
+        lastTimeUsed: Date.now() - 7200000, // Il y a 2 heures
+        firstTimeStamp: Date.now() - 86400000 * 7,
+        lastTimeStamp: Date.now() - 7200000,
+        totalTimeVisible: 5400000
+      },
+      {
+        packageName: 'fr.lequipe.lequipeapp',
+        appName: 'L\'Equipe',
+        totalTimeInForeground: 2700000, // 45 minutes
+        lastTimeUsed: Date.now() - 1800000, // Il y a 30 minutes
+        firstTimeStamp: Date.now() - 86400000 * 7,
+        lastTimeStamp: Date.now() - 1800000,
+        totalTimeVisible: 2700000
+      },
+      {
+        packageName: 'com.instagram.ios',
+        appName: 'Instagram',
+        totalTimeInForeground: 3600000, // 1 heure
+        lastTimeUsed: Date.now() - 900000, // Il y a 15 minutes
+        firstTimeStamp: Date.now() - 86400000 * 7,
+        lastTimeStamp: Date.now() - 900000,
+        totalTimeVisible: 3600000
+      },
+      {
+        packageName: 'com.spotify.client',
+        appName: 'Spotify',
+        totalTimeInForeground: 4800000, // 1h20
+        lastTimeUsed: Date.now() - 600000, // Il y a 10 minutes
+        firstTimeStamp: Date.now() - 86400000 * 7,
+        lastTimeStamp: Date.now() - 600000,
+        totalTimeVisible: 4800000
+      },
+      {
+        packageName: 'com.apple.mobilemail',
+        appName: 'Mail',
+        totalTimeInForeground: 1800000, // 30 minutes
+        lastTimeUsed: Date.now() - 1200000, // Il y a 20 minutes
+        firstTimeStamp: Date.now() - 86400000 * 7,
+        lastTimeStamp: Date.now() - 1200000,
+        totalTimeVisible: 1800000
+      },
+      {
+        packageName: 'com.apple.mobilesafari',
+        appName: 'Safari',
+        totalTimeInForeground: 3000000, // 50 minutes
+        lastTimeUsed: Date.now() - 2400000, // Il y a 40 minutes
+        firstTimeStamp: Date.now() - 86400000 * 7,
+        lastTimeStamp: Date.now() - 2400000,
+        totalTimeVisible: 3000000
+      },
+      {
+        packageName: 'com.apple.mobilephone',
+        appName: 'Téléphone',
+        totalTimeInForeground: 900000, // 15 minutes
+        lastTimeUsed: Date.now() - 3600000, // Il y a 1 heure
+        firstTimeStamp: Date.now() - 86400000 * 7,
+        lastTimeStamp: Date.now() - 3600000,
+        totalTimeVisible: 900000
+      }
+    ];
+
+    // Trier par temps d'utilisation
+    const sortedApps = simulatedApps.sort((a, b) => b.totalTimeInForeground - a.totalTimeInForeground);
+
+    // Calculer le temps total en minutes
+    const totalScreenTime = Math.floor(
+      sortedApps.reduce((total, app) => total + app.totalTimeInForeground, 0) / (1000 * 60)
+    );
+
+    // Catégories simulées
+    const categories = {
+      'Divertissement': 215, // Netflix + Prime Video + Spotify
+      'Réseaux sociaux': 60, // Instagram
+      'Actualités': 45, // L'Equipe
+      'Navigation': 50, // Safari
+      'Productivité': 30, // Mail
+      'Communication': 15 // Téléphone
+    };
+
+    // Insights personnalisés pour ces données
+    const insights = [
+      '📺 Vous passez beaucoup de temps sur les plateformes de streaming (3h35). Parfait pour se détendre !',
+      '🏃‍♂️ L\'Equipe occupe 45min de votre temps - vous êtes bien informé sur le sport !',
+      '📱 Temps d\'écran modéré pour les réseaux sociaux (1h). Bon équilibre !',
+      '💡 Conseil : Essayez de programmer vos sessions Netflix pour éviter le "binge watching" excessif.',
+      '⚽ Votre passion pour le sport transparaît dans votre usage de L\'Equipe !'
+    ];
+
+    return {
+      apps: sortedApps,
+      totalScreenTime,
+      mostUsedApp: sortedApps[0],
+      categories,
+      insights
+    };
+  };
+
   const fetchUsageStats = async (days: number = 7): Promise<DeviceUsageData | null> => {
     if (!hasPermission) {
       setError('Permissions non accordées. Veuillez d\'abord accorder les permissions.');
@@ -309,6 +422,14 @@ export const useDeviceUsageStats = () => {
     }
   };
 
+  // Utiliser les données simulées
+  const useSimulatedData = () => {
+    const simulatedData = generateSimulatedData();
+    setUsageData(simulatedData);
+    setHasPermission(true);
+    setError(null);
+  };
+
   const clearData = () => {
     setUsageData(null);
     setError(null);
@@ -323,6 +444,8 @@ export const useDeviceUsageStats = () => {
     requestPermissions,
     fetchUsageStats,
     clearData,
-    checkPermissions
+    checkPermissions,
+    generateSimulatedData,
+    useSimulatedData
   };
 };
