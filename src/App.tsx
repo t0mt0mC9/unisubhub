@@ -19,6 +19,7 @@ import ExpenseAnalysis from "./pages/ExpenseAnalysis";
 import { useSubscription } from "@/hooks/use-subscription";
 import { SubscriptionLock } from "@/components/subscription/subscription-lock";
 import { InitialSubscriptionSelector } from "@/components/subscription/initial-subscription-selector";
+import DeepLinkHandler from "./deeplink/DeepLinkHandler";
 
 const queryClient = new QueryClient();
 
@@ -27,7 +28,11 @@ const App = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
-  const { hasAccess, isLocked, loading: subscriptionLoading, refresh: refreshSubscription } = useSubscription();
+  const {
+    hasAccess,
+    loading: subscriptionLoading,
+    refresh: refreshSubscription,
+  } = useSubscription();
   const [showInitialSetup, setShowInitialSetup] = useState(false);
   const refreshedOnceRef = useRef(false);
 
@@ -51,16 +56,18 @@ const App = () => {
     }, 1000);
 
     // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state changed:", { event, session });
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("Initial session check:", { session });
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -72,39 +79,43 @@ const App = () => {
   // Fonction pour déterminer si l'utilisateur a accès
   const userHasAccess = () => {
     if (!user) {
-      console.log('🔍 userHasAccess: Pas d\'utilisateur connecté');
+      console.log("🔍 userHasAccess: Pas d'utilisateur connecté");
       return false;
     }
-    
+
     // PRIORITÉ 1: Si l'utilisateur a un abonnement actif selon le hook
     if (hasAccess) {
-      console.log('✅ userHasAccess: Accès accordé via abonnement/trial actif');
+      console.log("✅ userHasAccess: Accès accordé via abonnement/trial actif");
       return true;
     }
-    
+
     // PRIORITÉ 2: Vérifier l'essai gratuit basé sur la date de création (fallback uniquement)
     const userCreatedAt = new Date(user.created_at);
     const now = new Date();
-    const daysSinceCreation = Math.floor((now.getTime() - userCreatedAt.getTime()) / (1000 * 60 * 60 * 24));
-    
+    const daysSinceCreation = Math.floor(
+      (now.getTime() - userCreatedAt.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
     // Donner accès pendant 14 jours après création (seulement si pas d'abonnement)
     const trialAccess = daysSinceCreation < 14;
-    
-    console.log('🔍 userHasAccess: État détaillé', {
+
+    console.log("🔍 userHasAccess: État détaillé", {
       hasAccess,
       daysSinceCreation,
       trialAccess,
       subscriptionLoading,
-      finalAccess: trialAccess
+      finalAccess: trialAccess,
     });
-    
+
     return trialAccess;
   };
 
   // Check if user needs initial setup
   useEffect(() => {
     if (user && !loading && !subscriptionLoading) {
-      const setupCompleted = localStorage.getItem(`initial-setup-completed-${user.id}`);
+      const setupCompleted = localStorage.getItem(
+        `initial-setup-completed-${user.id}`
+      );
       if (!setupCompleted) {
         setShowInitialSetup(true);
       }
@@ -134,7 +145,9 @@ const App = () => {
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <InitialSubscriptionSelector onComplete={() => setShowInitialSetup(false)} />
+          <InitialSubscriptionSelector
+            onComplete={() => setShowInitialSetup(false)}
+          />
         </TooltipProvider>
       </QueryClientProvider>
     );
@@ -146,35 +159,57 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <DeepLinkHandler />
           <Routes>
-            <Route 
-              path="/" 
-              element={user ? (userHasAccess() ? <Index /> : <SubscriptionLock />) : <Landing />} 
+            <Route
+              path="/"
+              element={
+                user ? (
+                  userHasAccess() ? (
+                    <Index />
+                  ) : (
+                    <SubscriptionLock />
+                  )
+                ) : (
+                  <Landing />
+                )
+              }
             />
-            <Route 
-              path="/landing" 
-              element={<Landing />} 
+            <Route path="/landing" element={<Landing />} />
+            <Route
+              path="/auth"
+              element={!user ? <Auth /> : <Navigate to="/" replace />}
             />
-            <Route 
-              path="/auth" 
-              element={!user ? <Auth /> : <Navigate to="/" replace />} 
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route
+              path="/expense-analysis"
+              element={
+                user ? (
+                  userHasAccess() ? (
+                    <ExpenseAnalysis />
+                  ) : (
+                    <SubscriptionLock />
+                  )
+                ) : (
+                  <Navigate to="/auth" replace />
+                )
+              }
             />
-            <Route 
-              path="/reset-password" 
-              element={<ResetPassword />} 
+            <Route
+              path="/analytics"
+              element={
+                user ? (
+                  userHasAccess() ? (
+                    <ExpenseAnalysis />
+                  ) : (
+                    <SubscriptionLock />
+                  )
+                ) : (
+                  <Navigate to="/auth" replace />
+                )
+              }
             />
-            <Route 
-              path="/expense-analysis" 
-              element={user ? (userHasAccess() ? <ExpenseAnalysis /> : <SubscriptionLock />) : <Navigate to="/auth" replace />} 
-            />
-            <Route 
-              path="/analytics" 
-              element={user ? (userHasAccess() ? <ExpenseAnalysis /> : <SubscriptionLock />) : <Navigate to="/auth" replace />} 
-            />
-            <Route 
-              path="/payment-success" 
-              element={<PaymentSuccess />} 
-            />
+            <Route path="/payment-success" element={<PaymentSuccess />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

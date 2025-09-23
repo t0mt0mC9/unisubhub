@@ -4,10 +4,18 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { LogIn, UserPlus, Loader2, Eye, EyeOff, KeyRound } from "lucide-react";
+import { platform } from "node:process";
+import { Capacitor } from "@capacitor/core";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -27,34 +35,45 @@ const Auth = () => {
 
   // Vérifier les paramètres URL pour le reset de mot de passe (hash et query)
   useEffect(() => {
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const accessToken = searchParams.get('access_token') || hashParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token') || hashParams.get('refresh_token');
-    const type = searchParams.get('type') || hashParams.get('type');
+    const accessToken = searchParams.get("access_token");
+    const refreshToken = searchParams.get("refresh_token");
+    const type = searchParams.get("type");
+    const error = searchParams.get("error");
 
-    if (type === 'recovery' && accessToken && refreshToken) {
+    console.log("Paramètres URL:", {
+      accessToken,
+      refreshToken,
+      type,
+    });
+
+    // Gérer les erreurs d'abord
+    if (error) {
+      if (error === "expired") {
+        toast({
+          title: "Lien expiré",
+          description:
+            "Le lien de réinitialisation a expiré. Veuillez en demander un nouveau.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Erreur",
+          description: "Une erreur s'est produite lors de l'authentification.",
+          variant: "destructive",
+        });
+      }
+      // Nettoyer l'URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      return;
+    }
+
+    if (type === "recovery" && accessToken && refreshToken) {
       // L'utilisateur a cliqué sur le lien de reset
       setIsResettingPassword(true);
       setActiveTab("reset");
-      
-      // Définir la session avec les tokens de l'URL
-      supabase.auth.setSession({
-        access_token: accessToken,
-        refresh_token: refreshToken,
-      }).then(({ error }) => {
-        if (error) {
-          console.error('Erreur lors de la configuration de la session:', error);
-          toast({
-            title: "Erreur",
-            description: "Le lien de réinitialisation est invalide ou expiré.",
-            variant: "destructive",
-          });
-          setIsResettingPassword(false);
-        } else {
-          // Nettoyer l'URL pour retirer les tokens
-          window.history.replaceState({}, document.title, window.location.pathname);
-        }
-      });
+
+      sessionStorage.setItem("reset_access_token", accessToken);
+      sessionStorage.setItem("reset_refresh_token", refreshToken);
     }
   }, [searchParams, toast]);
 
@@ -75,7 +94,7 @@ const Auth = () => {
         description: "Vous êtes maintenant connecté à UniSubHub",
       });
 
-      navigate('/');
+      navigate("/");
     } catch (error: any) {
       toast({
         title: "Erreur de connexion",
@@ -89,7 +108,7 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!fullName.trim()) {
       toast({
         title: "Nom requis",
@@ -98,7 +117,7 @@ const Auth = () => {
       });
       return;
     }
-    
+
     setLoading(true);
 
     try {
@@ -109,9 +128,9 @@ const Auth = () => {
         options: {
           emailRedirectTo: `${window.location.origin}/`,
           data: {
-            full_name: fullName.trim()
-          }
-        }
+            full_name: fullName.trim(),
+          },
+        },
       });
 
       if (error) {
@@ -119,7 +138,8 @@ const Auth = () => {
         if (error.message === "User already registered") {
           toast({
             title: "Compte existant détecté",
-            description: "Un compte existe déjà avec cet email. Essayez de vous connecter ou réinitialiser votre mot de passe.",
+            description:
+              "Un compte existe déjà avec cet email. Essayez de vous connecter ou réinitialiser votre mot de passe.",
             variant: "destructive",
           });
           // Automatically switch to sign in tab
@@ -134,28 +154,37 @@ const Auth = () => {
       if (data.user) {
         try {
           // Create a welcome/information link that redirects to the app
-          const welcomeUrl = `${window.location.origin}/?welcome=true&email=${encodeURIComponent(email)}`;
-          
-          const { error: emailError } = await supabase.functions.invoke('send-confirmation-email', {
-            body: {
-              email: email,
-              confirmation_link: welcomeUrl
+          const welcomeUrl = `${
+            window.location.origin
+          }/?welcome=true&email=${encodeURIComponent(email)}`;
+
+          const { error: emailError } = await supabase.functions.invoke(
+            "send-confirmation-email",
+            {
+              body: {
+                email: email,
+                confirmation_link: welcomeUrl,
+              },
             }
-          });
+          );
 
           if (emailError) {
-            console.error('❌ Error sending UniSubHub welcome email:', emailError);
+            console.error(
+              "❌ Error sending UniSubHub welcome email:",
+              emailError
+            );
           } else {
-            console.log('✅ Email de bienvenue UniSubHub envoyé avec succès!');
+            console.log("✅ Email de bienvenue UniSubHub envoyé avec succès!");
           }
         } catch (emailError) {
-          console.error('❌ Exception sending welcome email:', emailError);
+          console.error("❌ Exception sending welcome email:", emailError);
         }
       }
 
       toast({
         title: "Inscription réussie",
-        description: "Un email de confirmation aux couleurs UniSubHub vous a été envoyé automatiquement ! Vérifiez votre boîte mail (et vos spams).",
+        description:
+          "Un email de confirmation aux couleurs UniSubHub vous a été envoyé automatiquement ! Vérifiez votre boîte mail (et vos spams).",
       });
     } catch (error: any) {
       toast({
@@ -172,7 +201,8 @@ const Auth = () => {
     if (!email) {
       toast({
         title: "Email requis",
-        description: "Veuillez saisir votre adresse email pour réinitialiser votre mot de passe.",
+        description:
+          "Veuillez saisir votre adresse email pour réinitialiser votre mot de passe.",
         variant: "destructive",
       });
       return;
@@ -181,14 +211,17 @@ const Auth = () => {
     setLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: Capacitor.isNativePlatform
+          ? "unisubhub://auth"
+          : `${window.location.origin}/auth`,
       });
 
       if (error) throw error;
 
       toast({
         title: "Email envoyé",
-        description: "Un lien de réinitialisation a été envoyé à votre adresse email.",
+        description:
+          "Un lien de réinitialisation a été envoyé à votre adresse email.",
       });
     } catch (error: any) {
       toast({
@@ -203,7 +236,7 @@ const Auth = () => {
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!newPassword || !confirmPassword) {
       toast({
         title: "Champs requis",
@@ -233,15 +266,34 @@ const Auth = () => {
 
     setLoading(true);
     try {
+      const accessToken = sessionStorage.getItem("reset_access_token");
+      const refreshToken = sessionStorage.getItem("reset_refresh_token");
+
+      if (!accessToken || !refreshToken) {
+        throw new Error("Tokens de réinitialisation manquants");
+      }
+
+      const { error: sessionError } = await supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      });
+
+      if (sessionError) throw sessionError;
+
+      // Changer le mot de passe
       const { error } = await supabase.auth.updateUser({
-        password: newPassword
+        password: newPassword,
       });
 
       if (error) throw error;
 
+      sessionStorage.removeItem("reset_access_token");
+      sessionStorage.removeItem("reset_refresh_token");
+
       toast({
         title: "Mot de passe mis à jour",
-        description: "Votre mot de passe a été modifié avec succès. Vous pouvez maintenant vous connecter.",
+        description:
+          "Votre mot de passe a été modifié avec succès. Vous pouvez maintenant vous connecter.",
       });
 
       // Rediriger vers la page de connexion
@@ -249,10 +301,7 @@ const Auth = () => {
       setActiveTab("signin");
       setNewPassword("");
       setConfirmPassword("");
-      
-      // Nettoyer l'URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-      
+      navigate("/");
     } catch (error: any) {
       toast({
         title: "Erreur",
@@ -269,19 +318,22 @@ const Auth = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">UniSubHub</h1>
-          <p className="text-muted-foreground">Gérez tous vos abonnements en un seul endroit</p>
+          <p className="text-muted-foreground">
+            Gérez tous vos abonnements en un seul endroit
+          </p>
         </div>
 
         <Card className="border-border/50 shadow-lg">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl text-center">
-              {isResettingPassword ? "Réinitialiser le mot de passe" : "Accéder à votre compte"}
+              {isResettingPassword
+                ? "Réinitialiser le mot de passe"
+                : "Accéder à votre compte"}
             </CardTitle>
             <CardDescription className="text-center">
-              {isResettingPassword 
-                ? "Définissez votre nouveau mot de passe" 
-                : "Connectez-vous ou créez un nouveau compte"
-              }
+              {isResettingPassword
+                ? "Définissez votre nouveau mot de passe"
+                : "Connectez-vous ou créez un nouveau compte"}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -318,7 +370,9 @@ const Auth = () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="confirm-password">Confirmer le nouveau mot de passe</Label>
+                  <Label htmlFor="confirm-password">
+                    Confirmer le nouveau mot de passe
+                  </Label>
                   <div className="relative">
                     <Input
                       id="confirm-password"
@@ -336,7 +390,9 @@ const Auth = () => {
                       variant="ghost"
                       size="sm"
                       className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                       disabled={loading}
                     >
                       {showConfirmPassword ? (
@@ -352,14 +408,18 @@ const Auth = () => {
                   <KeyRound className="mr-2 h-4 w-4" />
                   Mettre à jour le mot de passe
                 </Button>
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   className="w-full"
                   onClick={() => {
                     setIsResettingPassword(false);
                     setActiveTab("signin");
-                    window.history.replaceState({}, document.title, window.location.pathname);
+                    window.history.replaceState(
+                      {},
+                      document.title,
+                      window.location.pathname
+                    );
                   }}
                   disabled={loading}
                 >
@@ -367,13 +427,23 @@ const Auth = () => {
                 </Button>
               </form>
             ) : (
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <Tabs
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="w-full"
+              >
                 <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="signin" className="flex items-center gap-2">
+                  <TabsTrigger
+                    value="signin"
+                    className="flex items-center gap-2"
+                  >
                     <LogIn className="h-4 w-4" />
                     Connexion
                   </TabsTrigger>
-                  <TabsTrigger value="signup" className="flex items-center gap-2">
+                  <TabsTrigger
+                    value="signup"
+                    className="flex items-center gap-2"
+                  >
                     <UserPlus className="h-4 w-4" />
                     Inscription
                   </TabsTrigger>
@@ -423,9 +493,9 @@ const Auth = () => {
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
-                      <Button 
-                        type="button" 
-                        variant="link" 
+                      <Button
+                        type="button"
+                        variant="link"
                         className="p-0 h-auto text-sm text-muted-foreground hover:text-primary"
                         onClick={handleForgotPassword}
                         disabled={loading}
@@ -434,7 +504,9 @@ const Auth = () => {
                       </Button>
                     </div>
                     <Button type="submit" className="w-full" disabled={loading}>
-                      {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {loading && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      )}
                       Se connecter
                     </Button>
                   </form>
@@ -497,7 +569,9 @@ const Auth = () => {
                       </div>
                     </div>
                     <Button type="submit" className="w-full" disabled={loading}>
-                      {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {loading && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      )}
                       Créer un compte
                     </Button>
                   </form>
