@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useNotifications } from "@/hooks/use-notifications";
+import { BudgetTest } from "@/components/debug/budget-test";
 import { 
   Settings, 
   Bell, 
@@ -262,6 +263,11 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
           </div>
         </CardContent>
       </Card>
+
+      {/* Test Budget */}
+      <div className="flex justify-center">
+        <BudgetTest />
+      </div>
 
       {/* Support */}
       <Card>

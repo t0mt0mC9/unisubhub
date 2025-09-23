@@ -95,6 +95,21 @@ export const EditSubscriptionDialog = ({ open, onOpenChange, subscription, onSuc
 
       if (error) throw error;
 
+      // Vérifier le budget après modification de l'abonnement
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { error: budgetError } = await supabase.functions.invoke('check-budget-realtime', {
+            body: { userId: user.id }
+          });
+          if (budgetError) {
+            console.error('Erreur vérification budget:', budgetError);
+          }
+        }
+      } catch (budgetError) {
+        console.error('Erreur vérification budget:', budgetError);
+      }
+
       toast({
         title: "Abonnement modifié",
         description: `${formData.name} a été modifié avec succès`,

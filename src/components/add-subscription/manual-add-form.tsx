@@ -101,6 +101,18 @@ export const ManualAddForm = ({ onSuccess }: ManualAddFormProps) => {
 
       if (error) throw error;
 
+      // Vérifier le budget après ajout de l'abonnement
+      try {
+        const { error: budgetError } = await supabase.functions.invoke('check-budget-realtime', {
+          body: { userId: user.id }
+        });
+        if (budgetError) {
+          console.error('Erreur vérification budget:', budgetError);
+        }
+      } catch (budgetError) {
+        console.error('Erreur vérification budget:', budgetError);
+      }
+
       toast({
         title: "Abonnement ajouté",
         description: `${formData.name} a été ajouté avec succès`,

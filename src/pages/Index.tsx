@@ -16,6 +16,8 @@ import PremiumPage from "@/components/subscription/premium-page";
 // import { OnboardingOverlay } from "@/components/onboarding/onboarding-overlay"; // Removed
 import { mockSubscriptions, calculateTotalSpending } from "@/data/mock-subscriptions";
 import { useUserSettings } from "@/hooks/use-user-settings";
+import { useBudgetChecker } from "@/hooks/use-budget-checker";
+import { BudgetTest } from "@/components/debug/budget-test";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,6 +40,7 @@ const Index = () => {
   const [analyticsTab, setAnalyticsTab] = useState<'offers' | 'analytics'>('offers');
   
   const { settings, getCurrencySymbol } = useUserSettings();
+  const { checkBudget } = useBudgetChecker();
   
   // Récupérer les informations utilisateur pour le message de bienvenue
   const [user, setUser] = useState<any>(null);
