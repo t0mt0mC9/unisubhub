@@ -4,6 +4,7 @@ import { Progress } from '@/components/ui/progress';
 import { DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserSettings } from '@/hooks/use-user-settings';
+import { useNotifications } from '@/hooks/use-notifications';
 import { cn } from '@/lib/utils';
 
 interface BudgetData {
@@ -17,7 +18,8 @@ interface BudgetData {
 export const BudgetProgressBar = () => {
   const [budgetData, setBudgetData] = useState<BudgetData | null>(null);
   const [loading, setLoading] = useState(true);
-  const { settings } = useUserSettings();
+  const { settings: userSettings } = useUserSettings();
+  const { settings: notificationSettings } = useNotifications();
 
   const calculateBudgetData = async () => {
     setLoading(true);
@@ -49,7 +51,7 @@ export const BudgetProgressBar = () => {
         monthlyTotal += monthlyPrice;
       }
 
-      const budgetLimit = parseFloat(settings.budgetLimit) || 100;
+      const budgetLimit = notificationSettings.budgetLimit || parseFloat(userSettings.budgetLimit) || 100;
       console.log('🔄 Recalcul budget - Total:', monthlyTotal.toFixed(2), 'Limite:', budgetLimit);
       
       const percentage = (monthlyTotal / budgetLimit) * 100;
@@ -74,16 +76,37 @@ export const BudgetProgressBar = () => {
 
   useEffect(() => {
     calculateBudgetData();
-  }, [settings.budgetLimit]);
+  }, [notificationSettings.budgetLimit, userSettings.budgetLimit]);
 
-  // Recalculer aussi quand les paramètres changent
+  // Recalculer aussi quand les paramètres changent (avec un petit délai pour la synchronisation)
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       calculateBudgetData();
-    }, 100); // Petit délai pour laisser le temps aux paramètres de se sauvegarder
+    }, 100);
 
     return () => clearTimeout(timeoutId);
-  }, [settings]);
+  }, [notificationSettings, userSettings]);
+
+  // Calculer immédiatement si les données changent
+  useEffect(() => {
+    if (notificationSettings.budgetLimit !== undefined || userSettings.budgetLimit) {
+      calculateBudgetData();
+    }
+  }, [notificationSettings.budgetLimit, userSettings.budgetLimit]);
+
+  // Écouter les événements de mise à jour du budget
+  useEffect(() => {
+    const handleBudgetUpdate = () => {
+      console.log('📢 Événement budgetUpdated reçu, recalcul immédiat...');
+      calculateBudgetData();
+    };
+
+    window.addEventListener('budgetUpdated', handleBudgetUpdate);
+    
+    return () => {
+      window.removeEventListener('budgetUpdated', handleBudgetUpdate);
+    };
+  }, []);
 
   if (loading) {
     return (

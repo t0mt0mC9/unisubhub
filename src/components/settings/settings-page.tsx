@@ -161,6 +161,12 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
     if (pendingBudgetValue) {
       updateSettings({ budgetLimit: parseFloat(pendingBudgetValue) });
       setCurrentBudgetInput(pendingBudgetValue); // Synchroniser l'input
+      
+      // Déclencher un événement personnalisé pour forcer la mise à jour de la barre
+      window.dispatchEvent(new CustomEvent('budgetUpdated', { 
+        detail: { newBudget: parseFloat(pendingBudgetValue) }
+      }));
+      
       toast({
         title: "Budget mis à jour",
         description: `Nouvelle limite de budget: ${pendingBudgetValue}€`,
