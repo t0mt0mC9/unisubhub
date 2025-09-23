@@ -37,6 +37,12 @@
                 <data android:scheme="unisubhub" android:host="auth" />
             </intent-filter>
 
+        <intent-filter autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="unisubhub" android:host="oauth-callback" />
+            </intent-filter>
 
         </activity>
 

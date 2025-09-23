@@ -14,8 +14,9 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { LogIn, UserPlus, Loader2, Eye, EyeOff, KeyRound } from "lucide-react";
-import { platform } from "node:process";
 import { Capacitor } from "@capacitor/core";
+import { App } from "@capacitor/app";
+import { Browser } from "@capacitor/browser";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -199,16 +200,75 @@ const Auth = () => {
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/`
-        }
-      });
 
-      if (error) throw error;
-    } catch (error: any) {
+    try {
+      if (Capacitor.isNativePlatform()) {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            redirectTo: "unisubhub://oauth-callback",
+            skipBrowserRedirect: true,
+          },
+        });
+
+        if (error) throw error;
+        await Browser.open({ url: data.url });
+
+        // Écouter le retour de l'app
+        return new Promise((resolve, reject) => {
+          App.addListener("appUrlOpen", async (data) => {
+            if (data.url.includes("oauth-callback")) {
+              await Browser.close();
+
+              const url = new URL(data.url);
+              const code = url.searchParams.get("code");
+
+              if (code) {
+                const { error, data: sessionData } =
+                  await supabase.auth.exchangeCodeForSession(code);
+
+                if (error) {
+                  console.error("exchangeCodeForSession", error);
+                  reject(error);
+                  return;
+                }
+
+                resolve(sessionData);
+              } else if (data.url.includes("#")) {
+                const params = new URLSearchParams(data.url.split("#")[1]);
+                const access_token = params.get("access_token");
+                const refresh_token = params.get("refresh_token");
+
+                if (access_token && refresh_token) {
+                  const { data: sessionData, error: sessionError } =
+                    await supabase.auth.setSession({
+                      access_token,
+                      refresh_token,
+                    });
+                  if (sessionError) {
+                    console.error("setSession", sessionError);
+                    reject(sessionError);
+                  } else {
+                    resolve(sessionData);
+                  }
+                } else {
+                  reject(new Error("Tokens manquants dans l'URL de callback"));
+                }
+              }
+            }
+          });
+        });
+      } else {
+        // Pour web : méthode normale
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: "google",
+        });
+
+        if (error) throw error;
+        return data;
+      }
+    } catch (error) {
+      console.error("Erreur Google Sign-In:", error);
       toast({
         title: "Erreur de connexion Google",
         description: error.message,
@@ -223,10 +283,10 @@ const Auth = () => {
     setLoading(true);
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'apple',
+        provider: "apple",
         options: {
-          redirectTo: `${window.location.origin}/`
-        }
+          redirectTo: `${window.location.origin}/`,
+        },
       });
 
       if (error) throw error;
@@ -523,7 +583,7 @@ const Auth = () => {
                         </svg>
                         Google
                       </Button>
-                      
+
                       <Button
                         type="button"
                         variant="outline"
@@ -540,7 +600,7 @@ const Auth = () => {
                         Apple
                       </Button>
                     </div>
-                    
+
                     <div className="relative">
                       <div className="absolute inset-0 flex items-center">
                         <span className="w-full border-t" />
@@ -645,7 +705,7 @@ const Auth = () => {
                         </svg>
                         Google
                       </Button>
-                      
+
                       <Button
                         type="button"
                         variant="outline"
@@ -662,7 +722,7 @@ const Auth = () => {
                         Apple
                       </Button>
                     </div>
-                    
+
                     <div className="relative">
                       <div className="absolute inset-0 flex items-center">
                         <span className="w-full border-t" />
