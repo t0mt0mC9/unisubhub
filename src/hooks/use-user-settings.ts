@@ -67,6 +67,30 @@ export const useUserSettings = () => {
         budgetAlerts: updatedSettings.budgetAlerts,
         renewalAlerts: updatedSettings.renewalAlerts,
       }));
+
+      // Aussi sauvegarder dans la base de données pour synchronisation
+      if (newSettings.budgetLimit !== undefined || newSettings.budgetAlerts !== undefined) {
+        const { error } = await supabase
+          .from('notification_settings')
+          .upsert({
+            user_id: userId,
+            budget_limit: parseFloat(updatedSettings.budgetLimit) || 100,
+            budget_alerts: updatedSettings.budgetAlerts,
+            email_notifications: updatedSettings.emailNotifications,
+            push_notifications: updatedSettings.notifications,
+            renewal_alerts: updatedSettings.renewalAlerts,
+            offer_notifications: true, // valeur par défaut
+            monthly_summary: false // valeur par défaut
+          }, {
+            onConflict: 'user_id'
+          });
+
+        if (error) {
+          console.error('Erreur sauvegarde paramètres DB:', error);
+        } else {
+          console.log('✅ Paramètres sauvegardés en DB');
+        }
+      }
     } catch (error) {
       console.error('Error saving settings:', error);
     }

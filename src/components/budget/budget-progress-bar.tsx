@@ -50,14 +50,17 @@ export const BudgetProgressBar = () => {
       }
 
       const budgetLimit = parseFloat(settings.budgetLimit) || 100;
-      const percentage = Math.min((monthlyTotal / budgetLimit) * 100, 100);
+      console.log('🔄 Recalcul budget - Total:', monthlyTotal.toFixed(2), 'Limite:', budgetLimit);
+      
+      const percentage = (monthlyTotal / budgetLimit) * 100;
+      const displayPercentage = Math.min(percentage, 100); // Limiter l'affichage à 100% pour la barre
       const isOverBudget = monthlyTotal > budgetLimit;
       const excess = isOverBudget ? monthlyTotal - budgetLimit : 0;
 
       setBudgetData({
         monthlyTotal,
         budgetLimit,
-        percentage,
+        percentage: displayPercentage,
         isOverBudget,
         excess
       });
@@ -72,6 +75,15 @@ export const BudgetProgressBar = () => {
   useEffect(() => {
     calculateBudgetData();
   }, [settings.budgetLimit]);
+
+  // Recalculer aussi quand les paramètres changent
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      calculateBudgetData();
+    }, 100); // Petit délai pour laisser le temps aux paramètres de se sauvegarder
+
+    return () => clearTimeout(timeoutId);
+  }, [settings]);
 
   if (loading) {
     return (
@@ -117,8 +129,8 @@ export const BudgetProgressBar = () => {
           <Progress 
             value={percentage} 
             className={cn(
-              "h-3",
-              "[&>div]:transition-colors [&>div]:duration-300"
+              "h-3 transition-all duration-500",
+              "[&>div]:transition-all [&>div]:duration-500"
             )}
             style={{
               '--progress-background': isOverBudget ? 'hsl(var(--destructive))' : 'hsl(var(--primary))'
@@ -133,7 +145,7 @@ export const BudgetProgressBar = () => {
 
         {/* Indicateur de statut */}
         <div className={cn(
-          "flex items-center gap-2 p-3 rounded-lg text-sm",
+          "flex items-center gap-2 p-3 rounded-lg text-sm transition-all duration-300",
           isOverBudget 
             ? "bg-destructive/10 text-destructive border border-destructive/20" 
             : "bg-primary/10 text-primary border border-primary/20"
@@ -157,13 +169,13 @@ export const BudgetProgressBar = () => {
 
         {/* Détails */}
         <div className="grid grid-cols-2 gap-4 text-center">
-          <div className="space-y-1">
+          <div className="space-y-1 transition-all duration-300">
             <p className="text-2xl font-bold text-primary">
               {monthlyTotal.toFixed(2)}€
             </p>
             <p className="text-xs text-muted-foreground">Dépenses mensuelles</p>
           </div>
-          <div className="space-y-1">
+          <div className="space-y-1 transition-all duration-300">
             <p className="text-2xl font-bold text-muted-foreground">
               {budgetLimit}€
             </p>
