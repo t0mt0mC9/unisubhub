@@ -13,7 +13,6 @@ import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import ResetPassword from "./pages/ResetPassword";
-import ScreenTime from "./pages/ScreenTime";
 import { initializeOneSignal } from "./lib/onesignal";
 
 import ExpenseAnalysis from "./pages/ExpenseAnalysis";
@@ -167,10 +166,6 @@ const App = () => {
             <Route 
               path="/expense-analysis" 
               element={user ? (userHasAccess() ? <ExpenseAnalysis /> : <SubscriptionLock />) : <Navigate to="/auth" replace />} 
-            />
-            <Route 
-              path="/screen-time" 
-              element={user ? (userHasAccess() ? <ScreenTime /> : <SubscriptionLock />) : <Navigate to="/auth" replace />} 
             />
             <Route 
               path="/analytics" 

@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Home, Gift, BarChart3, Settings, Crown } from "lucide-react";
+import { Home, Gift, BarChart3, Settings, Crown, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface BottomNavProps {

@@ -6,8 +6,6 @@ import { SpendingOverview } from "@/components/dashboard/spending-overview";
 import { SubscriptionCard } from "@/components/dashboard/subscription-card";
 import { AnalyticsStats } from "@/components/analytics/analytics-stats";
 import { AnalyticsCharts } from "@/components/analytics/analytics-charts";
-import { ScreenTimeDashboard } from "@/components/screen-time/screen-time-dashboard";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DealabsOffers } from "@/components/deals/dealabs-offers";
 import { SettingsPage } from "@/components/settings/settings-page";
 import { SubscriptionPlans } from "@/components/subscription/subscription-plans";
@@ -328,24 +326,13 @@ const Index = () => {
       <div className="p-4 space-y-6">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold text-foreground mb-2">Analyses détaillées</h2>
-          <p className="text-muted-foreground">Analysez vos dépenses et votre usage</p>
+          <p className="text-muted-foreground">Analysez vos dépenses d'abonnements</p>
         </div>
         
-        <Tabs defaultValue="subscriptions" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="subscriptions">Abonnements</TabsTrigger>
-            <TabsTrigger value="usage">Analyse d'usage</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="subscriptions" className="space-y-6 mt-6">
-            <AnalyticsStats subscriptions={allSubscriptions} />
-            <AnalyticsCharts subscriptions={allSubscriptions} />
-          </TabsContent>
-          
-          <TabsContent value="usage" className="mt-6">
-            <ScreenTimeDashboard />
-          </TabsContent>
-        </Tabs>
+        <div className="space-y-6">
+          <AnalyticsStats subscriptions={allSubscriptions} />
+          <AnalyticsCharts subscriptions={allSubscriptions} />
+        </div>
         
         {/* Bottom spacing for fixed navigation */}
         <div className="h-20" />
