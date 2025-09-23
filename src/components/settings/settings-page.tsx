@@ -40,6 +40,8 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
 
   const [aiConsent, setAiConsent] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
+  const [showBudgetConfirm, setShowBudgetConfirm] = useState(false);
+  const [pendingBudgetValue, setPendingBudgetValue] = useState<string>("");
 
   useEffect(() => {
     const loadConsent = async () => {
@@ -117,6 +119,31 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
         variant: "destructive",
       });
     }
+  };
+
+  const handleBudgetChange = (newValue: string) => {
+    const numValue = parseFloat(newValue);
+    if (!isNaN(numValue) && numValue > 0 && numValue !== settings.budgetLimit) {
+      setPendingBudgetValue(newValue);
+      setShowBudgetConfirm(true);
+    }
+  };
+
+  const confirmBudgetChange = () => {
+    if (pendingBudgetValue) {
+      updateSettings({ budgetLimit: parseFloat(pendingBudgetValue) });
+      toast({
+        title: "Budget mis à jour",
+        description: `Nouvelle limite de budget: ${pendingBudgetValue}€`,
+      });
+    }
+    setShowBudgetConfirm(false);
+    setPendingBudgetValue("");
+  };
+
+  const cancelBudgetChange = () => {
+    setShowBudgetConfirm(false);
+    setPendingBudgetValue("");
   };
 
   return (
@@ -253,7 +280,12 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
               id="budget"
               type="number"
               value={settings.budgetLimit}
-              onChange={(e) => updateSettings({ budgetLimit: Number(e.target.value) })}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value && parseFloat(value) > 0) {
+                  handleBudgetChange(value);
+                }
+              }}
               placeholder="100"
               disabled={loading}
             />
@@ -355,6 +387,35 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
           </Button>
         </CardContent>
       </Card>
+
+      {/* Confirmation de modification du budget */}
+      <AlertDialog open={showBudgetConfirm} onOpenChange={setShowBudgetConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Modifier le budget limite ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Vous souhaitez changer votre budget mensuel limite de{" "}
+              <strong>{settings.budgetLimit}€</strong> à{" "}
+              <strong>{pendingBudgetValue}€</strong>.
+              <br /><br />
+              Cette modification affectera vos alertes de budget et la barre de progression.
+              {pendingBudgetValue && settings.budgetLimit > parseFloat(pendingBudgetValue) && (
+                <div className="mt-2 p-2 bg-orange-50 border border-orange-200 rounded text-orange-800 text-sm">
+                  ⚠️ Attention : Réduire votre budget peut déclencher des alertes si vos dépenses actuelles dépassent la nouvelle limite.
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelBudgetChange}>
+              Annuler
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmBudgetChange}>
+              Confirmer la modification
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
