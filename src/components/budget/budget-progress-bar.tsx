@@ -51,9 +51,26 @@ export const BudgetProgressBar = () => {
         monthlyTotal += monthlyPrice;
       }
 
-      const budgetLimit = notificationSettings.budgetLimit || parseFloat(userSettings.budgetLimit) || 100;
-      console.log('🔄 Recalcul budget - Total:', monthlyTotal.toFixed(2), 'Limite:', budgetLimit);
-      console.log('📊 Sources budget - NotificationSettings:', notificationSettings.budgetLimit, 'UserSettings:', userSettings.budgetLimit);
+      // Récupérer la limite de budget depuis la base (source de vérité)
+      let budgetLimit = 100;
+      const { data: notifSettings, error: notifErr } = await supabase
+        .from('notification_settings')
+        .select('budget_limit')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (notifErr) {
+        console.warn('⚠️ Erreur lecture notification_settings, fallback userSettings/localStorage:', notifErr.message);
+      }
+      if (notifSettings?.budget_limit && typeof notifSettings.budget_limit === 'number') {
+        budgetLimit = notifSettings.budget_limit;
+      } else if (notificationSettings.budgetLimit) {
+        budgetLimit = notificationSettings.budgetLimit;
+      } else if (userSettings.budgetLimit) {
+        budgetLimit = parseFloat(userSettings.budgetLimit) || 100;
+      }
+
+      console.log('🔄 Recalcul budget - Total:', monthlyTotal.toFixed(2), 'Limite (DB->hooks->localStorage):', budgetLimit);
+      console.log('📊 Sources budget - DB:', notifSettings?.budget_limit, 'NotificationSettings:', notificationSettings.budgetLimit, 'UserSettings:', userSettings.budgetLimit);
       
       const percentage = (monthlyTotal / budgetLimit) * 100;
       const displayPercentage = Math.min(percentage, 100); // Limiter l'affichage à 100% pour la barre
