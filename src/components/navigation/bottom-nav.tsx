@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Home, Gift, BarChart3, Settings, Crown, Users, Clock } from "lucide-react";
+import { Home, Gift, BarChart3, Settings, Crown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface BottomNavProps {
@@ -11,7 +11,6 @@ const navItems = [
   { id: 'dashboard', label: 'Abonnements', icon: Home, path: '/' },
   { id: 'offers', label: 'Offres', icon: Gift, path: null },
   { id: 'analytics', label: 'Analyses', icon: BarChart3, path: null },
-  { id: 'screen-time', label: 'Screen Time', icon: Clock, path: '/screen-time' },
   { id: 'subscription', label: 'Premium', icon: Crown, path: null },
   { id: 'settings', label: 'Réglages', icon: Settings, path: null },
 ];
@@ -31,7 +30,7 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-surface border-t border-border">
-      <div className="grid grid-cols-6 h-16">
+      <div className="grid grid-cols-5 h-16">
         {navItems.map(({ id, label, icon: Icon, path }) => (
           <button
             key={id}
