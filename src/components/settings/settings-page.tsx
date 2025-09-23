@@ -42,6 +42,12 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
   const [aiLoading, setAiLoading] = useState(false);
   const [showBudgetConfirm, setShowBudgetConfirm] = useState(false);
   const [pendingBudgetValue, setPendingBudgetValue] = useState<string>("");
+  const [currentBudgetInput, setCurrentBudgetInput] = useState<string>("");
+
+  useEffect(() => {
+    // Initialiser l'input avec la valeur actuelle du budget
+    setCurrentBudgetInput(settings.budgetLimit.toString());
+  }, [settings.budgetLimit]);
 
   useEffect(() => {
     const loadConsent = async () => {
@@ -129,9 +135,32 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
     }
   };
 
+  const handleBudgetInputChange = (value: string) => {
+    // Permettre seulement les nombres et limiter à 4 chiffres
+    const numericValue = value.replace(/[^0-9]/g, '');
+    if (numericValue.length <= 4) {
+      setCurrentBudgetInput(numericValue);
+    }
+  };
+
+  const handleBudgetBlur = () => {
+    if (currentBudgetInput && currentBudgetInput !== settings.budgetLimit.toString()) {
+      handleBudgetChange(currentBudgetInput);
+    }
+  };
+
+  const handleBudgetKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      if (currentBudgetInput && currentBudgetInput !== settings.budgetLimit.toString()) {
+        handleBudgetChange(currentBudgetInput);
+      }
+    }
+  };
+
   const confirmBudgetChange = () => {
     if (pendingBudgetValue) {
       updateSettings({ budgetLimit: parseFloat(pendingBudgetValue) });
+      setCurrentBudgetInput(pendingBudgetValue); // Synchroniser l'input
       toast({
         title: "Budget mis à jour",
         description: `Nouvelle limite de budget: ${pendingBudgetValue}€`,
@@ -142,6 +171,7 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
   };
 
   const cancelBudgetChange = () => {
+    setCurrentBudgetInput(settings.budgetLimit.toString()); // Remettre l'ancienne valeur
     setShowBudgetConfirm(false);
     setPendingBudgetValue("");
   };
@@ -278,16 +308,16 @@ export const SettingsPage = ({ onSignOut, onShowPrivacyPolicy }: SettingsPagePro
             <Label htmlFor="budget">Budget mensuel moyen à ne pas dépasser (€)</Label>
             <Input
               id="budget"
-              type="number"
-              value={settings.budgetLimit}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (value && parseFloat(value) > 0) {
-                  handleBudgetChange(value);
-                }
-              }}
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={currentBudgetInput}
+              onChange={(e) => handleBudgetInputChange(e.target.value)}
+              onBlur={handleBudgetBlur}
+              onKeyPress={handleBudgetKeyPress}
               placeholder="100"
               disabled={loading}
+              maxLength={4}
             />
             <div className="text-sm text-muted-foreground">
               Vous serez alerté si vos dépenses dépassent ce montant
