@@ -1,10 +1,16 @@
 PODS:
-  - Capacitor (7.4.3):
+  - Capacitor (7.4.2):
     - CapacitorCordova
+  - CapacitorApp (7.1.0):
+    - Capacitor
+  - CapacitorBrowser (7.0.2):
+    - Capacitor
+  - CapacitorCommunityAppleSignIn (7.0.1):
+    - Capacitor
   - CapacitorCommunityFirebaseAnalytics (7.0.1):
     - Capacitor
     - FirebaseAnalytics
-  - CapacitorCordova (7.4.3)
+  - CapacitorCordova (7.4.2)
   - FirebaseAnalytics (11.9.0):
     - FirebaseAnalytics/AdIdSupport (= 11.9.0)
     - FirebaseCore (~> 11.9.0)
@@ -95,10 +101,13 @@ PODS:
     - PurchasesHybridCommon (= 16.2.0)
 
 DEPENDENCIES:
-  - "Capacitor (from `../../node_modules/.pnpm/@capacitor+ios@7.4.3_@capacitor+core@7.4.3/node_modules/@capacitor/ios`)"
-  - "CapacitorCommunityFirebaseAnalytics (from `../../node_modules/.pnpm/@capacitor-community+firebase-analytics@7.0.1_@capacitor+core@7.4.3/node_modules/@capacitor-community/firebase-analytics`)"
-  - "CapacitorCordova (from `../../node_modules/.pnpm/@capacitor+ios@7.4.3_@capacitor+core@7.4.3/node_modules/@capacitor/ios`)"
-  - "RevenuecatPurchasesCapacitor (from `../../node_modules/.pnpm/@revenuecat+purchases-capacitor@11.1.1_@capacitor+core@7.4.3/node_modules/@revenuecat/purchases-capacitor`)"
+  - "Capacitor (from `../../node_modules/@capacitor/ios`)"
+  - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
+  - "CapacitorBrowser (from `../../node_modules/@capacitor/browser`)"
+  - "CapacitorCommunityAppleSignIn (from `../../node_modules/@capacitor-community/apple-sign-in`)"
+  - "CapacitorCommunityFirebaseAnalytics (from `../../node_modules/@capacitor-community/firebase-analytics`)"
+  - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
+  - "RevenuecatPurchasesCapacitor (from `../../node_modules/@revenuecat/purchases-capacitor`)"
 
 SPEC REPOS:
   trunk:
@@ -115,18 +124,27 @@ SPEC REPOS:
 
 EXTERNAL SOURCES:
   Capacitor:
-    :path: "../../node_modules/.pnpm/@capacitor+ios@7.4.3_@capacitor+core@7.4.3/node_modules/@capacitor/ios"
+    :path: "../../node_modules/@capacitor/ios"
+  CapacitorApp:
+    :path: "../../node_modules/@capacitor/app"
+  CapacitorBrowser:
+    :path: "../../node_modules/@capacitor/browser"
+  CapacitorCommunityAppleSignIn:
+    :path: "../../node_modules/@capacitor-community/apple-sign-in"
   CapacitorCommunityFirebaseAnalytics:
-    :path: "../../node_modules/.pnpm/@capacitor-community+firebase-analytics@7.0.1_@capacitor+core@7.4.3/node_modules/@capacitor-community/firebase-analytics"
+    :path: "../../node_modules/@capacitor-community/firebase-analytics"
   CapacitorCordova:
-    :path: "../../node_modules/.pnpm/@capacitor+ios@7.4.3_@capacitor+core@7.4.3/node_modules/@capacitor/ios"
+    :path: "../../node_modules/@capacitor/ios"
   RevenuecatPurchasesCapacitor:
-    :path: "../../node_modules/.pnpm/@revenuecat+purchases-capacitor@11.1.1_@capacitor+core@7.4.3/node_modules/@revenuecat/purchases-capacitor"
+    :path: "../../node_modules/@revenuecat/purchases-capacitor"
 
 SPEC CHECKSUMS:
-  Capacitor: b4741ca7affb32c1b70debd03df92cbf522d8a80
+  Capacitor: 156d98aba46ec01dde72c4bbb92fa626837cad29
+  CapacitorApp: 846d4b4a1dbb19dd1e9029c08ba6f028aa7be862
+  CapacitorBrowser: 45c681e7abc3b4384e54eb52bafeef1347d98fa8
+  CapacitorCommunityAppleSignIn: b95415441e6c4223783a543f3a736ea4eabf8524
   CapacitorCommunityFirebaseAnalytics: b70024dd8bee31e6e5bcc07d8a207454056e30c1
-  CapacitorCordova: 435121e81a2df4d0034f0fb11fcefab5104cfdb5
+  CapacitorCordova: 5e58d04631bc5094894ac106e2bf1da18a9e6151
   FirebaseAnalytics: 68aa43d0556fb7ea3957570f65417813851fcf95
   FirebaseCore: 7cfcf7e8b33985c06478fd2b96e2f7101eb61a1c
   FirebaseCoreInternal: 154779013b85b4b290fdba38414df475f42e3096
@@ -139,6 +157,6 @@ SPEC CHECKSUMS:
   RevenueCat: eb2aa042789d9c99ad5172bd96e28b96286d6ada
   RevenuecatPurchasesCapacitor: f3f6a8a814da109a183a941097eb0b94307a8521
 
-PODFILE CHECKSUM: b0203dd4bb04e0d0ddba7adff9a00e7e7fcc1a89
+PODFILE CHECKSUM: 028fc262c9a5cbd80d78f22449eb8fc86a233ad4
 
 COCOAPODS: 1.16.2
