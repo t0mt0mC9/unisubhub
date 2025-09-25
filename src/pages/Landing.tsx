@@ -33,6 +33,18 @@ const Landing = () => {
   const [hoveredFeature, setHoveredFeature] = useState<number | null>(null);
   const navigate = useNavigate();
 
+  // Detect iOS devices
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const appStoreUrl = "https://apps.apple.com/fr/app/unisubhub-app/id6751284623";
+
+  const handleButtonClick = () => {
+    if (isIOS) {
+      window.open(appStoreUrl, '_blank');
+    } else {
+      navigate('/auth');
+    }
+  };
+
   const features = [
     {
       icon: CreditCard,
@@ -106,7 +118,7 @@ const Landing = () => {
             </div>
             <Button 
               className="bg-gradient-primary hover:opacity-90 text-primary-foreground"
-              onClick={() => navigate('/auth')}
+              onClick={handleButtonClick}
             >
               Se connecter
             </Button>
@@ -144,7 +156,7 @@ const Landing = () => {
               <Button 
                 size="lg" 
                 className="bg-gradient-primary hover:opacity-90 text-primary-foreground px-8 py-6 text-lg"
-                onClick={() => navigate('/auth')}
+                onClick={handleButtonClick}
               >
                 <Play className="mr-2 h-5 w-5" />
                 Commencer gratuitement
@@ -375,7 +387,7 @@ const Landing = () => {
               <div className="text-center mt-8">
                 <Button 
                   className="bg-gradient-primary hover:opacity-90 text-primary-foreground px-8 py-3 text-lg"
-                  onClick={() => navigate('/auth')}
+                  onClick={handleButtonClick}
                 >
                   Essayer maintenant
                 </Button>
@@ -445,7 +457,7 @@ const Landing = () => {
               <Button 
                 size="lg"
                 className="bg-gradient-primary hover:opacity-90 text-primary-foreground px-8 py-6 text-lg"
-                onClick={() => navigate('/auth')}
+                onClick={handleButtonClick}
               >
                 Commencer gratuitement
                 <ArrowRight className="ml-2 h-5 w-5" />
