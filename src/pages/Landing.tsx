@@ -309,6 +309,76 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* Values Section */}
+      <section className="py-20 bg-gradient-to-br from-background via-surface to-background relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,hsl(var(--primary))_0%,transparent_50%)] opacity-5" />
+        <div className="container mx-auto px-4 relative">
+          <div className="text-center mb-16">
+            <Badge variant="outline" className="mb-4 border-primary/20 text-primary">
+              Nos valeurs
+            </Badge>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              Ce qui nous guide
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Cinq principes fondamentaux qui orientent chaque décision dans le développement d'UniSubHub.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-6 max-w-6xl mx-auto">
+            <div className="text-center group">
+              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-primary to-primary-light flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                <BarChart3 className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Clarté</h3>
+              <p className="text-sm text-muted-foreground">
+                Des données simples et visuelles pour comprendre sa consommation.
+              </p>
+            </div>
+
+            <div className="text-center group">
+              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-success to-warning flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                <Shield className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Contrôle</h3>
+              <p className="text-sm text-muted-foreground">
+                L'utilisateur reprend la main sur ses paiements.
+              </p>
+            </div>
+
+            <div className="text-center group">
+              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-warning to-destructive flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                <Zap className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Efficacité</h3>
+              <p className="text-sm text-muted-foreground">
+                Gagner du temps grâce à l'automatisation et aux alertes intelligentes.
+              </p>
+            </div>
+
+            <div className="text-center group">
+              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-accent to-primary flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                <CheckCircle className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Confiance</h3>
+              <p className="text-sm text-muted-foreground">
+                Sécurité des données et respect de la vie privée au cœur du produit.
+              </p>
+            </div>
+
+            <div className="text-center group">
+              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                <TrendingUp className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Équilibre</h3>
+              <p className="text-sm text-muted-foreground">
+                Encourager une consommation responsable et durable.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Dashboard Preview */}
       <section className="py-20">
         <div className="container mx-auto px-4">
