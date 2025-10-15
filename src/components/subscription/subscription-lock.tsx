@@ -26,37 +26,22 @@ export const SubscriptionLock = ({ onUpgrade, trialDaysRemaining = 0 }: Subscrip
     }
   };
 
-  const handleForceReauth = async () => {
+  const handleBackToAuth = async () => {
     try {
-      toast({
-        title: "Nettoyage de la session...",
-        description: "Réinitialisation complète de l'authentification en cours",
-      });
+      console.log('🔄 Déconnexion et redirection vers /auth...');
       
-      console.log('🔄 Début du nettoyage d\'authentification...');
+      // Déconnexion de l'utilisateur
+      await supabase.auth.signOut();
       
-      // 1. Nettoyer complètement l'état d'authentification
+      // Nettoyer l'état d'authentification
       cleanupAuthState();
       
-      // 2. Tenter une déconnexion globale (ignore les erreurs)
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-        console.log('✅ Déconnexion globale réussie');
-      } catch (err) {
-        console.log('⚠️ Erreur lors de la déconnexion globale (ignorée):', err);
-      }
-      
-      // 3. Rediriger vers la page de connexion sans rechargement
-      console.log('🔄 Redirection vers la page de connexion...');
+      // Rediriger vers la page de connexion
       navigate('/auth');
-      
     } catch (error) {
-      console.error('❌ Erreur lors du nettoyage:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de nettoyer la session. Veuillez rafraîchir manuellement la page.",
-        variant: "destructive",
-      });
+      console.error('❌ Erreur lors de la déconnexion:', error);
+      // Rediriger quand même vers /auth
+      navigate('/auth');
     }
   };
   return (
@@ -76,7 +61,7 @@ export const SubscriptionLock = ({ onUpgrade, trialDaysRemaining = 0 }: Subscrip
           </p>
           <div className="flex flex-col gap-3">
             <Button 
-              onClick={() => navigate('/auth')} 
+              onClick={handleBackToAuth} 
               variant="outline"
               className="w-full"
             >
