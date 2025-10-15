@@ -83,31 +83,10 @@ const App = () => {
       return false;
     }
 
-    // PRIORITÉ 1: Si l'utilisateur a un abonnement actif selon le hook
-    if (hasAccess) {
-      console.log("✅ userHasAccess: Accès accordé via abonnement/trial actif");
-      return true;
-    }
-
-    // PRIORITÉ 2: Vérifier l'essai gratuit basé sur la date de création (fallback uniquement)
-    const userCreatedAt = new Date(user.created_at);
-    const now = new Date();
-    const daysSinceCreation = Math.floor(
-      (now.getTime() - userCreatedAt.getTime()) / (1000 * 60 * 60 * 24)
-    );
-
-    // Donner accès pendant 14 jours après création (seulement si pas d'abonnement)
-    const trialAccess = daysSinceCreation < 14;
-
-    console.log("🔍 userHasAccess: État détaillé", {
-      hasAccess,
-      daysSinceCreation,
-      trialAccess,
-      subscriptionLoading,
-      finalAccess: trialAccess,
-    });
-
-    return trialAccess;
+    // Utiliser directement la valeur hasAccess du hook useSubscription
+    // Le hook gère déjà la logique d'abonnement et de trial
+    console.log("✅ userHasAccess: Accès =", hasAccess);
+    return hasAccess;
   };
 
   // Check if user needs initial setup
