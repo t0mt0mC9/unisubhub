@@ -21,21 +21,31 @@ interface CreativityOffer {
 const creativityOffers: CreativityOffer[] = [
   {
     name: "Adobe Creative Cloud",
-    price: "23.99€",
-    originalPrice: "59.99€",
+    price: "59,99€",
     duration: "1 mois",
     description: "Suite complète de création Adobe",
     highlights: ["Photoshop + Illustrator + Premiere", "20+ apps créatives", "100GB cloud", "Portfolio en ligne"],
     url: "https://www.adobe.com/fr/creativecloud.html",
     category: "design",
     rating: 4.7,
-    promotion: "-60% pendant 3 mois",
+    promotion: "Réduction étudiants -65%",
     userCount: "26M+"
   },
   {
+    name: "Figma Professional",
+    price: "12€",
+    duration: "1 mois",
+    description: "Design collaboratif UI/UX",
+    highlights: ["Collaboration temps réel", "Prototypage avancé", "Versions illimitées", "Plugins communauté"],
+    url: "https://www.figma.com/",
+    category: "design",
+    rating: 4.9,
+    promotion: "Version gratuite disponible",
+    userCount: "4M+"
+  },
+  {
     name: "Canva Pro",
-    price: "11.99€",
-    originalPrice: "119.90€",
+    price: "11,99€",
     duration: "1 mois",
     description: "Design graphique simplifié",
     highlights: ["Templates premium", "Backgrounds remover", "Brand kit", "Équipe collaborative"],
@@ -46,22 +56,8 @@ const creativityOffers: CreativityOffer[] = [
     userCount: "135M+"
   },
   {
-    name: "Figma Professional",
-    price: "12€",
-    originalPrice: "15€",
-    duration: "1 mois",
-    description: "Design collaboratif UI/UX",
-    highlights: ["Collaboration temps réel", "Prototypage avancé", "Versions illimitées", "Plugins communauté"],
-    url: "https://www.figma.com/",
-    category: "design",
-    rating: 4.9,
-    promotion: "-20% pour équipes",
-    userCount: "4M+"
-  },
-  {
     name: "Midjourney",
     price: "10$",
-    originalPrice: "30$",
     duration: "1 mois",
     description: "Génération d'images par IA",
     highlights: ["IA générative avancée", "Images haute résolution", "Styles artistiques variés", "Communauté Discord"],
@@ -72,36 +68,21 @@ const creativityOffers: CreativityOffer[] = [
     userCount: "15M+"
   },
   {
-    name: "ChatGPT Plus",
-    price: "20$",
-    originalPrice: "Plus de fonctionnalités",
-    duration: "1 mois",
-    description: "IA conversationnelle avancée",
-    highlights: ["GPT-4 illimité", "Génération d'images DALL-E", "Plugins avancés", "Accès prioritaire"],
-    url: "https://openai.com/chatgpt/pricing",
-    category: "ai",
-    rating: 4.8,
-    promotion: "Modèle gratuit disponible",
-    userCount: "100M+"
-  },
-  {
     name: "Notion Pro",
     price: "8$",
-    originalPrice: "16$",
     duration: "1 mois",
     description: "Workspace tout-en-un créatif",
     highlights: ["Bases de données avancées", "Collaboration équipe", "Templates créatifs", "Intégrations"],
     url: "https://www.notion.so/",
     category: "writing",
     rating: 4.7,
-    promotion: "-50% pour étudiants",
+    promotion: "Version gratuite disponible",
     userCount: "30M+"
   },
   {
     name: "Final Cut Pro",
-    price: "329.99€",
-    originalPrice: "Achat unique",
-    duration: "À vie",
+    price: "329,99€",
+    duration: "Achat unique",
     description: "Montage vidéo professionnel Mac",
     highlights: ["Montage 4K/8K", "Effets cinématographiques", "Audio multicanal", "Export optimisé"],
     url: "https://www.apple.com/final-cut-pro/",
@@ -111,35 +92,8 @@ const creativityOffers: CreativityOffer[] = [
     userCount: "2M+"
   },
   {
-    name: "DaVinci Resolve Studio",
-    price: "295$",
-    originalPrice: "Achat unique",
-    duration: "À vie",
-    description: "Montage, étalonnage et post-prod",
-    highlights: ["Version gratuite puissante", "Étalonnage Hollywood", "Fusion VFX", "Fairlight audio"],
-    url: "https://www.blackmagicdesign.com/products/davinciresolve/",
-    category: "video",
-    rating: 4.8,
-    promotion: "Version gratuite disponible",
-    userCount: "5M+"
-  },
-  {
-    name: "Lightroom + Photoshop",
-    price: "11.99€",
-    originalPrice: "23.99€",
-    duration: "1 mois",
-    description: "Retouche photo professionnelle",
-    highlights: ["Lightroom + Photoshop", "Stockage cloud 20GB", "Lightroom mobile", "Presets exclusifs"],
-    url: "https://www.adobe.com/fr/creativecloud/photography.html",
-    category: "photo",
-    rating: 4.7,
-    promotion: "Plan photographe",
-    userCount: "20M+"
-  },
-  {
     name: "Sketch",
     price: "9$",
-    originalPrice: "99$ annuel",
     duration: "1 mois",
     description: "Design d'interface Mac",
     highlights: ["Design système", "Symbols réutilisables", "Plugins riches", "Prototypage simple"],
@@ -148,32 +102,6 @@ const creativityOffers: CreativityOffer[] = [
     rating: 4.5,
     promotion: "Essai gratuit 30 jours",
     userCount: "1M+"
-  },
-  {
-    name: "Ableton Live Suite",
-    price: "599€",
-    originalPrice: "Achat unique",
-    duration: "À vie",
-    description: "Production musicale avancée",
-    highlights: ["Instruments virtuels", "Effets professionnels", "Session view unique", "Max for Live"],
-    url: "https://www.ableton.com/",
-    category: "audio",
-    rating: 4.8,
-    promotion: "Réductions étudiants -40%",
-    userCount: "5M+"
-  },
-  {
-    name: "Grammarly Premium",
-    price: "12$",
-    originalPrice: "30$",
-    duration: "1 mois",
-    description: "Assistant d'écriture IA",
-    highlights: ["Correction avancée", "Suggestions de style", "Détecteur de plagiat", "Tons personnalisés"],
-    url: "https://www.grammarly.com/",
-    category: "writing",
-    rating: 4.6,
-    promotion: "-60% première année",
-    userCount: "30M+"
   }
 ];
 
