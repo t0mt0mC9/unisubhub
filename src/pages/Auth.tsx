@@ -1,9 +1,4 @@
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -11,13 +6,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { LogIn, UserPlus, Loader2, Eye, EyeOff, KeyRound } from "lucide-react";
-import { Capacitor } from "@capacitor/core";
+import { supabase } from "@/integrations/supabase/client";
+import { SignInWithApple } from "@capacitor-community/apple-sign-in";
 import { App } from "@capacitor/app";
 import { Browser } from "@capacitor/browser";
-import { SignInWithApple } from "@capacitor-community/apple-sign-in";
+import { Capacitor } from "@capacitor/core";
+import { Eye, EyeOff, KeyRound, Loader2, LogIn, UserPlus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -34,6 +34,25 @@ const Auth = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
+  const isMacOS = () => {
+    const platform = navigator.platform.toLowerCase();
+    const userAgent = navigator.userAgent.toLowerCase();
+
+    return platform.includes("mac") || userAgent.includes("mac");
+  };
+
+  const isAppleSignInAvailable = () => {
+    if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === "ios") {
+      return true;
+    }
+
+    if (!Capacitor.isNativePlatform() && isMacOS()) {
+      return true;
+    }
+
+    return false;
+  };
 
   // Vérifier les paramètres URL pour le reset de mot de passe (hash et query)
   useEffect(() => {
@@ -283,31 +302,42 @@ const Auth = () => {
   const handleAppleSignIn = async () => {
     setLoading(true);
     try {
-      const result = await SignInWithApple.authorize({
-        clientId: "com.unisubhub.mobile",
-        scopes: "email name",
-        redirectURI:
-          "https://rhmxohcqyyyglgmtnioc.supabase.co/auth/v1/callback",
-      });
-
-      console.log("Apple Sign-In result:", result);
-
-      if (result.response?.identityToken) {
-        const { data, error } = await supabase.auth.signInWithIdToken({
-          provider: "apple",
-          token: result.response.identityToken,
+      if (Capacitor.isNativePlatform()) {
+        const result = await SignInWithApple.authorize({
+          clientId: "com.unisubhub.mobile",
+          scopes: "email name",
+          redirectURI:
+            "https://rhmxohcqyyyglgmtnioc.supabase.co/auth/v1/callback",
         });
-        if (error) {
-          console.error("Erreur Supabase:", error);
-          throw error;
+
+        console.log("Apple Sign-In result:", result);
+
+        if (result.response?.identityToken) {
+          const { data, error } = await supabase.auth.signInWithIdToken({
+            provider: "apple",
+            token: result.response.identityToken,
+          });
+          if (error) {
+            console.error("Erreur Supabase:", error);
+            throw error;
+          }
+
+          console.log("Connexion réussie:", data);
+
+          toast({
+            title: "Connexion Apple réussie",
+            description: "Vous êtes maintenant connecté",
+          });
         }
-
-        console.log("Connexion réussie:", data);
-
-        toast({
-          title: "Connexion Apple réussie",
-          description: "Vous êtes maintenant connecté",
+      } else {
+        const result = await supabase.auth.signInWithOAuth({
+          provider: "apple",
+          options: {
+            redirectTo: `${window.location.origin}/auth?provider=apple`,
+          },
         });
+
+        console.log("Apple OAuth redirect URL:", result);
       }
     } catch (error: any) {
       toast({
@@ -319,6 +349,42 @@ const Auth = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const handleOAuthCallback = async () => {
+      const { data, error } = await supabase.auth.getSession();
+
+      if (data.session && searchParams.get("provider") === "apple") {
+        console.log("✅ Session Apple OAuth récupérée:", data.session);
+
+        toast({
+          title: "Connexion Apple réussie",
+          description: `Bienvenue ${
+            data.session.user?.user_metadata?.full_name ||
+            data.session.user?.email
+          }`,
+        });
+
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname
+        );
+        navigate("/");
+      } else if (error) {
+        console.error("❌ Erreur session OAuth Apple:", error);
+        toast({
+          title: "Erreur de connexion Apple",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    };
+
+    if (searchParams.get("provider") === "apple") {
+      handleOAuthCallback();
+    }
+  }, [searchParams, navigate, toast]);
 
   const handleForgotPassword = async () => {
     if (!email) {
@@ -603,24 +669,23 @@ const Auth = () => {
                         Google
                       </Button>
 
-                      {Capacitor.isNativePlatform() &&
-                        Capacitor.getPlatform() === "ios" && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={handleAppleSignIn}
-                            disabled={loading}
-                            className="w-full"
-                          >
-                            <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
-                              <path
-                                fill="currentColor"
-                                d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"
-                              />
-                            </svg>
-                            Apple
-                          </Button>
-                        )}
+                      {isAppleSignInAvailable() && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={handleAppleSignIn}
+                          disabled={loading}
+                          className="w-full"
+                        >
+                          <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+                            <path
+                              fill="currentColor"
+                              d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"
+                            />
+                          </svg>
+                          Apple
+                        </Button>
+                      )}
                     </div>
 
                     <div className="relative">
@@ -728,21 +793,23 @@ const Auth = () => {
                         Google
                       </Button>
 
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={handleAppleSignIn}
-                        disabled={loading}
-                        className="w-full"
-                      >
-                        <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
-                          <path
-                            fill="currentColor"
-                            d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"
-                          />
-                        </svg>
-                        Apple
-                      </Button>
+                      {isAppleSignInAvailable() && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={handleAppleSignIn}
+                          disabled={loading}
+                          className="w-full"
+                        >
+                          <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+                            <path
+                              fill="currentColor"
+                              d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"
+                            />
+                          </svg>
+                          Apple
+                        </Button>
+                      )}
                     </div>
 
                     <div className="relative">
