@@ -333,7 +333,8 @@ const Auth = () => {
         const result = await supabase.auth.signInWithOAuth({
           provider: "apple",
           options: {
-            redirectTo: `${window.location.origin}/auth?provider=apple`,
+            redirectTo:
+              "https://rhmxohcqyyyglgmtnioc.supabase.co/auth/v1/callback",
           },
         });
 
