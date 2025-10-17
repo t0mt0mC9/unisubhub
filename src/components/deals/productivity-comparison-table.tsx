@@ -45,14 +45,14 @@ const productivityOffers: ProductivityOffer[] = [
   },
   {
     name: "Microsoft 365 Personal",
-    price: "6,99€",
+    price: "3,18€",
     duration: "1 mois",
     description: "Suite bureautique complète Microsoft",
     highlights: ["Word, Excel, PowerPoint", "1TB OneDrive", "Teams inclus", "Outlook professionnel"],
-    url: "https://www.microsoft.com/fr-fr/microsoft-365",
+    url: "https://www.sharesub.com/fr/brand/office-365?ref=unisubhub",
     category: "office",
     rating: 4.5,
-    promotion: "Version famille à 9,99€",
+    promotion: "Partage d'abonnement",
     userCount: "345M+"
   },
   {
@@ -81,14 +81,14 @@ const productivityOffers: ProductivityOffer[] = [
   },
   {
     name: "Dropbox Plus",
-    price: "9,99€",
+    price: "4,40€",
     duration: "1 mois",
     description: "Stockage cloud sécurisé",
     highlights: ["2TB stockage", "Partage sécurisé", "Versions & historique", "Scan documents"],
-    url: "https://www.dropbox.com/",
+    url: "https://www.sharesub.com/fr/brand/dropbox?ref=unisubhub",
     category: "cloud",
     rating: 4.3,
-    promotion: "Essai gratuit 30 jours",
+    promotion: "Partage d'abonnement",
     userCount: "700M+"
   },
   {

@@ -77,14 +77,14 @@ const fitnessOffers: FitnessOffer[] = [
   },
   {
     name: "Apple Fitness+",
-    price: "9,99€",
+    price: "2,65€",
     duration: "1 mois",
     description: "Workouts Apple avec Apple Watch",
     highlights: ["Apple Watch requis", "Cours en direct", "Tous types d'entraînement", "Partage familial"],
-    url: "https://www.apple.com/apple-fitness-plus/",
+    url: "https://www.sharesub.com/fr/brand/apple?ref=unisubhub",
     category: "wellness",
     rating: 4.6,
-    promotion: "1 mois gratuit avec Apple Watch",
+    promotion: "Partage d'abonnement",
     userCount: "Millions"
   },
   {

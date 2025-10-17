@@ -28,80 +28,80 @@ interface PressOffer {
 const pressOffers: PressOffer[] = [
   {
     name: "Le Monde",
-    price: "À partir de 1€",
+    price: "6,93€",
     duration: "1 mois",
     description: "Journal de référence français",
     highlights: ["Édition numérique", "Application mobile", "Podcasts exclusifs", "Archives"],
-    url: "https://www.lemonde.fr/abonnement",
+    url: "https://www.sharesub.com/fr/brand/le-monde?ref=unisubhub",
     category: "quotidien",
     rating: 4.7,
-    promotion: "Offre découverte"
+    promotion: "Partage d'abonnement"
   },
   {
     name: "Le Figaro",
-    price: "À partir de 1€",
-    duration: "2 mois",
+    price: "7,20€",
+    duration: "1 mois",
     description: "Quotidien d'information générale",
     highlights: ["Édition numérique", "Archives illimitées", "Application mobile", "Sans engagement"],
-    url: "https://www.lefigaro.fr/abonnement",
+    url: "https://www.sharesub.com/fr/brand/figaro?ref=unisubhub",
     category: "quotidien",
     rating: 4.5,
-    promotion: "Offre découverte"
+    promotion: "Partage d'abonnement"
   },
   {
     name: "Libération",
-    price: "À partir de 1€",
-    duration: "2 mois",
+    price: "5,10€",
+    duration: "1 mois",
     description: "Quotidien d'information et d'opinion",
     highlights: ["Version numérique", "Newsletter quotidienne", "Archives", "Podcasts"],
-    url: "https://www.liberation.fr/abonnement",
+    url: "https://www.sharesub.com/fr/brand/liberation?ref=unisubhub",
     category: "quotidien",
     rating: 4.3,
-    promotion: "Offre découverte"
+    promotion: "Partage d'abonnement"
   },
   {
     name: "L'Équipe",
-    price: "À partir de 1€",
+    price: "6,50€",
     duration: "1 mois",
     description: "Quotidien sportif français",
     highlights: ["Édition numérique", "Vidéos exclusives", "Stats en direct", "Application mobile"],
-    url: "https://www.lequipe.fr/abonnement",
+    url: "https://www.sharesub.com/fr/brand/l-equipe?ref=unisubhub",
     category: "specialise",
     rating: 4.4,
-    promotion: "Offre découverte"
+    promotion: "Partage d'abonnement"
   },
   {
     name: "Le Parisien",
-    price: "À partir de 1€",
+    price: "4,68€",
     duration: "1 mois",
     description: "Information locale et nationale",
     highlights: ["Édition numérique", "Info locale", "Application mobile", "Archives"],
-    url: "https://www.leparisien.fr/abonnement",
+    url: "https://www.sharesub.com/fr/brand/le-parisien?ref=unisubhub",
     category: "quotidien",
     rating: 4.2,
-    promotion: "Offre découverte"
+    promotion: "Partage d'abonnement"
   },
   {
     name: "La Croix",
-    price: "À partir de 1€",
+    price: "4,81€",
     duration: "1 mois",
     description: "Quotidien d'information générale",
     highlights: ["Édition numérique", "Analyses approfondies", "Application mobile", "Débats"],
-    url: "https://www.la-croix.com/abonnement",
+    url: "https://www.sharesub.com/fr/brand/la-croix?ref=unisubhub",
     category: "quotidien",
     rating: 4.3,
-    promotion: "Offre découverte"
+    promotion: "Partage d'abonnement"
   },
   {
     name: "Le Point",
-    price: "À partir de 1€",
+    price: "4,31€",
     duration: "1 mois",
     description: "Hebdomadaire d'actualité",
     highlights: ["Magazine numérique", "Enquêtes exclusives", "Suppléments", "Archives"],
-    url: "https://www.lepoint.fr/abonnement",
+    url: "https://www.sharesub.com/fr/brand/le-point?ref=unisubhub",
     category: "magazine",
     rating: 4.4,
-    promotion: "Offre découverte"
+    promotion: "Partage d'abonnement"
   },
   {
     name: "Courrier International",
@@ -127,36 +127,36 @@ const pressOffers: PressOffer[] = [
   },
   {
     name: "Paris Match",
-    price: "À partir de 1€",
+    price: "2,56€",
     duration: "1 mois",
     description: "Magazine people et actualité",
     highlights: ["Magazine numérique", "Photos exclusives", "Reportages", "Application"],
-    url: "https://www.parismatch.com/abonnement",
+    url: "https://www.sharesub.com/fr/brand/paris-match?ref=unisubhub",
     category: "magazine",
     rating: 4.2,
-    promotion: "Offre découverte"
+    promotion: "Partage d'abonnement"
   },
   {
     name: "Cafeyn",
-    price: "9,99€",
+    price: "3,42€",
     duration: "1 mois",
     description: "Plus de 1500 magazines et journaux",
     highlights: ["Magazines illimités", "Journaux français et internationaux", "Lecture hors-ligne", "Tous supports"],
-    url: "https://www.cafeyn.co/fr/abonnement",
+    url: "https://www.sharesub.com/fr/brand/cafeyn?ref=unisubhub",
     category: "numerique",
     rating: 4.2,
-    promotion: "Essai gratuit 7 jours"
+    promotion: "Partage d'abonnement"
   },
   {
     name: "ePresse",
-    price: "9,99€",
+    price: "4,40€",
     duration: "1 mois",
     description: "Accès illimité à la presse",
     highlights: ["1000+ titres", "Presse française", "Magazines thématiques", "Multi-supports"],
-    url: "https://www.epresse.fr/",
+    url: "https://www.sharesub.com/fr/brand/epresse?ref=unisubhub",
     category: "numerique",
     rating: 4.1,
-    promotion: "Essai gratuit 7 jours"
+    promotion: "Partage d'abonnement"
   }
 ];
 

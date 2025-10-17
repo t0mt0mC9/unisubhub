@@ -21,38 +21,38 @@ interface GamingOffer {
 const gamingOffers: GamingOffer[] = [
   {
     name: "Xbox Game Pass Ultimate",
-    price: "17,99€",
+    price: "15,07€",
     duration: "1 mois",
     description: "Accès à plus de 100 jeux PC et Xbox",
     highlights: ["100+ jeux", "Jeux day one", "Xbox Live Gold", "PC Gaming", "Cloud Gaming"],
-    url: "https://www.xbox.com/fr-FR/xbox-game-pass",
+    url: "https://www.sharesub.com/fr/brand/xbox?ref=unisubhub",
     category: "abonnement",
     rating: 4.8,
-    promotion: "Offre découverte à 1€",
+    promotion: "Partage d'abonnement",
     playerCount: "25M+"
   },
   {
     name: "PlayStation Plus Premium",
-    price: "16,99€",
+    price: "9,82€",
     duration: "1 mois",
     description: "Catalogue de jeux PS5, PS4 et rétro",
     highlights: ["Catalogue premium", "Jeux rétro", "Essais de jeux", "Streaming cloud"],
-    url: "https://www.playstation.com/fr-fr/ps-plus/",
+    url: "https://www.sharesub.com/fr/brand/playstation?ref=unisubhub",
     category: "abonnement",
     rating: 4.6,
-    promotion: "Essential à 8,99€",
+    promotion: "Partage d'abonnement",
     playerCount: "47M+"
   },
   {
     name: "Nintendo Switch Online",
-    price: "3,99€",
+    price: "1,28€",
     duration: "1 mois",
     description: "Service en ligne Nintendo",
     highlights: ["Jeu en ligne", "Jeux NES & SNES", "Sauvegardes cloud", "Offres exclusives"],
-    url: "https://www.nintendo.fr/Nintendo-Switch/Nintendo-Switch-Online/",
+    url: "https://www.sharesub.com/fr/brand/nintendo?ref=unisubhub",
     category: "abonnement",
     rating: 4.3,
-    promotion: "7 jours gratuits",
+    promotion: "Partage d'abonnement",
     playerCount: "36M+"
   },
   {
@@ -90,25 +90,25 @@ const gamingOffers: GamingOffer[] = [
   },
   {
     name: "Google Play Pass",
-    price: "4,99€",
+    price: "1,95€",
     duration: "1 mois",
     description: "Apps et jeux Android premium",
     highlights: ["1000+ apps", "Jeux sans pub", "Fonctionnalités premium", "Partage familial"],
-    url: "https://play.google.com/pass",
+    url: "https://www.sharesub.com/fr/brand/google?ref=unisubhub",
     category: "mobile",
     rating: 4.1,
-    promotion: "Essai gratuit 1 mois"
+    promotion: "Partage d'abonnement"
   },
   {
     name: "Apple Arcade",
-    price: "6,99€",
+    price: "2,12€",
     duration: "1 mois",
     description: "200+ jeux premium sans pub",
     highlights: ["200+ jeux", "Sans publicité", "Pas d'achats intégrés", "Partage familial"],
-    url: "https://www.apple.com/fr/apple-arcade/",
+    url: "https://www.sharesub.com/fr/brand/apple?ref=unisubhub",
     category: "mobile",
     rating: 4.5,
-    promotion: "Essai gratuit 1 mois",
+    promotion: "Partage d'abonnement",
     playerCount: "Millions"
   }
 ];
