@@ -1,11 +1,16 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Crown, Star, AlertCircle, Smartphone } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { revenueCatService, SubscriptionInfo } from "@/services/revenuecat";
-import { useSubscription } from "@/hooks/use-subscription";
+import { AlertCircle, Check, Crown, Smartphone, Star } from "lucide-react";
+import { useEffect, useState } from "react";
 
 // Types locaux pour éviter les imports conditionnels
 interface PurchasesOffering {
@@ -31,24 +36,14 @@ interface PurchasesPackage {
 
 export const MobileSubscriptionPlans = () => {
   const [offerings, setOfferings] = useState<PurchasesOffering[]>([]);
-  const [subscriptionInfo, setSubscriptionInfo] = useState<SubscriptionInfo | null>(null);
+  const [subscriptionInfo, setSubscriptionInfo] =
+    useState<SubscriptionInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState<string | null>(null);
   const { toast } = useToast();
-  
-  // Vérifier l'abonnement Supabase/Stripe
-  const { 
-    subscribed, 
-    hasAccess, 
-    subscription_tier, 
-    subscription_type, 
-    subscription_end,
-    trial_active,
-    trial_days_remaining
-  } = useSubscription();
 
   useEffect(() => {
-    initializeRevenueCat().catch(error => {
+    initializeRevenueCat().catch((error) => {
       console.error("Failed to initialize RevenueCat in mobile plans:", error);
       setLoading(false);
     });
@@ -61,10 +56,12 @@ export const MobileSubscriptionPlans = () => {
       await loadOfferings();
       await loadSubscriptionInfo();
     } catch (error) {
-      console.error('Failed to initialize RevenueCat:', error);
+      console.error("Failed to initialize RevenueCat:", error);
       // Ne pas afficher d'erreur tant qu'on est en mode développement
       // L'erreur est normale jusqu'à ce que l'app soit sur un vrai device avec App Store Connect configuré
-      console.log('RevenueCat non disponible en mode développement - comportement normal');
+      console.log(
+        "RevenueCat non disponible en mode développement - comportement normal"
+      );
     } finally {
       setLoading(false);
     }
@@ -81,50 +78,53 @@ export const MobileSubscriptionPlans = () => {
         setOfferings([currentOffering]);
       }
     } catch (error) {
-      console.error('Failed to load offerings:', error);
+      console.error("Failed to load offerings:", error);
     }
   };
 
   const loadSubscriptionInfo = async () => {
     try {
       const info = await revenueCatService.getSubscriptionInfo();
+      console.log("Loaded subscription info from RevenueCat:", info);
       setSubscriptionInfo(info);
     } catch (error) {
-      console.error('Failed to load subscription info:', error);
+      console.error("Failed to load subscription info:", error);
     }
   };
 
   const handlePurchase = async (packageToPurchase: PurchasesPackage) => {
     setPurchasing(packageToPurchase.identifier);
-    
+
     try {
       await revenueCatService.purchasePackage(packageToPurchase);
       await loadSubscriptionInfo();
-      
+
       toast({
         title: "Abonnement activé !",
         description: "Votre abonnement a été activé avec succès",
       });
     } catch (error: any) {
-      console.error('Purchase failed:', error);
-      
-      if (error.code === 'PURCHASE_CANCELLED') {
+      console.error("Purchase failed:", error);
+
+      if (error.code === "PURCHASE_CANCELLED") {
         toast({
           title: "Achat annulé",
           description: "L'achat a été annulé par l'utilisateur",
         });
       } else {
         // Log détaillé pour le débogage
-        console.error('Détails de l\'erreur d\'achat:', {
+        console.error("Détails de l'erreur d'achat:", {
           code: error.code,
           message: error.message,
           userInfo: error.userInfo,
-          stack: error.stack
+          stack: error.stack,
         });
-        
+
         toast({
           title: "Erreur d'achat",
-          description: `Erreur: ${error.message || 'Une erreur inconnue est survenue'}. Code: ${error.code || 'N/A'}`,
+          description: `Erreur: ${
+            error.message || "Une erreur inconnue est survenue"
+          }. Code: ${error.code || "N/A"}`,
           variant: "destructive",
         });
       }
@@ -137,13 +137,13 @@ export const MobileSubscriptionPlans = () => {
     try {
       await revenueCatService.restorePurchases();
       await loadSubscriptionInfo();
-      
+
       toast({
         title: "Achats restaurés",
         description: "Vos achats précédents ont été restaurés",
       });
     } catch (error) {
-      console.error('Failed to restore purchases:', error);
+      console.error("Failed to restore purchases:", error);
       toast({
         title: "Erreur de restauration",
         description: "Impossible de restaurer vos achats",
@@ -153,32 +153,36 @@ export const MobileSubscriptionPlans = () => {
   };
 
   const getPlanIcon = (productId: string) => {
-    if (productId.includes('monthly') || productId === 'com.unisubhub.PM02') return <Star className="h-6 w-6" />;
-    if (productId.includes('lifetime') || productId === 'com.unisubhub.PAV02') return <Crown className="h-6 w-6" />;
+    if (productId.includes("monthly") || productId === "com.unisubhub.PM02")
+      return <Star className="h-6 w-6" />;
+    if (productId.includes("lifetime") || productId === "com.unisubhub.PAV02")
+      return <Crown className="h-6 w-6" />;
     return <Star className="h-6 w-6" />;
   };
 
   const getPlanFeatures = (productId: string) => {
-    if (productId.includes('monthly') || productId === 'com.unisubhub.PM02') {
+    if (productId.includes("monthly") || productId === "com.unisubhub.PM02") {
       return [
         "Analyses détaillées illimitées",
         "Recommandations d'optimisation",
         "Alertes personnalisées",
-        "Support prioritaire"
+        "Support prioritaire",
       ];
     }
-    if (productId.includes('lifetime') || productId === 'com.unisubhub.PAV02') {
+    if (productId.includes("lifetime") || productId === "com.unisubhub.PAV02") {
       return [
         "Avantages du plan mensuel",
         "Abonnements illimités",
-        "Paiement unique"
+        "Paiement unique",
       ];
     }
     return ["Fonctionnalités de base"];
   };
 
   const isPopularPlan = (productId: string) => {
-    return productId.includes('lifetime') || productId === 'com.unisubhub.PAV02';
+    return (
+      productId.includes("lifetime") || productId === "com.unisubhub.PAV02"
+    );
   };
 
   if (loading) {
@@ -196,13 +200,16 @@ export const MobileSubscriptionPlans = () => {
     return (
       <div className="text-center p-8 space-y-4">
         <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-        <h3 className="text-lg font-semibold mb-2">Aucun abonnement disponible</h3>
+        <h3 className="text-lg font-semibold mb-2">
+          Aucun abonnement disponible
+        </h3>
         <div className="space-y-2">
           <p className="text-muted-foreground">
             Les options d'abonnement ne sont pas disponibles en mode web.
           </p>
           <p className="text-sm text-muted-foreground">
-            Sur un appareil mobile, les vrais abonnements seront disponibles après avoir configuré le secret partagé RevenueCat.
+            Sur un appareil mobile, les vrais abonnements seront disponibles
+            après avoir configuré le secret partagé RevenueCat.
           </p>
         </div>
         <div className="flex gap-2 justify-center">
@@ -226,46 +233,25 @@ export const MobileSubscriptionPlans = () => {
         </CardHeader>
       </Card>
 
-      {/* Statut de l'abonnement actuel - vérifier d'abord Supabase/Stripe puis RevenueCat */}
-      {(hasAccess || subscriptionInfo?.isActive) && (
-        <Card className="border-green-200 bg-green-50 dark:bg-green-950/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-green-800 dark:text-green-400">
-              <Check className="h-5 w-5" />
-              Abonnement actif
-            </CardTitle>
-            <CardDescription>
-              {subscribed ? (
-                <>
-                  Plan {subscription_tier} ({subscription_type})
-                  {subscription_end && 
-                    ` - Expire le ${new Date(subscription_end).toLocaleDateString('fr-FR')}`
-                  }
-                </>
-              ) : trial_active ? (
-                `Période d'essai - ${trial_days_remaining} jours restants`
-              ) : subscriptionInfo ? (
-                <>
-                  Plan {subscriptionInfo.tier} - 
-                  {subscriptionInfo.expirationDate && 
-                    ` Expire le ${new Date(subscriptionInfo.expirationDate).toLocaleDateString('fr-FR')}`
-                  }
-                </>
-              ) : null}
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      )}
-
       {/* Plans d'abonnement */}
       <div className="grid gap-6 md:grid-cols-2">
-        {offerings.length > 0 && offerings[0].availablePackages ? 
+        {offerings.length > 0 && offerings[0].availablePackages ? (
           offerings[0].availablePackages.map((pkg) => {
-            const isCurrentPlan = subscriptionInfo?.productId === pkg.product.identifier;
+            const isCurrentPlan =
+              subscriptionInfo?.productId === pkg.product.identifier;
             const popular = isPopularPlan(pkg.product.identifier);
-            
+
             return (
-              <Card key={pkg.identifier} className={`relative ${isCurrentPlan ? 'ring-2 ring-primary' : popular ? 'ring-2 ring-primary' : ''}`}>
+              <Card
+                key={pkg.identifier}
+                className={`relative ${
+                  isCurrentPlan
+                    ? "ring-2 ring-primary"
+                    : popular
+                    ? "ring-2 ring-primary"
+                    : ""
+                }`}
+              >
                 {popular && !isCurrentPlan && (
                   <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-primary">
                     Le plus populaire
@@ -276,61 +262,79 @@ export const MobileSubscriptionPlans = () => {
                     Plan actuel
                   </Badge>
                 )}
-                
+
                 <CardHeader className="text-center">
                   <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
                     {getPlanIcon(pkg.product.identifier)}
                   </div>
                   <CardTitle>{pkg.product.title}</CardTitle>
-                  <CardDescription className="text-sm">{pkg.product.description}</CardDescription>
+                  <CardDescription className="text-sm">
+                    {pkg.product.description}
+                  </CardDescription>
                   <div className="mt-4">
                     <span className="text-3xl font-bold">
                       {pkg.product.priceString}
                     </span>
-                    {!pkg.product.identifier.includes('lifetime') && (
+                    {!pkg.product.identifier.includes("lifetime") && (
                       <span className="text-muted-foreground">
-                        /{pkg.packageType === 'MONTHLY' ? 'mois' : 'an'}
+                        /{pkg.packageType === "MONTHLY" ? "mois" : "an"}
                       </span>
                     )}
                   </div>
                 </CardHeader>
-                
+
                 <CardContent className="space-y-4">
                   <ul className="space-y-2">
-                    {getPlanFeatures(pkg.product.identifier).map((feature, index) => (
-                      <li key={index} className="flex items-center gap-2 text-sm">
-                        <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
-                        {feature}
-                      </li>
-                    ))}
+                    {getPlanFeatures(pkg.product.identifier).map(
+                      (feature, index) => (
+                        <li
+                          key={index}
+                          className="flex items-center gap-2 text-sm"
+                        >
+                          <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                          {feature}
+                        </li>
+                      )
+                    )}
                   </ul>
-                  
+
                   <Button
                     onClick={() => handlePurchase(pkg)}
                     disabled={purchasing === pkg.identifier || isCurrentPlan}
                     className="w-full"
-                    variant={isCurrentPlan ? "outline" : popular ? "default" : "outline"}
+                    variant={
+                      isCurrentPlan
+                        ? "outline"
+                        : popular
+                        ? "default"
+                        : "outline"
+                    }
                   >
                     {purchasing === pkg.identifier && (
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                     )}
-                    {isCurrentPlan ? "Plan actuel" : pkg.product.identifier.includes('lifetime') ? 'Acheter maintenant' : "S'abonner"}
+                    {isCurrentPlan
+                      ? "Plan actuel"
+                      : pkg.product.identifier.includes("lifetime")
+                      ? "Acheter maintenant"
+                      : "S'abonner"}
                   </Button>
                 </CardContent>
               </Card>
             );
-          }) : (
-            <div className="col-span-2 text-center p-8">
-              <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Aucun plan disponible</h3>
-              <p className="text-muted-foreground">
-                Les plans d'abonnement ne sont pas disponibles actuellement.
-              </p>
-            </div>
-          )
-        }
+          })
+        ) : (
+          <div className="col-span-2 text-center p-8">
+            <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">
+              Aucun plan disponible
+            </h3>
+            <p className="text-muted-foreground">
+              Les plans d'abonnement ne sont pas disponibles actuellement.
+            </p>
+          </div>
+        )}
       </div>
-
     </div>
   );
 };

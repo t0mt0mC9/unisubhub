@@ -1,13 +1,13 @@
-import { useEffect } from "react";
-import { Tag } from "lucide-react";
-import { PremiumHeader } from "./premium-header";
-import { UnifiedSubscriptionManager } from "../subscription/unified-subscription-manager";
-import { useStoreKitSubscription } from "@/hooks/use-storekit-subscription";
-import { supabase } from "@/integrations/supabase/client";
-import { useIsIOS } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
-import { revenueCatService } from "@/services/revenuecat";
+import { useIsIOS } from "@/hooks/use-mobile";
+import { useStoreKitSubscription } from "@/hooks/use-storekit-subscription";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { Purchases } from "@revenuecat/purchases-capacitor";
+import { Tag } from "lucide-react";
+import { useEffect } from "react";
+import { UnifiedSubscriptionManager } from "../subscription/unified-subscription-manager";
+import { PremiumHeader } from "./premium-header";
 
 export default function PremiumPage() {
   const { identifyUser } = useStoreKitSubscription();
@@ -16,7 +16,9 @@ export default function PremiumPage() {
 
   useEffect(() => {
     const getCurrentUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (user?.id) {
         identifyUser(user.id);
       }
@@ -26,12 +28,13 @@ export default function PremiumPage() {
 
   const handlePromoCode = async () => {
     try {
-      await revenueCatService.presentCodeRedemptionSheet();
+      await Purchases.presentCodeRedemptionSheet();
     } catch (error) {
-      console.error('Failed to present promo code sheet:', error);
+      console.error("Error presenting code redemption sheet:", error);
       toast({
         title: "Erreur",
-        description: "Impossible d'ouvrir l'écran de code promo",
+        description:
+          "Impossible d'ouvrir la feuille de saisie du code promo. Veuillez réessayer plus tard.",
         variant: "destructive",
       });
     }
@@ -45,8 +48,8 @@ export default function PremiumPage() {
         <div className="space-y-6">
           {isIOS && (
             <div className="flex justify-center">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={handlePromoCode}
                 className="gap-2"
               >
@@ -55,10 +58,10 @@ export default function PremiumPage() {
               </Button>
             </div>
           )}
-          
-          <UnifiedSubscriptionManager 
+
+          <UnifiedSubscriptionManager
             onSubscriptionChange={(isActive) => {
-              console.log('Subscription status changed:', isActive);
+              console.log("Subscription status changed:", isActive);
             }}
           />
         </div>

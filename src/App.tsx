@@ -1,25 +1,27 @@
-import { useState, useEffect, useRef } from "react";
-import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { SplashScreen } from "@/components/ui/splash-screen";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { Session, User } from "@supabase/supabase-js";
-import Index from "./pages/Index";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { initializeOneSignal } from "./lib/onesignal";
 import Auth from "./pages/Auth";
+import Index from "./pages/Index";
 import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import ResetPassword from "./pages/ResetPassword";
-import { initializeOneSignal } from "./lib/onesignal";
 
-import ExpenseAnalysis from "./pages/ExpenseAnalysis";
-import { useSubscription } from "@/hooks/use-subscription";
-import { SubscriptionLock } from "@/components/subscription/subscription-lock";
 import { InitialSubscriptionSelector } from "@/components/subscription/initial-subscription-selector";
+import { SubscriptionLock } from "@/components/subscription/subscription-lock";
+import { useSubscription } from "@/hooks/use-subscription";
+import { CustomerInfo, Purchases } from "@revenuecat/purchases-capacitor";
 import DeepLinkHandler from "./deeplink/DeepLinkHandler";
+import ExpenseAnalysis from "./pages/ExpenseAnalysis";
+import { revenueCatService } from "./services/revenuecat";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +57,21 @@ const App = () => {
       initializeOneSignal();
     }, 1000);
 
+    // Initialize RevenueCat
+    const initRevenueCat = async () => {
+      try {
+        await revenueCatService.initialize();
+        console.log("✅ RevenueCat initialisé");
+      } catch (error) {
+        console.error(
+          "❌ Erreur lors de l'initialisation de RevenueCat:",
+          error
+        );
+      }
+    };
+
+    initRevenueCat();
+
     // Set up auth state listener FIRST
     const {
       data: { subscription },
@@ -88,6 +105,33 @@ const App = () => {
     console.log("✅ userHasAccess: Accès =", hasAccess);
     return hasAccess;
   };
+
+  useEffect(() => {
+    console.log("🔔 Configuration du listener RevenueCat...");
+
+    // Stocker la référence pour le cleanup
+    let listenerAdded = false;
+
+    const setupListener = async () => {
+      try {
+        await Purchases.addCustomerInfoUpdateListener(
+          (customerInfo: CustomerInfo) => {
+            console.log("CustomerInfo mis à jour !", customerInfo);
+            refreshSubscription();
+          }
+        );
+        listenerAdded = true;
+        console.log("Listener RevenueCat configuré");
+      } catch (error) {
+        console.error(
+          "Erreur lors de la configuration du listener RevenueCat:",
+          error
+        );
+      }
+    };
+
+    setupListener();
+  }, [refreshSubscription]);
 
   // Check if user needs initial setup
   useEffect(() => {
