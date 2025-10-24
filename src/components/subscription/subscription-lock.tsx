@@ -3,9 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSubscription } from "@/hooks/use-subscription";
 import { supabase } from "@/integrations/supabase/client";
 import { cleanupAuthState } from "@/lib/auth-cleanup";
-import { ArrowLeft, Clock, Crown, Gift, Lock } from "lucide-react";
+import { ArrowLeft, Clock, Crown, Gift, Lock, Tag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { UnifiedSubscriptionManager } from "./unified-subscription-manager";
+import { useIsIOS } from "@/hooks/use-mobile";
+import { revenueCatService } from "@/services/revenuecat";
 
 interface SubscriptionLockProps {
   onUpgrade?: () => void;
@@ -18,6 +20,7 @@ export const SubscriptionLock = ({
 }: SubscriptionLockProps) => {
   const { refresh } = useSubscription();
   const navigate = useNavigate();
+  const isIOS = useIsIOS();
 
   const handleBackToAuth = async () => {
     try {
@@ -100,6 +103,16 @@ export const SubscriptionLock = ({
             <CardTitle className="text-center">Choisissez votre plan</CardTitle>
           </CardHeader>
           <CardContent>
+            {isIOS && (
+              <Button
+                onClick={() => revenueCatService.presentCodeRedemptionSheet()}
+                variant="outline"
+                className="w-full mb-4"
+              >
+                <Tag className="h-4 w-4 mr-2" />
+                J'ai un code promo
+              </Button>
+            )}
             <UnifiedSubscriptionManager
               onSubscriptionChange={(isActive) => {
                 if (isActive && onUpgrade) {
