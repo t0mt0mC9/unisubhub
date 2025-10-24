@@ -1,47 +1,40 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Lock, Crown, Clock, Gift, RefreshCw, LogOut, ArrowLeft } from "lucide-react";
-import { UnifiedSubscriptionManager } from "./unified-subscription-manager";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSubscription } from "@/hooks/use-subscription";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
 import { cleanupAuthState } from "@/lib/auth-cleanup";
+import { ArrowLeft, Clock, Crown, Gift, Lock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { UnifiedSubscriptionManager } from "./unified-subscription-manager";
 
 interface SubscriptionLockProps {
   onUpgrade?: () => void;
   trialDaysRemaining?: number;
 }
 
-export const SubscriptionLock = ({ onUpgrade, trialDaysRemaining = 0 }: SubscriptionLockProps) => {
-  const { refresh, loading } = useSubscription();
-  const { toast } = useToast();
+export const SubscriptionLock = ({
+  onUpgrade,
+  trialDaysRemaining = 0,
+}: SubscriptionLockProps) => {
+  const { refresh } = useSubscription();
   const navigate = useNavigate();
-
-  const handleRefresh = async () => {
-    const data = await refresh();
-    if (data?.subscribed && onUpgrade) {
-      onUpgrade();
-    }
-  };
 
   const handleBackToAuth = async () => {
     try {
-      console.log('🔄 Déconnexion et redirection vers /auth...');
-      
+      console.log("🔄 Déconnexion et redirection vers /auth...");
+
       // Déconnexion de l'utilisateur
       await supabase.auth.signOut();
-      
+
       // Nettoyer l'état d'authentification
       cleanupAuthState();
-      
+
       // Rediriger vers la page de connexion
-      navigate('/auth');
+      navigate("/auth");
     } catch (error) {
-      console.error('❌ Erreur lors de la déconnexion:', error);
+      console.error("❌ Erreur lors de la déconnexion:", error);
       // Rediriger quand même vers /auth
-      navigate('/auth');
+      navigate("/auth");
     }
   };
   return (
@@ -56,12 +49,12 @@ export const SubscriptionLock = ({ onUpgrade, trialDaysRemaining = 0 }: Subscrip
             Essai gratuit terminé
           </h1>
           <p className="text-muted-foreground mb-4">
-            Votre période d'essai de 14 jours est maintenant terminée. 
-            Passez à Premium pour continuer à utiliser UniSubHub.
+            Votre période d'essai de 14 jours est maintenant terminée. Passez à
+            Premium pour continuer à utiliser UniSubHub.
           </p>
           <div className="flex flex-col gap-3">
-            <Button 
-              onClick={handleBackToAuth} 
+            <Button
+              onClick={handleBackToAuth}
               variant="outline"
               className="w-full"
             >
@@ -107,7 +100,7 @@ export const SubscriptionLock = ({ onUpgrade, trialDaysRemaining = 0 }: Subscrip
             <CardTitle className="text-center">Choisissez votre plan</CardTitle>
           </CardHeader>
           <CardContent>
-            <UnifiedSubscriptionManager 
+            <UnifiedSubscriptionManager
               onSubscriptionChange={(isActive) => {
                 if (isActive && onUpgrade) {
                   onUpgrade();
@@ -120,8 +113,8 @@ export const SubscriptionLock = ({ onUpgrade, trialDaysRemaining = 0 }: Subscrip
         {/* Footer */}
         <div className="text-center text-xs text-muted-foreground">
           <p>
-            En vous abonnant, vous acceptez nos conditions d'utilisation 
-            et notre politique de confidentialité.
+            En vous abonnant, vous acceptez nos conditions d'utilisation et
+            notre politique de confidentialité.
           </p>
         </div>
       </div>
