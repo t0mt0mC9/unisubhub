@@ -486,6 +486,22 @@ class RevenueCatService {
       throw error;
     }
   }
+
+  async presentCodeRedemptionSheet(): Promise<void> {
+    try {
+      if (this.isNative && Capacitor.getPlatform() === 'ios') {
+        const { Purchases } = await import('@revenuecat/purchases-capacitor');
+        await Purchases.presentCodeRedemptionSheet();
+        console.log('Code redemption sheet presented');
+      } else {
+        console.log('Code redemption sheet is only available on iOS');
+        throw new Error('La fonctionnalité de code promo n\'est disponible que sur iOS');
+      }
+    } catch (error) {
+      console.error('Failed to present code redemption sheet:', error);
+      throw error;
+    }
+  }
 }
 
 export const revenueCatService = new RevenueCatService();

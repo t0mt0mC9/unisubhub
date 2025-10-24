@@ -1,12 +1,18 @@
 import { useEffect } from "react";
-import { Star } from "lucide-react";
+import { Tag } from "lucide-react";
 import { PremiumHeader } from "./premium-header";
 import { UnifiedSubscriptionManager } from "../subscription/unified-subscription-manager";
 import { useStoreKitSubscription } from "@/hooks/use-storekit-subscription";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsIOS } from "@/hooks/use-mobile";
+import { Button } from "@/components/ui/button";
+import { revenueCatService } from "@/services/revenuecat";
+import { useToast } from "@/hooks/use-toast";
 
 export default function PremiumPage() {
   const { identifyUser } = useStoreKitSubscription();
+  const isIOS = useIsIOS();
+  const { toast } = useToast();
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -18,12 +24,37 @@ export default function PremiumPage() {
     getCurrentUser();
   }, [identifyUser]);
 
+  const handlePromoCode = async () => {
+    try {
+      await revenueCatService.presentCodeRedemptionSheet();
+    } catch (error) {
+      console.error('Failed to present promo code sheet:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible d'ouvrir l'écran de code promo",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background p-4 pb-20">
       <div className="mx-auto max-w-4xl space-y-6">
         <PremiumHeader />
 
         <div className="space-y-6">
+          {isIOS && (
+            <div className="flex justify-center">
+              <Button 
+                variant="outline" 
+                onClick={handlePromoCode}
+                className="gap-2"
+              >
+                <Tag className="h-4 w-4" />
+                J'ai un code promo
+              </Button>
+            </div>
+          )}
           
           <UnifiedSubscriptionManager 
             onSubscriptionChange={(isActive) => {

@@ -29,3 +29,14 @@ export function useIsNativePlatform() {
 
   return isNative
 }
+
+// Hook pour détecter si on est spécifiquement sur iOS
+export function useIsIOS() {
+  const [isIOS, setIsIOS] = React.useState<boolean>(false)
+
+  React.useEffect(() => {
+    setIsIOS(Capacitor.getPlatform() === 'ios')
+  }, [])
+
+  return isIOS
+}
