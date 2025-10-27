@@ -333,8 +333,8 @@ const Auth = () => {
         const result = await supabase.auth.signInWithOAuth({
           provider: "apple",
           options: {
-            redirectTo:
-              "https://rhmxohcqyyyglgmtnioc.supabase.co/auth/v1/callback",
+            redirectTo: `${window.location.origin}/auth`,
+            scopes: "email name",
           },
         });
 
@@ -354,6 +354,9 @@ const Auth = () => {
   useEffect(() => {
     const handleOAuthCallback = async () => {
       const { data, error } = await supabase.auth.getSession();
+
+      console.log("OAuth callback session data:", data, error);
+      console.log("Search params inside method :", searchParams.toString());
 
       if (data.session && searchParams.get("provider") === "apple") {
         console.log("✅ Session Apple OAuth récupérée:", data.session);
@@ -382,6 +385,7 @@ const Auth = () => {
       }
     };
 
+    console.log("Search params outside method :", searchParams.toString());
     if (searchParams.get("provider") === "apple") {
       handleOAuthCallback();
     }
