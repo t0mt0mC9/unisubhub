@@ -258,11 +258,12 @@ export const useSubscription = () => {
     };
   }, []); // Vide pour éviter les re-exécutions
 
-  // Determine if user has access (either subscribed or trial active)
+  // RÈGLE D'ACTIVATION:
+  // - hasAccess = true si abonnement actif OU période d'essai active (< 14 jours)
+  // - isLocked = true si compte > 14 jours ET pas d'abonnement actif
   const hasAccess =
     subscriptionData.subscribed || subscriptionData.trial_active;
 
-  // Check if trial has expired and user hasn't subscribed
   const isLocked =
     !subscriptionData.subscribed && !subscriptionData.trial_active;
 

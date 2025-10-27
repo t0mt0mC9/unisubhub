@@ -109,6 +109,7 @@ serve(async (req) => {
       });
     }
 
+    // RÈGLE D'ACTIVATION: 14 jours d'accès gratuit pour les nouveaux comptes
     const now = new Date();
     const userCreatedAt = new Date(user.created_at);
     const trialEndDate = new Date(userCreatedAt.getTime() + 14 * 24 * 60 * 60 * 1000); // 14 jours après création
@@ -122,7 +123,8 @@ serve(async (req) => {
       timeDiffMs: trialEndDate.getTime() - now.getTime(),
       isTrialActive,
       trialDaysRemaining,
-      userCreatedAtRaw: user.created_at
+      userCreatedAtRaw: user.created_at,
+      accountAge: Math.floor((now.getTime() - userCreatedAt.getTime()) / (1000 * 60 * 60 * 24))
     });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
@@ -183,8 +185,10 @@ serve(async (req) => {
       }
     }
 
-    // Determine final access status
-    // Si l'utilisateur a un abonnement actif, priorité à celui-ci
+    // RÈGLE D'ACTIVATION FINALE:
+    // - subscribed = true si abonnement payant actif (Stripe ou RevenueCat)
+    // - trial_active = true si compte < 14 jours
+    // - Accès accordé si subscribed OU trial_active
     let finalSubscribed = hasActiveSub;
     let finalTier = subscriptionTier || (isTrialActive ? 'Trial' : null);
     let finalType = subscriptionType || (isTrialActive ? 'trial' : null);
@@ -207,7 +211,9 @@ serve(async (req) => {
       subscriptionTier: finalTier,
       subscriptionType: finalType,
       isTrialActive,
-      trialDaysRemaining
+      trialDaysRemaining,
+      hasAccess: finalSubscribed || isTrialActive,
+      shouldBlock: !finalSubscribed && !isTrialActive
     });
     
     return new Response(JSON.stringify({
