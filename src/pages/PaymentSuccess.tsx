@@ -16,35 +16,38 @@ const PaymentSuccess = () => {
     const checkSubscriptionAndRedirect = async () => {
       try {
         // Attendre un peu pour que Stripe traite le paiement
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
         // Vérifier le statut de l'abonnement
         const subscriptionData = await refresh();
-        
+
         if (subscriptionData?.subscribed || hasAccess) {
           toast({
             title: "✅ Paiement réussi !",
-            description: "Votre abonnement est maintenant actif. Redirection...",
+            description:
+              "Votre abonnement est maintenant actif. Redirection...",
           });
-          
+
           // Rediriger automatiquement vers l'application après 1 seconde
           setTimeout(() => {
-            navigate('/');
+            navigate("/");
           }, 1000);
         } else {
           // Si l'abonnement n'est pas encore actif, laisser l'utilisateur sur cette page
           setIsChecking(false);
           toast({
             title: "✅ Paiement reçu !",
-            description: "Votre paiement est en cours de traitement. Vous pouvez retourner à l'application.",
+            description:
+              "Votre paiement est en cours de traitement. Vous pouvez retourner à l'application.",
           });
         }
       } catch (error) {
-        console.error('Erreur lors de la vérification de l\'abonnement:', error);
+        console.error("Erreur lors de la vérification de l'abonnement:", error);
         setIsChecking(false);
         toast({
           title: "✅ Paiement effectué !",
-          description: "Veuillez retourner à l'application pour vérifier votre abonnement.",
+          description:
+            "Veuillez retourner à l'application pour vérifier votre abonnement.",
         });
       }
     };
@@ -59,9 +62,12 @@ const PaymentSuccess = () => {
           {isChecking ? (
             <>
               <Loader2 className="w-16 h-16 text-primary mx-auto mb-4 animate-spin" />
-              <h1 className="text-2xl font-bold mb-2">Vérification en cours...</h1>
+              <h1 className="text-2xl font-bold mb-2">
+                Vérification en cours...
+              </h1>
               <p className="text-muted-foreground mb-6">
-                Nous vérifions votre paiement et activons votre abonnement. Vous serez redirigé automatiquement.
+                Nous vérifions votre paiement et activons votre abonnement. Vous
+                serez redirigé automatiquement.
               </p>
             </>
           ) : (
@@ -69,12 +75,10 @@ const PaymentSuccess = () => {
               <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
               <h1 className="text-2xl font-bold mb-2">Paiement effectué !</h1>
               <p className="text-muted-foreground mb-6">
-                Votre paiement a été traité avec succès. Vous pouvez retourner à l'application.
+                Votre paiement a été traité avec succès. Vous pouvez retourner à
+                l'application.
               </p>
-              <Button 
-                onClick={() => navigate('/')}
-                className="w-full"
-              >
+              <Button onClick={() => navigate("/")} className="w-full">
                 Retourner à l'application
               </Button>
             </>

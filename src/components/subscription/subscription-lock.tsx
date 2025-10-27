@@ -1,23 +1,20 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useIsIOS } from "@/hooks/use-mobile";
 import { useSubscription } from "@/hooks/use-subscription";
 import { supabase } from "@/integrations/supabase/client";
 import { cleanupAuthState } from "@/lib/auth-cleanup";
+import { revenueCatService } from "@/services/revenuecat";
 import { ArrowLeft, Clock, Crown, Gift, Lock, Tag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { UnifiedSubscriptionManager } from "./unified-subscription-manager";
-import { useIsIOS } from "@/hooks/use-mobile";
-import { revenueCatService } from "@/services/revenuecat";
 
 interface SubscriptionLockProps {
   onUpgrade?: () => void;
   trialDaysRemaining?: number;
 }
 
-export const SubscriptionLock = ({
-  onUpgrade,
-  trialDaysRemaining = 0,
-}: SubscriptionLockProps) => {
+export const SubscriptionLock = ({ onUpgrade }: SubscriptionLockProps) => {
   const { refresh } = useSubscription();
   const navigate = useNavigate();
   const isIOS = useIsIOS();

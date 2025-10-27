@@ -305,15 +305,12 @@ const Auth = () => {
       if (Capacitor.isNativePlatform()) {
         const result = await SignInWithApple.authorize({
           clientId: "com.unisubhub.mobile",
-          scopes: "email name",
           redirectURI:
             "https://rhmxohcqyyyglgmtnioc.supabase.co/auth/v1/callback",
         });
 
-        console.log("Apple Sign-In result:", result);
-
         if (result.response?.identityToken) {
-          const { data, error } = await supabase.auth.signInWithIdToken({
+          const { error } = await supabase.auth.signInWithIdToken({
             provider: "apple",
             token: result.response.identityToken,
           });
@@ -321,8 +318,6 @@ const Auth = () => {
             console.error("Erreur Supabase:", error);
             throw error;
           }
-
-          console.log("Connexion réussie:", data);
 
           toast({
             title: "Connexion Apple réussie",
@@ -332,10 +327,7 @@ const Auth = () => {
       } else {
         const result = await supabase.auth.signInWithOAuth({
           provider: "apple",
-          options: {
-            redirectTo: `https://unisubhub.fr/auth`,
-            scopes: "email name",
-          },
+          options: {},
         });
 
         console.log("Apple OAuth redirect URL:", result);
@@ -350,46 +342,6 @@ const Auth = () => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    const handleOAuthCallback = async () => {
-      const { data, error } = await supabase.auth.getSession();
-
-      console.log("OAuth callback session data:", data, error);
-      console.log("Search params inside method :", searchParams.toString());
-
-      if (data.session && searchParams.get("provider") === "apple") {
-        console.log("✅ Session Apple OAuth récupérée:", data.session);
-
-        toast({
-          title: "Connexion Apple réussie",
-          description: `Bienvenue ${
-            data.session.user?.user_metadata?.full_name ||
-            data.session.user?.email
-          }`,
-        });
-
-        window.history.replaceState(
-          {},
-          document.title,
-          window.location.pathname
-        );
-        navigate("/");
-      } else if (error) {
-        console.error("❌ Erreur session OAuth Apple:", error);
-        toast({
-          title: "Erreur de connexion Apple",
-          description: error.message,
-          variant: "destructive",
-        });
-      }
-    };
-
-    console.log("Search params outside method :", searchParams.toString());
-    if (searchParams.get("provider") === "apple") {
-      handleOAuthCallback();
-    }
-  }, [searchParams, navigate, toast]);
 
   const handleForgotPassword = async () => {
     if (!email) {
