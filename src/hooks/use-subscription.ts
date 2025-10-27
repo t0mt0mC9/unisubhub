@@ -38,7 +38,7 @@ export const useSubscription = () => {
       // Vérifier les entitlements actifs
       const activeEntitlements = customerInfo.entitlements?.active || {};
       const hasActiveEntitlement = Object.keys(activeEntitlements).length > 0;
-      
+
       // Vérifier aussi les abonnements actifs même sans entitlement
       const activeSubscriptions = customerInfo.activeSubscriptions || [];
       const hasActiveSubscription = activeSubscriptions.length > 0;
@@ -122,12 +122,23 @@ export const useSubscription = () => {
         sub.toLowerCase().includes("trial")
       );
 
+      const user = await supabase.auth.getUser();
+      const createdAt = user.data.user?.created_at;
+
+      let daysSinceCreation = 0;
+      if (createdAt) {
+        const createdDate = new Date(createdAt);
+        const now = new Date();
+        const diffTime = Math.abs(now.getTime() - createdDate.getTime());
+        daysSinceCreation = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      }
+
       const subscriptionState: SubscriptionData = {
         subscribed: isSubscribed,
         subscription_tier: tier,
         subscription_type: subscriptionType,
         subscription_end: expirationDate,
-        trial_active: hasActiveTrial,
+        trial_active: hasActiveTrial || daysSinceCreation <= 14,
         trial_days_remaining: 0, // RevenueCat ne fournit pas cette info directement
         trial_end_date: null,
       };
@@ -144,7 +155,7 @@ export const useSubscription = () => {
         subscription_tier: null,
         subscription_type: null,
         subscription_end: null,
-        trial_active: false,
+        trial_active: true,
         trial_days_remaining: 0,
         trial_end_date: null,
       };

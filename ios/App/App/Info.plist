@@ -45,9 +45,11 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>com.apple.developer.applesignin</key>
-  <array>
-    <string>Default</string>
-  </array>
+	<array>
+		<string>Default</string>
+	</array>
 </dict>
 </plist>
