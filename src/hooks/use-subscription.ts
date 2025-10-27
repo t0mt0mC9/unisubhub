@@ -38,14 +38,21 @@ export const useSubscription = () => {
       // Vérifier les entitlements actifs
       const activeEntitlements = customerInfo.entitlements?.active || {};
       const hasActiveEntitlement = Object.keys(activeEntitlements).length > 0;
+      
+      // Vérifier aussi les abonnements actifs même sans entitlement
+      const activeSubscriptions = customerInfo.activeSubscriptions || [];
+      const hasActiveSubscription = activeSubscriptions.length > 0;
 
       console.log("🔐 Entitlements actifs:", activeEntitlements);
+      console.log("📱 Abonnements actifs:", activeSubscriptions);
       console.log("✅ A un entitlement actif:", hasActiveEntitlement);
+      console.log("✅ A un abonnement actif:", hasActiveSubscription);
 
       // Déterminer le tier et le type d'abonnement
       let tier: string | null = null;
       let subscriptionType: string | null = null;
       let expirationDate: string | null = null;
+      let isSubscribed = false;
 
       if (hasActiveEntitlement) {
         // Prendre le premier entitlement actif
@@ -75,17 +82,48 @@ export const useSubscription = () => {
         }
 
         expirationDate = entitlement.expirationDate || null;
+        isSubscribed = true;
         console.log("📅 Date d'expiration:", expirationDate);
+      } else if (hasActiveSubscription) {
+        // Si pas d'entitlement mais un abonnement actif, essayer de déterminer le type
+        const productId = activeSubscriptions[0] || "";
+        if (
+          productId.includes("PM") ||
+          productId.toLowerCase().includes("monthly")
+        ) {
+          tier = "Premium";
+          subscriptionType = "monthly";
+          isSubscribed = true;
+        } else if (
+          productId.includes("PAV") ||
+          productId.toLowerCase().includes("lifetime")
+        ) {
+          tier = "Lifetime";
+          subscriptionType = "lifetime";
+          isSubscribed = true;
+        } else if (
+          productId.includes("PA") ||
+          productId.toLowerCase().includes("annual")
+        ) {
+          tier = "Premium";
+          subscriptionType = "annual";
+          isSubscribed = true;
+        } else {
+          // Abonnement actif mais type inconnu - donner l'accès quand même
+          tier = "Premium";
+          subscriptionType = "monthly";
+          isSubscribed = true;
+        }
+        console.log("✅ Abonnement actif détecté sans entitlement:", productId);
       }
 
       // Vérifier si l'utilisateur est en trial
-      const activeSubscriptions = customerInfo.activeSubscriptions || [];
       const hasActiveTrial = activeSubscriptions.some((sub: string) =>
         sub.toLowerCase().includes("trial")
       );
 
       const subscriptionState: SubscriptionData = {
-        subscribed: hasActiveEntitlement,
+        subscribed: isSubscribed,
         subscription_tier: tier,
         subscription_type: subscriptionType,
         subscription_end: expirationDate,

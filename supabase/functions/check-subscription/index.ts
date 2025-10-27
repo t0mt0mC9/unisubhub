@@ -184,7 +184,8 @@ serve(async (req) => {
     }
 
     // Determine final access status
-    let finalAccess = hasActiveSub || isTrialActive;
+    // Si l'utilisateur a un abonnement actif, priorité à celui-ci
+    let finalSubscribed = hasActiveSub;
     let finalTier = subscriptionTier || (isTrialActive ? 'Trial' : null);
     let finalType = subscriptionType || (isTrialActive ? 'trial' : null);
     let finalEnd = subscriptionEnd || (isTrialActive ? trialEndDate.toISOString() : null);
@@ -194,17 +195,15 @@ serve(async (req) => {
       email: user.email,
       user_id: user.id,
       stripe_customer_id: customerId,
-      subscribed: finalAccess,
+      subscribed: finalSubscribed,
       subscription_tier: finalTier,
       subscription_type: finalType,
       subscription_end: finalEnd,
-      trial_end_date: trialEndDate.toISOString(),
-      trial_days_remaining: trialDaysRemaining,
       updated_at: new Date().toISOString(),
     }, { onConflict: 'email' });
 
     logStep("Updated database with subscription info", { 
-      subscribed: finalAccess, 
+      subscribed: finalSubscribed, 
       subscriptionTier: finalTier,
       subscriptionType: finalType,
       isTrialActive,
@@ -212,7 +211,7 @@ serve(async (req) => {
     });
     
     return new Response(JSON.stringify({
-      subscribed: finalAccess,
+      subscribed: finalSubscribed,
       subscription_tier: finalTier,
       subscription_type: finalType,
       subscription_end: finalEnd,
