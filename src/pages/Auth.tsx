@@ -333,7 +333,7 @@ const Auth = () => {
         const result = await supabase.auth.signInWithOAuth({
           provider: "apple",
           options: {
-            redirectTo: `${window.location.origin}/auth`,
+            redirectTo: `https://unisubhub.fr/auth`,
             scopes: "email name",
           },
         });
