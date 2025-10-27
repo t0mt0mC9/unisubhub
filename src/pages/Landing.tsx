@@ -33,16 +33,8 @@ const Landing = () => {
   const [hoveredFeature, setHoveredFeature] = useState<number | null>(null);
   const navigate = useNavigate();
 
-  // Detect iOS devices
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  const appStoreUrl = "https://apps.apple.com/fr/app/unisubhub-app/id6751284623";
-
   const handleButtonClick = () => {
-    if (isIOS) {
-      window.open(appStoreUrl, '_blank');
-    } else {
-      navigate('/auth');
-    }
+    navigate('/auth');
   };
 
   const features = [
