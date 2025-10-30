@@ -110,21 +110,27 @@ serve(async (req) => {
     }
 
     // RÈGLE D'ACTIVATION: 14 jours d'accès gratuit pour les nouveaux comptes
+    // Récupérer la date de début d'essai depuis le profil
+    const { data: profile } = await supabaseClient
+      .from("profiles")
+      .select("trial_start_date")
+      .eq("id", user.id)
+      .single();
+    
     const now = new Date();
-    const userCreatedAt = new Date(user.created_at);
-    const trialEndDate = new Date(userCreatedAt.getTime() + 14 * 24 * 60 * 60 * 1000); // 14 jours après création
+    const trialStartDate = profile?.trial_start_date ? new Date(profile.trial_start_date) : new Date(user.created_at);
+    const trialEndDate = new Date(trialStartDate.getTime() + 14 * 24 * 60 * 60 * 1000); // 14 jours après début d'essai
     const isTrialActive = now < trialEndDate;
     const trialDaysRemaining = Math.max(0, Math.ceil((trialEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
 
     logStep("Trial period calculation", { 
       now: now.toISOString(),
-      userCreatedAt: userCreatedAt.toISOString(), 
+      trialStartDate: trialStartDate.toISOString(), 
       trialEndDate: trialEndDate.toISOString(),
       timeDiffMs: trialEndDate.getTime() - now.getTime(),
       isTrialActive,
       trialDaysRemaining,
-      userCreatedAtRaw: user.created_at,
-      accountAge: Math.floor((now.getTime() - userCreatedAt.getTime()) / (1000 * 60 * 60 * 24))
+      accountAge: Math.floor((now.getTime() - trialStartDate.getTime()) / (1000 * 60 * 60 * 24))
     });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });

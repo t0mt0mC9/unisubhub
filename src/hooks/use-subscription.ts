@@ -123,14 +123,24 @@ export const useSubscription = () => {
       );
 
       const user = await supabase.auth.getUser();
-      const createdAt = user.data.user?.created_at;
+      const userId = user.data.user?.id;
 
-      let daysSinceCreation = 0;
-      if (createdAt) {
-        const createdDate = new Date(createdAt);
+      // Récupérer la date de début d'essai depuis le profil
+      let daysSinceTrialStart = 0;
+      if (userId) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("trial_start_date")
+          .eq("id", userId)
+          .single();
+
+        const trialStartDate = profile?.trial_start_date
+          ? new Date(profile.trial_start_date)
+          : new Date(user.data.user?.created_at || new Date());
+        
         const now = new Date();
-        const diffTime = Math.abs(now.getTime() - createdDate.getTime());
-        daysSinceCreation = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const diffTime = Math.abs(now.getTime() - trialStartDate.getTime());
+        daysSinceTrialStart = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       }
 
       const subscriptionState: SubscriptionData = {
@@ -138,8 +148,8 @@ export const useSubscription = () => {
         subscription_tier: tier,
         subscription_type: subscriptionType,
         subscription_end: expirationDate,
-        trial_active: hasActiveTrial || daysSinceCreation <= 14,
-        trial_days_remaining: 0, // RevenueCat ne fournit pas cette info directement
+        trial_active: hasActiveTrial || daysSinceTrialStart <= 14,
+        trial_days_remaining: Math.max(0, 14 - daysSinceTrialStart),
         trial_end_date: null,
       };
 
