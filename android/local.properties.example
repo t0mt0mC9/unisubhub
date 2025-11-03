@@ -1,0 +1,12 @@
+## This file is an example of local.properties configuration
+# Copy this file to local.properties and fill in your actual values
+#
+# Location of the SDK. This is only used by Gradle.
+sdk.dir=/path/to/your/Android/sdk
+
+# Keystore configuration for release builds
+# Replace these values with your actual keystore information
+KEYSTORE_FILE=../keystore
+KEYSTORE_PASSWORD=your_keystore_password_here
+KEY_ALIAS=your_key_alias_here
+KEY_PASSWORD=your_key_password_here
